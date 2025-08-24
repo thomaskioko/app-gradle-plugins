@@ -1,4 +1,4 @@
-package com.thomaskioko.gradle.plugin.utils
+package io.github.thomaskioko.gradle.plugins.utils
 
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project

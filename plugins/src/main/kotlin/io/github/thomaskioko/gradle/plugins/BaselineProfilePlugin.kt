@@ -1,10 +1,10 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
 import androidx.baselineprofile.gradle.producer.BaselineProfileProducerExtension
 import com.android.build.api.variant.TestAndroidComponentsExtension
 import com.android.build.gradle.TestExtension
-import com.thomaskioko.gradle.plugin.extensions.AndroidExtension
-import com.thomaskioko.gradle.plugin.utils.baseExtension
+import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
+import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

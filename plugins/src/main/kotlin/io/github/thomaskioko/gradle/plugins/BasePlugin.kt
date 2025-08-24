@@ -1,13 +1,13 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
-import com.thomaskioko.gradle.plugin.extensions.BaseExtension
-import com.thomaskioko.gradle.plugin.utils.compilerOptions
-import com.thomaskioko.gradle.plugin.utils.getVersionOrNull
-import com.thomaskioko.gradle.plugin.utils.java
-import com.thomaskioko.gradle.plugin.utils.javaTarget
-import com.thomaskioko.gradle.plugin.utils.javaToolchainVersion
-import com.thomaskioko.gradle.plugin.utils.jvmTarget
-import com.thomaskioko.gradle.plugin.utils.kotlin
+import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
+import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
+import io.github.thomaskioko.gradle.plugins.utils.getVersionOrNull
+import io.github.thomaskioko.gradle.plugins.utils.java
+import io.github.thomaskioko.gradle.plugins.utils.javaTarget
+import io.github.thomaskioko.gradle.plugins.utils.javaToolchainVersion
+import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
+import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.jvm.tasks.Jar

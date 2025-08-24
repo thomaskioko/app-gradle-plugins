@@ -1,10 +1,10 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
-import com.thomaskioko.gradle.plugin.utils.compilerOptions
-import com.thomaskioko.gradle.plugin.utils.defaultTestSetup
-import com.thomaskioko.gradle.plugin.utils.getPackageNameProvider
-import com.thomaskioko.gradle.plugin.utils.kotlin
-import com.thomaskioko.gradle.plugin.utils.kotlinMultiplatform
+import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
+import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
+import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
+import io.github.thomaskioko.gradle.plugins.utils.kotlin
+import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test

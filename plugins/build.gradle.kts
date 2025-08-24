@@ -51,53 +51,53 @@ dependencies {
 
 gradlePlugin {
     plugins.create("appPlugin") {
-        id = "com.thomaskioko.gradle.app"
-        implementationClass = "com.thomaskioko.gradle.plugin.AppPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.app"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.AppPlugin"
     }
 
     plugins.create("androidPlugin") {
-        id = "com.thomaskioko.gradle.android"
-        implementationClass = "com.thomaskioko.gradle.plugin.AndroidPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.android"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.AndroidPlugin"
     }
 
     plugins.create("androidMultiplatformPlugin") {
-        id = "com.thomaskioko.gradle.android.multiplatform"
-        implementationClass = "com.thomaskioko.gradle.plugin.AndroidMultiplatformPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.android.multiplatform"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.AndroidMultiplatformPlugin"
     }
 
     plugins.create("jvmPlugin") {
-        id = "com.thomaskioko.gradle.jvm"
-        implementationClass = "com.thomaskioko.gradle.plugin.JvmPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.jvm"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.JvmPlugin"
     }
 
     plugins.create("baselineProfilePlugin") {
-        id = "com.thomaskioko.gradle.baseline.profile"
-        implementationClass = "com.thomaskioko.gradle.plugin.BaselineProfilePlugin"
+        id = "io.github.thomaskioko.gradle.plugins.baseline.profile"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.BaselineProfilePlugin"
     }
 
     plugins.create("commonMultiplatformPlugin") {
-        id = "com.thomaskioko.gradle.multiplatform"
-        implementationClass = "com.thomaskioko.gradle.plugin.KotlinMultiplatformPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.multiplatform"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.KotlinMultiplatformPlugin"
     }
 
     plugins.create("basePlugin") {
-        id = "com.thomaskioko.gradle.base"
-        implementationClass = "com.thomaskioko.gradle.plugin.BasePlugin"
+        id = "io.github.thomaskioko.gradle.plugins.base"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.BasePlugin"
     }
 
     plugins.create("rootPlugin") {
-        id = "com.thomaskioko.gradle.root"
-        implementationClass = "com.thomaskioko.gradle.plugin.RootPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.root"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.RootPlugin"
     }
 
     plugins.create("spotlessPlugin") {
-        id = "com.thomaskioko.gradle.spotless"
-        implementationClass = "com.thomaskioko.gradle.plugin.checks.SpotlessPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.spotless"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.checks.SpotlessPlugin"
     }
 
     plugins.create("resourceGeneratorPlugin") {
-        id = "com.thomaskioko.resource.generator"
-        implementationClass = "com.thomaskioko.gradle.plugin.ResourceGeneratorPlugin"
+        id = "io.github.thomaskioko.gradle.plugins.resource.generator"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.ResourceGeneratorPlugin"
     }
 }
 

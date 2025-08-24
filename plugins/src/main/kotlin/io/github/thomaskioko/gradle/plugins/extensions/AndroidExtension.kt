@@ -1,11 +1,11 @@
-package com.thomaskioko.gradle.plugin.extensions
+package io.github.thomaskioko.gradle.plugins.extensions
 
 import androidx.baselineprofile.gradle.consumer.BaselineProfileConsumerExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
-import com.thomaskioko.gradle.plugin.utils.android
-import com.thomaskioko.gradle.plugin.utils.getDependency
-import com.thomaskioko.gradle.plugin.utils.setupCompose
+import io.github.thomaskioko.gradle.plugins.utils.android
+import io.github.thomaskioko.gradle.plugins.utils.getDependency
+import io.github.thomaskioko.gradle.plugins.utils.setupCompose
 import org.gradle.api.Project
 
 public abstract class AndroidExtension(private val project: Project) {

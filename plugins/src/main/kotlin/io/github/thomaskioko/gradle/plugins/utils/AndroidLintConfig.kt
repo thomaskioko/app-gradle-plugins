@@ -1,4 +1,4 @@
-package com.thomaskioko.gradle.plugin.utils
+package io.github.thomaskioko.gradle.plugins.utils
 
 import com.android.build.api.dsl.Lint
 import org.gradle.api.Project

@@ -1,6 +1,6 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
-import com.thomaskioko.gradle.tasks.MokoResourceGeneratorTask
+import io.github.thomaskioko.gradle.tasks.MokoResourceGeneratorTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension

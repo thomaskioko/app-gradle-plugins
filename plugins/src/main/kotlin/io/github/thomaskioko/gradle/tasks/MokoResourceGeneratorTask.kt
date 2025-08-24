@@ -1,4 +1,4 @@
-package com.thomaskioko.gradle.tasks
+package io.github.thomaskioko.gradle.tasks
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec

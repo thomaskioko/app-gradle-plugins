@@ -1,7 +1,7 @@
-package com.thomaskioko.gradle.plugin.checks
+package io.github.thomaskioko.gradle.plugins.checks
 
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.thomaskioko.gradle.plugin.utils.libs
+import io.github.thomaskioko.gradle.plugins.utils.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

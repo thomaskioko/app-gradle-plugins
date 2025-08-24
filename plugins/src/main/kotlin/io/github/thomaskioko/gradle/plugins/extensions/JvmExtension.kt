@@ -1,6 +1,6 @@
-package com.thomaskioko.gradle.plugin.extensions
+package io.github.thomaskioko.gradle.plugins.extensions
 
-import com.thomaskioko.gradle.plugin.utils.configureStandaloneLint
+import io.github.thomaskioko.gradle.plugins.utils.configureStandaloneLint
 import org.gradle.api.Project
 
 public abstract class JvmExtension(private val project: Project) {

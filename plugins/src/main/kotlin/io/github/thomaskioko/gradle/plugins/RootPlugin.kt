@@ -1,8 +1,8 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
 import com.autonomousapps.DependencyAnalysisExtension
 import com.osacky.doctor.DoctorExtension
-import com.thomaskioko.gradle.plugin.utils.booleanProperty
+import io.github.thomaskioko.gradle.plugins.utils.booleanProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm

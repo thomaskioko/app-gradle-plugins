@@ -1,13 +1,13 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
-import com.thomaskioko.gradle.plugin.extensions.AppExtension
-import com.thomaskioko.gradle.plugin.utils.androidApp
-import com.thomaskioko.gradle.plugin.utils.androidComponents
-import com.thomaskioko.gradle.plugin.utils.androidExtension
-import com.thomaskioko.gradle.plugin.utils.baseExtension
-import com.thomaskioko.gradle.plugin.utils.disableAndroidApplicationTasks
-import com.thomaskioko.gradle.plugin.utils.getVersion
-import com.thomaskioko.gradle.plugin.utils.stringProperty
+import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
+import io.github.thomaskioko.gradle.plugins.utils.androidApp
+import io.github.thomaskioko.gradle.plugins.utils.androidComponents
+import io.github.thomaskioko.gradle.plugins.utils.androidExtension
+import io.github.thomaskioko.gradle.plugins.utils.baseExtension
+import io.github.thomaskioko.gradle.plugins.utils.disableAndroidApplicationTasks
+import io.github.thomaskioko.gradle.plugins.utils.getVersion
+import io.github.thomaskioko.gradle.plugins.utils.stringProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

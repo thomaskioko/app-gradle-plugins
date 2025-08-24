@@ -1,10 +1,10 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
-import com.thomaskioko.gradle.plugin.extensions.JvmExtension
-import com.thomaskioko.gradle.plugin.utils.baseExtension
-import com.thomaskioko.gradle.plugin.utils.defaultTestSetup
-import com.thomaskioko.gradle.plugin.utils.java
-import com.thomaskioko.gradle.plugin.utils.javaTargetVersion
+import io.github.thomaskioko.gradle.plugins.extensions.JvmExtension
+import io.github.thomaskioko.gradle.plugins.utils.baseExtension
+import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
+import io.github.thomaskioko.gradle.plugins.utils.java
+import io.github.thomaskioko.gradle.plugins.utils.javaTargetVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile

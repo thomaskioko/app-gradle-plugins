@@ -1,11 +1,11 @@
-package com.thomaskioko.gradle.plugin
+package io.github.thomaskioko.gradle.plugins
 
 import com.android.build.api.dsl.androidLibrary
-import com.thomaskioko.gradle.plugin.utils.addIfNotNull
-import com.thomaskioko.gradle.plugin.utils.getDependencyOrNull
-import com.thomaskioko.gradle.plugin.utils.getVersion
-import com.thomaskioko.gradle.plugin.utils.jvmCompilerOptions
-import com.thomaskioko.gradle.plugin.utils.kotlinMultiplatform
+import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
+import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
+import io.github.thomaskioko.gradle.plugins.utils.getVersion
+import io.github.thomaskioko.gradle.plugins.utils.jvmCompilerOptions
+import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

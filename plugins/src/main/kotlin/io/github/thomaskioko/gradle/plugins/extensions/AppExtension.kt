@@ -1,6 +1,6 @@
-package com.thomaskioko.gradle.plugin.extensions
+package io.github.thomaskioko.gradle.plugins.extensions
 
-import com.thomaskioko.gradle.plugin.utils.androidApp
+import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import java.io.File
 import org.gradle.api.Project
 
