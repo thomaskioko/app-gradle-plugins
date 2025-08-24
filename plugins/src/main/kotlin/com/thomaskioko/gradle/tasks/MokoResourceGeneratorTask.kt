@@ -15,10 +15,13 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.Incremental
+import org.gradle.work.InputChanges
 
 @CacheableTask
 public abstract class MokoResourceGeneratorTask
@@ -27,6 +30,13 @@ public abstract class MokoResourceGeneratorTask
     layout: ProjectLayout,
 ) : DefaultTask() {
 
+    init {
+        outputs.cacheIf { true }
+        description = "Generates resource sealed classes from Moko resources"
+        group = "build"
+    }
+
+    @get:Incremental
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
@@ -37,16 +47,8 @@ public abstract class MokoResourceGeneratorTask
         .convention(layout.buildDirectory.dir("generated/resources"))
 
     @TaskAction
-    public fun generate() {
-        logger.lifecycle("Starting GenerateMokoStringsTask")
-
+    public fun generate(inputChanges: InputChanges) {
         val outputDir = commonMainOutput.get().asFile
-        logger.lifecycle("Output directory: ${outputDir.absolutePath}")
-
-        outputDir.deleteRecursively()
-        outputDir.mkdirs()
-
-        val mrClass = ClassName("com.thomaskioko.tvmaniac.i18n", "MR")
         val mrFile = mokoGeneratedFile.get().asFile
 
         if (!mrFile.exists()) {
@@ -54,26 +56,31 @@ public abstract class MokoResourceGeneratorTask
             return
         }
 
-        val (stringKeys, pluralKeys) = readKeysFromMRFile(mrFile)
-        logger.lifecycle("Found ${stringKeys.size} string keys and ${pluralKeys.size} plural keys")
+        // Only regenerate if input has changed or output doesn't exist
+        if (inputChanges.isIncremental) {
+            val hasChanges = inputChanges.getFileChanges(mokoGeneratedFile).iterator().hasNext()
+            if (!hasChanges && outputDir.exists() && outputDir.listFiles()?.isNotEmpty() == true) {
+                logger.debug("Skipping generation - no changes detected")
+                return
+            }
+        }
 
-        // Generate StringResourceKey sealed class
-        val resourceKeyFile = File(outputDir, "StringResourceKey.kt")
-        logger.lifecycle("Generating StringResourceKey.kt at: ${resourceKeyFile.absolutePath}")
+        // Clean and recreate output directory
+        outputDir.deleteRecursively()
+        outputDir.mkdirs()
+
+        val mrClass = ClassName("com.thomaskioko.tvmaniac.i18n", "MR")
+        val (stringKeys, pluralKeys) = readKeysFromMRFile(mrFile)
+
         stringResourceKeyFileSpec(
             stringKeys = stringKeys,
             mrClass = mrClass,
         ).writeTo(outputDir)
 
-        // Generate PluralsResourceKey sealed class
-        val pluralsResourceKeyFile = File(outputDir, "PluralsResourceKey.kt")
-        logger.lifecycle("Generating PluralsResourceKey.kt at: ${pluralsResourceKeyFile.absolutePath}")
         pluralsResourceKeyFileSpec(
             pluralKeys = pluralKeys,
             mrClass = mrClass,
         ).writeTo(outputDir)
-
-        logger.lifecycle("GenerateMokoStringsTask completed successfully")
     }
 
     private fun readKeysFromMRFile(mrFile: File): Pair<List<String>, List<String>> {
@@ -82,29 +89,31 @@ public abstract class MokoResourceGeneratorTask
         var isInStringsObject = false
         var isInPluralsObject = false
 
-        mrFile.readLines().forEach { line ->
-            when {
-                line.contains("object strings") -> {
-                    isInStringsObject = true
-                    isInPluralsObject = false
-                }
+        mrFile.bufferedReader().use { reader ->
+            reader.lineSequence().forEach { line ->
+                when {
+                    line.contains("object strings") -> {
+                        isInStringsObject = true
+                        isInPluralsObject = false
+                    }
 
-                line.contains("object plurals") -> {
-                    isInStringsObject = false
-                    isInPluralsObject = true
-                }
+                    line.contains("object plurals") -> {
+                        isInStringsObject = false
+                        isInPluralsObject = true
+                    }
 
-                line.trim() == "}" -> {
-                    isInStringsObject = false
-                    isInPluralsObject = false
-                }
+                    line.trim() == "}" -> {
+                        isInStringsObject = false
+                        isInPluralsObject = false
+                    }
 
-                isInStringsObject && line.contains("public val") && line.contains(": StringResource") -> {
-                    extractKeyName(line)?.let { stringKeys.add(it) }
-                }
+                    isInStringsObject && line.contains("public val") && line.contains(": StringResource") -> {
+                        extractKeyName(line)?.let { stringKeys.add(it) }
+                    }
 
-                isInPluralsObject && line.contains("public val") && line.contains(": PluralsResource") -> {
-                    extractKeyName(line)?.let { pluralKeys.add(it) }
+                    isInPluralsObject && line.contains("public val") && line.contains(": PluralsResource") -> {
+                        extractKeyName(line)?.let { pluralKeys.add(it) }
+                    }
                 }
             }
         }
