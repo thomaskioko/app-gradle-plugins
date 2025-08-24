@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local properties
+local.properties
+
+# Signing
+*.gpg
+*.asc
+
+# Maven Central credentials (should never be committed)
+gradle.properties.local
