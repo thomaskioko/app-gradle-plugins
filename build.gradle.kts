@@ -5,7 +5,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.thomaskioko.gradle.plugins"
+    group = "io.github.thomaskioko.gradle.plugins"
     version = providers.gradleProperty("VERSION_NAME").get()
 }
 
