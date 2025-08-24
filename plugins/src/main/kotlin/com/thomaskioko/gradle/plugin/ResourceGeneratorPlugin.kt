@@ -13,10 +13,9 @@ public class ResourceGeneratorPlugin : Plugin<Project> {
             task.description = "Generates resource sealed class from Moko resources"
         }
 
-        target.afterEvaluate {
-            val generateMRTask = it.tasks.findByName("generateMRcommonMain")
-            if (generateMRTask != null) {
-                generateStringsTask.configure { task -> task.dependsOn(generateMRTask) }
+        target.pluginManager.withPlugin("dev.icerock.mobile.multiplatform-resources") {
+            generateStringsTask.configure { task ->
+                task.dependsOn(target.tasks.named("generateMRcommonMain"))
             }
         }
 
