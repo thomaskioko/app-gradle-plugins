@@ -11,10 +11,9 @@ import com.thomaskioko.gradle.plugin.utils.baseExtension
 import com.thomaskioko.gradle.plugin.utils.configure
 import com.thomaskioko.gradle.plugin.utils.defaultTestSetup
 import com.thomaskioko.gradle.plugin.utils.getDependencyOrNull
-import com.thomaskioko.gradle.plugin.utils.getPackageName
+import com.thomaskioko.gradle.plugin.utils.getPackageNameProvider
 import com.thomaskioko.gradle.plugin.utils.getVersion
 import com.thomaskioko.gradle.plugin.utils.javaTargetVersion
-import com.thomaskioko.gradle.plugin.utils.stringProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
@@ -115,5 +114,5 @@ internal fun Project.pathBasedAndroidNamespace(): String {
         }
         .joinToString(separator = ".")
 
-    return "${getPackageName()}.$transformedPath"
+    return "${getPackageNameProvider().get()}.$transformedPath"
 }

@@ -2,7 +2,7 @@ package com.thomaskioko.gradle.plugin
 
 import com.thomaskioko.gradle.plugin.utils.compilerOptions
 import com.thomaskioko.gradle.plugin.utils.defaultTestSetup
-import com.thomaskioko.gradle.plugin.utils.getPackageName
+import com.thomaskioko.gradle.plugin.utils.getPackageNameProvider
 import com.thomaskioko.gradle.plugin.utils.kotlin
 import com.thomaskioko.gradle.plugin.utils.kotlinMultiplatform
 import org.gradle.api.Plugin
@@ -28,9 +28,9 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
             iosSimulatorArm64()
 
             targets.withType(KotlinNativeTarget::class.java).configureEach {
-                it.binaries.all { framework ->
+                it.binaries.configureEach { framework ->
                     framework.linkerOpts("-lsqlite3")
-                    framework.binaryOption("bundleId", target.getPackageName())
+                    framework.binaryOption("bundleId", target.getPackageNameProvider().get())
                 }
 
                 it.compilations.configureEach { compilation ->
