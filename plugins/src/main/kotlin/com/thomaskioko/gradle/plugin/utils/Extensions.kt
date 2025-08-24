@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.gradle.api.provider.Provider
 
 internal val Project.baseExtension: BaseExtension
     get() = extensions.getByType(BaseExtension::class.java)
@@ -43,6 +44,15 @@ internal fun Project.composeCompiler(block: ComposeCompilerGradlePluginExtension
     }
 }
 
+/**
+ * Configures the Android Gradle Plugin for the [Project] by applying the specified [block].
+ *
+ * This method allows modification of properties and settings within the Android Gradle Plugin's
+ * [CommonExtension] configuration block.
+ *
+ * @param block A lambda receiver of type [CommonExtension], used to perform configurations
+ * applied to the Android Gradle Plugin for the project.
+ */
 internal fun Project.android(block: CommonExtension<*, *, *, *, *, *>.() -> Unit) {
     extensions.configure(CommonExtension::class.java) {
         it.block()
@@ -68,17 +78,35 @@ internal fun Project.androidComponents(block: AndroidComponentsExtension<*, *, *
     }
 }
 
+/**
+ * Configures Kotlin-related settings for the current project by applying the provided `block`
+ * on the project's Kotlin extension (`KotlinProjectExtension`).
+ *
+ * @param block A lambda used to configure the `KotlinProjectExtension`.
+ */
 internal fun Project.kotlin(block: KotlinProjectExtension.() -> Unit) {
     (project.extensions.getByName("kotlin") as KotlinProjectExtension).block()
 }
 
+/**
+ * Configures the `JavaPluginExtension` for the given project using the provided configuration block.
+ *
+ * @param block A lambda expression of type `JavaPluginExtension.() -> Unit` that defines the configuration logic
+ *              for the `JavaPluginExtension` in the context of the current project.
+ */
 internal fun Project.java(block: JavaPluginExtension.() -> Unit) {
     extensions.configure(JavaPluginExtension::class.java) {
         it.block()
     }
 }
 
-
+/**
+ * Configures the compiler options for a Kotlin project extension.
+ * This method handles different types of Kotlin project extensions, such as JVM, Android, or Multiplatform,
+ * and applies the specified configurations to their respective compiler options.
+ *
+ * @param configure A lambda expression used to configure the Kotlin compiler options.
+ */
 internal fun KotlinProjectExtension.compilerOptions(configure: KotlinCommonCompilerOptions.() -> Unit) {
     when (this) {
         is KotlinJvmProjectExtension -> compilerOptions(configure)
@@ -102,6 +130,16 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.jvmCompilerOptions(block: K
     }
 }
 
-internal fun Project.getPackageName(): String =
-    stringProperty("package.name").orNull?.takeIf { it.isNotBlank() }
-        ?: error("Required property 'package.name' is missing or empty in gradle.properties. Add: package.name=com.yourcompany.yourapp")
+/**
+ * Provides the package name defined in the project's Gradle properties as a [Provider].
+ * The method retrieves the value of the "package.name" property and ensures it is not blank.
+ * If the property is missing or blank, an error is thrown, informing the user to define it.
+ *
+ * @return A [Provider] of [String] representing the package name.
+ * Throws an error if the package name is missing or empty in the Gradle properties.
+ */
+internal fun Project.getPackageNameProvider(): Provider<String> =
+    stringProperty("package.name").map { 
+        it.takeIf { it.isNotBlank() } 
+            ?: error("Required property 'package.name' is missing or empty in gradle.properties. Add: package.name=com.yourcompany.yourapp")
+    }
