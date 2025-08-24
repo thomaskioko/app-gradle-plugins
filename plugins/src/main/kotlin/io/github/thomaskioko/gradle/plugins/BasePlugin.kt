@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 public abstract class BasePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("com.autonomousapps.dependency-analysis")
-        target.plugins.apply("com.thomaskioko.gradle.spotless")
+        target.plugins.apply("io.github.thomaskioko.gradle.plugins.spotless")
 
         target.extensions.create("scaffold", BaseExtension::class.java)
 
