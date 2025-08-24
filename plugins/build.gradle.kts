@@ -22,12 +22,6 @@ tasks {
     }
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get()))
-    }
-}
-
 kotlin {
     explicitApi()
 }

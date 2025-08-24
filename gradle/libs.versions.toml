@@ -1,5 +1,4 @@
 [versions]
-jdk = "21"
 java-target = "21"
 java-toolchain = "21"
 
