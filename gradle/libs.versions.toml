@@ -1,0 +1,37 @@
+[versions]
+jdk = "21"
+java-target = "21"
+java-toolchain = "21"
+
+agp = "8.12.0"
+baselineprofile = "1.4.0"
+dependency-analysis = "3.0.0"
+gradle-doctor = "0.11.0"
+kotlin = "2.2.10"
+moko-resources = "0.25.0"
+publish = "0.34.0"
+skie = "0.10.6"
+spotless = "7.2.1"
+kotlinPoet = "2.2.0"
+
+[libraries]
+baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
+moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
+moko-resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko-resources" }
+spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
+
+# Build logic dependencies
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
+dependency-analysis-gradle-plugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependency-analysis" }
+gradle-doctor-gradle-plugin = { group = "com.osacky.doctor", name = "doctor-plugin", version.ref = "gradle-doctor" }
+skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin", version.ref = "skie" }
+
+[plugins]
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
+
