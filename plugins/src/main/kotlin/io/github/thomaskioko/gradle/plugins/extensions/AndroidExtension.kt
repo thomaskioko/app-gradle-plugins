@@ -1,6 +1,9 @@
 package io.github.thomaskioko.gradle.plugins.extensions
 
 import androidx.baselineprofile.gradle.consumer.BaselineProfileConsumerExtension
+import com.android.build.api.dsl.AndroidResources
+import com.android.build.api.dsl.ApplicationAndroidResources
+import com.android.build.api.dsl.LibraryAndroidResources
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
 import io.github.thomaskioko.gradle.plugins.utils.android
@@ -15,6 +18,12 @@ public abstract class AndroidExtension(private val project: Project) {
             project.android {
                 defaultConfig.minSdk = minSdkVersion
             }
+        }
+    }
+
+    public fun enableAndroidResources() {
+        project.android {
+            androidResources.enable = true
         }
     }
 
@@ -82,3 +91,15 @@ public abstract class AndroidExtension(private val project: Project) {
         }
     }
 }
+
+internal var AndroidResources.enable: Boolean
+    get() = when (this) {
+        is LibraryAndroidResources -> enable
+        is ApplicationAndroidResources -> true
+        else -> throw UnsupportedOperationException("")
+    }
+    set(value) = when (this) {
+        is LibraryAndroidResources -> enable = value
+        is ApplicationAndroidResources -> {}
+        else -> throw UnsupportedOperationException("")
+    }

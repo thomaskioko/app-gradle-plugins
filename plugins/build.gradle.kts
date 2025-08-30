@@ -30,12 +30,13 @@ kotlin {
 dependencies {
     api(libs.kotlin.gradle.plugin)
     implementation(libs.android.gradle.plugin)
-    implementation(libs.moko.resources.generator)
     implementation(libs.compose.compiler.gradle.plugin)
-    implementation(libs.kotlin.gradle.plugin.api)
     implementation(libs.dependency.analysis.gradle.plugin)
+    implementation(libs.kotlin.gradle.plugin.api)
+    implementation(libs.ksp.gradle)
     implementation(libs.kotlinpoet.ksp)
     implementation(libs.moko.resources)
+    implementation(libs.moko.resources.generator)
 
     compileOnly(libs.baselineprofile.gradlePlugin)
     compileOnly(libs.skie.gradle.plugin)
@@ -98,7 +99,9 @@ gradlePlugin {
 
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
+    if (providers.gradleProperty("maven.central.publish").orNull == "true") {
+        signAllPublications()
+    }
 
     pom {
         name.set(providers.gradleProperty("POM_NAME").get())

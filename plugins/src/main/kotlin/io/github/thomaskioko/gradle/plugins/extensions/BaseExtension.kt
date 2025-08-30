@@ -9,6 +9,7 @@ import io.github.thomaskioko.gradle.plugins.utils.addBundleImplementationDepende
 import io.github.thomaskioko.gradle.plugins.utils.addImplementationDependency
 import io.github.thomaskioko.gradle.plugins.utils.addKspDependencyForAllTargets
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
+import io.github.thomaskioko.gradle.plugins.utils.configureProcessing
 import io.github.thomaskioko.gradle.plugins.utils.getBundleDependencies
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import io.github.thomaskioko.gradle.plugins.utils.jvmCompilerOptions
@@ -36,6 +37,12 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
+    public fun useMetro() {
+        project.plugins.apply("dev.zacsweers.metro")
+
+        project.addImplementationDependency(project.getDependency("metro-runtime"))
+    }
+
     public fun useSerialization() {
         project.plugins.apply("org.jetbrains.kotlin.plugin.serialization")
 
@@ -43,7 +50,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
     }
 
     public fun useKotlinInject() {
-        project.plugins.apply("com.google.devtools.ksp")
+        project.configureProcessing()
 
         project.addBundleImplementationDependency(project.getBundleDependencies("kotlinInject"))
         project.addKspDependencyForAllTargets(project.getDependency("kotlinInject-compiler"))
