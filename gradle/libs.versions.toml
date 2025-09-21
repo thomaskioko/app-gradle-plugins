@@ -2,7 +2,7 @@
 java-target = "21"
 java-toolchain = "21"
 
-agp = "8.12.1"
+agp = "8.13.0"
 baselineprofile = "1.4.0"
 dependency-analysis = "3.0.4"
 gradle-doctor = "0.12.0"
