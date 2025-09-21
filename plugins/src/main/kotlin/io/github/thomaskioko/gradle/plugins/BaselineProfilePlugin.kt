@@ -5,30 +5,37 @@ import com.android.build.api.variant.TestAndroidComponentsExtension
 import com.android.build.gradle.TestExtension
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
+import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 public class BaselineProfilePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("com.android.test")
-        target.plugins.apply("androidx.baselineprofile")
         target.plugins.apply("org.jetbrains.kotlin.android")
         target.plugins.apply(BasePlugin::class.java)
 
         target.baseExtension.extensions.create("benchmark", AndroidExtension::class.java)
 
         target.androidSetup()
-        target.componentsConfiguration()
+        target.basicTestConfiguration()
+
+        // Only configure baseline profiling when not in debug-only mode
+        if (!target.isDebugOnlyBuild()) {
+            target.plugins.apply("androidx.baselineprofile")
+            target.fullComponentsConfiguration()
+        }
     }
 
-    @Suppress("UnstableApiUsage")
-    private fun Project.componentsConfiguration() {
-
+    private fun Project.basicTestConfiguration() {
         extensions.configure(TestExtension::class.java) { extension ->
             extension.defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             extension.targetProjectPath = ":app"
         }
+    }
 
+    @Suppress("UnstableApiUsage")
+    private fun Project.fullComponentsConfiguration() {
         extensions.configure(BaselineProfileProducerExtension::class.java) {
             it.managedDevices += "pixel6Api34"
             it.useConnectedDevices = false
