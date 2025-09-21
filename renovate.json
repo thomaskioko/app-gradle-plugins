@@ -21,6 +21,13 @@
         "https://dl.google.com/android/maven2",
         "https://plugins.gradle.org/m2"
       ]
+    },
+    {
+      "groupName": "Kotlin & KSP",
+      "matchPackagePatterns": [
+        "org.jetbrains.kotlin",
+        "com.google.devtools.ksp"
+      ]
     }
   ]
 }
