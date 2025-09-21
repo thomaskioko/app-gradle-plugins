@@ -31,9 +31,7 @@ private fun Project.configureAndroidKotlinMultiplatform() {
             val desugarLibrary = project.getDependencyOrNull("android-desugarJdkLibs")
             project.dependencies.addIfNotNull("coreLibraryDesugaring", desugarLibrary)
 
-            jvmCompilerOptions {
-                enableCoreLibraryDesugaring = true
-            }
+            enableCoreLibraryDesugaring = true
         }
     }
 }
