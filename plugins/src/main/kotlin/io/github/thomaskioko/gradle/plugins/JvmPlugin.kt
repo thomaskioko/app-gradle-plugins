@@ -3,6 +3,7 @@ package io.github.thomaskioko.gradle.plugins
 import io.github.thomaskioko.gradle.plugins.extensions.JvmExtension
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
+import io.github.thomaskioko.gradle.plugins.utils.disableKotlinLibraryTasks
 import io.github.thomaskioko.gradle.plugins.utils.java
 import io.github.thomaskioko.gradle.plugins.utils.javaTargetVersion
 import org.gradle.api.Plugin
@@ -27,5 +28,7 @@ public abstract class JvmPlugin : Plugin<Project> {
         }
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
+
+        target.disableKotlinLibraryTasks()
     }
 }

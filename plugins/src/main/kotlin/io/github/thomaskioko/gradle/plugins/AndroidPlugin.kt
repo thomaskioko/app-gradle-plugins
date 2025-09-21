@@ -10,6 +10,7 @@ import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.configure
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
+import io.github.thomaskioko.gradle.plugins.utils.disableAndroidLibraryTasks
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
@@ -34,6 +35,7 @@ public abstract class AndroidPlugin : Plugin<Project> {
         target.configureLint()
         target.configureUnitTests()
         target.disableAndroidTests()
+        target.disableAndroidLibraryTasks()
     }
 
     private fun Project.configureLint() {

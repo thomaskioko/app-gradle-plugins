@@ -2,6 +2,7 @@ package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
+import io.github.thomaskioko.gradle.plugins.utils.disableMultiplatformTasks
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
@@ -55,5 +56,7 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
         }
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
+
+        target.disableMultiplatformTasks()
     }
 }
