@@ -102,6 +102,12 @@ public abstract class AndroidExtension(private val project: Project) {
             }
         }
     }
+
+    public fun libraryConfiguration(configuration: LibraryExtension.() -> Unit) {
+        project.extensions.configure(LibraryExtension::class.java) { extension ->
+            extension.configuration()
+        }
+    }
 }
 
 internal var AndroidResources.enable: Boolean
