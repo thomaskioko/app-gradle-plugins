@@ -4,7 +4,7 @@ java-toolchain = "21"
 
 agp = "8.13.0"
 baselineprofile = "1.4.1"
-dependency-analysis = "3.0.4"
+dependency-analysis = "3.1.0"
 gradle-doctor = "0.12.1"
 kotlin = "2.2.10"
 kotlinPoet = "2.2.0"
