@@ -124,8 +124,10 @@ internal fun KotlinProjectExtension.compilerOptions(configure: KotlinCommonCompi
 
 internal fun KotlinMultiplatformAndroidLibraryTarget.jvmCompilerOptions(block: KotlinJvmCompilerOptions.() -> Unit) {
     compilations.configureEach { compilation ->
-        compilation.compilerOptions.configure {
-            block()
+        compilation.compileTaskProvider.configure {
+            compilerOptions {
+                block()
+            }
         }
     }
 }

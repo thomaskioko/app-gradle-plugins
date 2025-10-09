@@ -14,3 +14,20 @@ internal fun Project.stringProperty(name: String): Provider<String> = providers.
 internal fun Project.booleanProperty(name: String, defaultValue: Boolean): Provider<Boolean> {
     return stringProperty(name).map { it.toBoolean() }.orElse(defaultValue)
 }
+
+/**
+ * Checks if debug-only build optimizations should be enabled.
+ */
+internal fun Project.isDebugOnlyBuild(): Boolean {
+    return booleanProperty("app.debugOnly", false).get()
+}
+
+/**
+ * Checks if iOS targets should be enabled in KMP compilation.
+ */
+internal fun Project.isIosDebugBuildEnabled(): Boolean {
+    val debugOnlyProperty = isDebugOnlyBuild()
+    val enableIosProperty = booleanProperty("app.enableIos", false).get()
+
+    return enableIosProperty || !debugOnlyProperty
+}

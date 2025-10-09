@@ -8,6 +8,7 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
 import io.github.thomaskioko.gradle.plugins.utils.android
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
+import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import io.github.thomaskioko.gradle.plugins.utils.setupCompose
 import org.gradle.api.Project
 
@@ -58,16 +59,27 @@ public abstract class AndroidExtension(private val project: Project) {
         }
     }
 
-    public fun useBaselineProfile() {
-        project.plugins.apply("androidx.baselineprofile")
+    /**
+     * Configures baseline profiles for optimizing runtime performance. Only applied on release builds.
+     *
+     * @param benchmarkProject Benchmark project for generating baseline profiles
+     */
+    public fun useBaselineProfile(benchmarkProject: Any? = null) {
+        // Only apply baseline profile plugin for release builds
+        if (!project.isDebugOnlyBuild()) {
+            project.plugins.apply("androidx.baselineprofile")
 
-        project.dependencies.apply {
-            add("runtimeOnly", project.getDependency("androidx-profileinstaller"))
-        }
+            project.dependencies.apply {
+                add("runtimeOnly", project.getDependency("androidx-profileinstaller"))
+                benchmarkProject?.let { benchmark ->
+                    add("baselineProfile", benchmark)
+                }
+            }
 
-        project.extensions.configure(BaselineProfileConsumerExtension::class.java) {
-            it.mergeIntoMain = true
-            it.saveInSrc = true
+            project.extensions.configure(BaselineProfileConsumerExtension::class.java) {
+                it.mergeIntoMain = true
+                it.saveInSrc = true
+            }
         }
     }
 
@@ -88,6 +100,12 @@ public abstract class AndroidExtension(private val project: Project) {
                     }
                 }
             }
+        }
+    }
+
+    public fun libraryConfiguration(configuration: LibraryExtension.() -> Unit) {
+        project.extensions.configure(LibraryExtension::class.java) { extension ->
+            extension.configuration()
         }
     }
 }

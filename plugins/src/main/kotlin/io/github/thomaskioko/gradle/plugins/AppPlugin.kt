@@ -7,6 +7,7 @@ import io.github.thomaskioko.gradle.plugins.utils.androidExtension
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidApplicationTasks
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
+import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import io.github.thomaskioko.gradle.plugins.utils.stringProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -14,7 +15,6 @@ import org.gradle.api.Project
 public abstract class AppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("com.android.application")
-        target.plugins.apply("androidx.baselineprofile")
         target.plugins.apply(AndroidPlugin::class.java)
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
@@ -76,6 +76,13 @@ public abstract class AppPlugin : Plugin<Project> {
         }
 
         target.androidComponents {
+            // Disable non-debug variants when debugOnly is enabled
+            if (target.isDebugOnlyBuild()) {
+                beforeVariants { variant ->
+                    variant.enable = variant.buildType == "debug"
+                }
+            }
+
             onVariants(selector().withBuildType("release")) {
                 it.packaging.resources.excludes.addAll(
                     // produced by Kotlin for each module/library that uses it, they are not needed inside an app
