@@ -10,15 +10,15 @@ Add to your `gradle/libs.versions.toml`:
 
 ```toml
 [versions]
-app-plugins = "0.1.1"
+app-gradle-plugins = "0.1.1"
 
 [plugins]
-app-android = { id = "io.github.thomaskioko.gradle.plugins.android", version.ref = "app-plugins" }
-app-app = { id = "io.github.thomaskioko.gradle.plugins.app", version.ref = "app-plugins" }
-app-jvm = { id = "io.github.thomaskioko.gradle.plugins.jvm", version.ref = "app-plugins" }
-app-multiplatform = { id = "io.github.thomaskioko.gradle.plugins.multiplatform", version.ref = "app-plugins" }
-app-root = { id = "io.github.thomaskioko.gradle.plugins.root", version.ref = "app-plugins" }
-app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless", version.ref = "app-plugins" }
+app-android = { id = "io.github.thomaskioko.gradle.plugins.android", version.ref = "app-gradle-plugins" }
+app-app = { id = "io.github.thomaskioko.gradle.plugins.app", version.ref = "app-gradle-plugins" }
+app-jvm = { id = "io.github.thomaskioko.gradle.plugins.jvm", version.ref = "app-gradle-plugins" }
+app-multiplatform = { id = "io.github.thomaskioko.gradle.plugins.multiplatform", version.ref = "app-gradle-plugins" }
+app-root = { id = "io.github.thomaskioko.gradle.plugins.root", version.ref = "app-gradle-plugins" }
+app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless", version.ref = "app-gradle-plugins" }
 ```
 
 Then use in your `build.gradle.kts`:
@@ -193,11 +193,11 @@ Add to `gradle.properties`:
 
 ```properties
 # Used to generate Android namespace based on module path
-fgp.android.namespacePrefix=com.example
+package.name=com.example
 
-# Version information for apps
-app-version-code=1
-app-version-name=1.0.0
+# Build Flags
+app.debugOnly=true
+app.enableIos=false
 ```
 
 ### Version Catalog Setup
@@ -219,15 +219,6 @@ androidx-compose-compiler = { module = "androidx.compose.compiler:compiler", ver
 
 # For serialization
 kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version = "..." }
-
-# For Kotlin Inject
-kotlinInject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version = "..." }
-kotlinInject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version = "..." }
-
-# For Roborazzi testing
-androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4", version = "..." }
-robolectric = { module = "org.robolectric:robolectric", version = "..." }
-roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version = "..." }
 
 # For baseline profiles
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "..." }
@@ -258,119 +249,6 @@ Built-in support for Kotlin Inject:
 - Configures for all targets in multiplatform
 - Adds necessary runtime dependencies
 
-### Testing
-
-- **Roborazzi**: Screenshot testing with automatic configuration
-- **Managed Devices**: Configure virtual devices for consistent testing
-- **Test Reporting**: Centralized test reports in `build/reports/tests`
-
-## Project Structure
-
-After applying these plugins, your project structure might look like:
-
-```
-your-project/
-├── gradle.properties         # Plugin configuration
-├── gradle/
-│   └── libs.versions.toml  # Version catalog
-├── app/
-│   └── build.gradle.kts    # Uses app plugin
-├── feature/
-│   ├── api/
-│   │   └── build.gradle.kts # Uses multiplatform plugin
-│   └── android/
-│       └── build.gradle.kts # Uses android plugin
-└── core/
-    └── build.gradle.kts     # Uses jvm or multiplatform plugin
-```
-
-## Migration from Manual Configuration
-
-These plugins replace hundreds of lines of boilerplate configuration. For example:
-
-**Before** (manual configuration):
-```kotlin
-android {
-    namespace = "com.example.feature"
-    compileSdk = 34
-    
-    defaultConfig {
-        minSdk = 24
-    }
-    
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    
-    buildFeatures {
-        compose = true
-    }
-    
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.0"
-    }
-    // ... more configuration
-}
-```
-
-**After** (with plugins):
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.android")
-}
-
-scaffold {
-    android {
-        useCompose()
-    }
-}
-```
-
-## Publishing
-
-### Prerequisites
-
-1. Register namespace `io.github.thomaskioko` on [Maven Central](https://central.sonatype.com)
-2. Configure GPG signing in `~/.gradle/gradle.properties`:
-
-```properties
-mavenCentralUsername=your-username
-mavenCentralPassword=your-password
-signing.keyId=your-key-id
-signing.password=your-password
-signing.secretKeyRingFile=/path/to/secring.gpg
-```
-
-### Publishing Commands
-
-```bash
-# Local testing
-./gradlew publishToMavenLocal
-
-# Publish to Maven Central
-./gradlew publishToMavenCentral
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**Plugin not found**: Ensure Maven Central is in your plugin repositories:
-```kotlin
-// settings.gradle.kts
-pluginManagement {
-    repositories {
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-    }
-}
-```
-
-**Namespace not generated**: Check that `fgp.android.namespacePrefix` is set in `gradle.properties`
-
-**Compose version conflicts**: Ensure `androidx-compose-compiler` version matches your Kotlin version
 
 ## License
 
