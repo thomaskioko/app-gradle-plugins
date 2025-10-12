@@ -11,7 +11,7 @@ import org.gradle.api.Project
  */
 internal fun Project.disableAndroidApplicationTasks() {
     if (isDebugOnlyBuild()) {
-        disableAndroidTasks(androidAppTasksToDisableForDebugOnly)
+        disableAndroidTasks(androidAppTasksToDisableForDebugOnly, "debug")
         disableAndroidTasks(androidAppLintTasksToDisableExceptOneVariant, "debug")
         disableTasks(composeTasksToDisableForDebugOnly)
         disableTasks(testTasksToDisableForDebugOnly)
@@ -33,10 +33,10 @@ internal fun Project.disableAndroidApplicationTasks() {
  * - Compose compiler reports
  */
 internal fun Project.disableAndroidLibraryTasks() {
-    disableAndroidTasks(androidLibraryTasksToDisable)
+    disableAndroidTasks(androidLibraryTasksToDisable, "debug")
     if (isDebugOnlyBuild()) {
-        disableAndroidTasks(androidLibraryLintTasksToDisable)
-        disableAndroidTasks(androidLibraryTasksToDisableForDebugOnly)
+        disableAndroidTasks(androidLibraryLintTasksToDisable, "debug")
+        disableAndroidTasks(androidLibraryTasksToDisableForDebugOnly, "debug")
         disableTasks(composeTasksToDisableForDebugOnly)
     }
     disableAndroidTasks(androidLibraryLintTasksToDisableExceptOneVariant, "debug")
