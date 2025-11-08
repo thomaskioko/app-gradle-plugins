@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - '**'
+      - main
   pull_request:
   workflow_call:
 
@@ -38,6 +38,15 @@ jobs:
       - name: Build plugins
         run: ./gradlew build --stacktrace
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            **/build/
+            .gradle/
+          retention-days: 1
+
       - name: Upload build reports
         if: failure()
         uses: actions/upload-artifact@v4
@@ -55,6 +64,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
 
       - name: Setup Gradle
         uses: ./.github/actions/gradle-setup
