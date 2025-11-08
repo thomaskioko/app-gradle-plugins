@@ -17,17 +17,12 @@ internal val Project.libs: VersionCatalog
 /**
  * Retrieves the version string associated with the given [name] from the project's properties.
  */
-internal fun Project.getVersion(name: String): String {
-    return getVersionOrNull(name) ?: throw NoSuchElementException("Could not find version $name")
-}
+internal fun Project.getVersion(name: String): String = getVersionOrNull(name) ?: throw NoSuchElementException("Could not find version $name")
 
 /**
  * Retrieves the version of a library dependency specified by its name, or null if not found.
  */
-internal fun Project.getVersionOrNull(name: String): String? {
-    return libs.findVersion(name).orElseGet { null }?.requiredVersion
-}
-
+internal fun Project.getVersionOrNull(name: String): String? = libs.findVersion(name).orElseGet { null }?.requiredVersion
 
 /**
  * Adds a dependency to the dependency handler if the provided dependency object is not null.
@@ -41,23 +36,17 @@ internal fun DependencyHandler.addIfNotNull(name: String, dependency: Any?) {
 /**
  * Retrieves a library dependency from the version catalog by its alias.
  */
-internal fun Project.getDependency(name: String): Provider<MinimalExternalModuleDependency> {
-    return libs.findLibrary(name).orElseThrow { NoSuchElementException("Could not find library $name") }
-}
+internal fun Project.getDependency(name: String): Provider<MinimalExternalModuleDependency> = libs.findLibrary(name).orElseThrow { NoSuchElementException("Could not find library $name") }
 
 /**
  * Retrieves a library bundle from the version catalog by its alias.
  */
-internal fun Project.getBundleDependencies(name: String): Provider<ExternalModuleDependencyBundle> {
-    return libs.findBundle(name).orElseThrow { NoSuchElementException("Could not find library $name") }
-}
+internal fun Project.getBundleDependencies(name: String): Provider<ExternalModuleDependencyBundle> = libs.findBundle(name).orElseThrow { NoSuchElementException("Could not find library $name") }
 
 /**
  * Retrieves a dependency bundle from the `libs` catalog by its name, or `null` if the bundle is not found.
  */
-internal fun Project.getDependencyOrNull(name: String): Provider<MinimalExternalModuleDependency>? {
-    return libs.findLibrary(name).orElseGet { null }
-}
+internal fun Project.getDependencyOrNull(name: String): Provider<MinimalExternalModuleDependency>? = libs.findLibrary(name).orElseGet { null }
 
 internal val Project.javaTarget: String
     get() = getVersion("java-target")
@@ -73,4 +62,3 @@ internal val Project.jvmTarget: Provider<JvmTarget>
 
 internal val Project.javaToolchainVersion: Provider<JavaLanguageVersion>
     get() = provider { JavaLanguageVersion.of(getVersion("java-toolchain")) }
-

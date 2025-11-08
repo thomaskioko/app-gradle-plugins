@@ -3,7 +3,6 @@ package io.github.thomaskioko.gradle.plugins.utils
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
-
 internal fun Project.setupCompose() {
     plugins.apply("org.jetbrains.kotlin.plugin.compose")
 
@@ -12,7 +11,7 @@ internal fun Project.setupCompose() {
 
     composeCompiler {
         // Needed for Layout Inspector to be able to see all of the nodes in the component tree:
-        //https://issuetracker.google.com/issues/338842143
+        // https://issuetracker.google.com/issues/338842143
         includeSourceInformation.set(true)
 
         if (enableMetrics.get()) {

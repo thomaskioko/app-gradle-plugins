@@ -44,7 +44,6 @@ public abstract class AndroidExtension(private val project: Project) {
         project.setupCompose()
     }
 
-
     public fun useRoborazzi() {
         project.plugins.apply("io.github.takahirom.roborazzi")
 
