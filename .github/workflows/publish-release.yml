@@ -1,0 +1,51 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    name: Publish Release
+    runs-on: macos-latest
+    needs: build
+    if: github.repository == 'thomaskioko/app-gradle-plugins'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Get release version from tag
+        run: |
+          # Remove 'v' prefix from tag if present (v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "VERSION_NAME=$VERSION" >> $GITHUB_ENV
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$(awk '/^## ${{ env.VERSION_NAME }}/{flag=1;next}/^## /{flag=0}flag' CHANGELOG.md)" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Publish to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache --stacktrace
+        env:
+          ORG_GRADLE_PROJECT_VERSION_NAME: ${{ env.VERSION_NAME }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ env.RELEASE_NOTES }}
