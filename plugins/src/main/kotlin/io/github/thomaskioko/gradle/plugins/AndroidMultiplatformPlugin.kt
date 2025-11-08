@@ -4,7 +4,6 @@ import com.android.build.api.dsl.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
-import io.github.thomaskioko.gradle.plugins.utils.jvmCompilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -32,6 +31,8 @@ private fun Project.configureAndroidKotlinMultiplatform() {
             project.dependencies.addIfNotNull("coreLibraryDesugaring", desugarLibrary)
 
             enableCoreLibraryDesugaring = true
+
+            withHostTestBuilder {}.configure {}
         }
     }
 }

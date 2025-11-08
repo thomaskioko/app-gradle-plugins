@@ -93,7 +93,7 @@ private fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Stri
         components.onVariants { variant ->
             if (variant.name != variantToKeep) {
                 val variantAwareNames =
-                    names.map { it.replace("{VARIANT}", variant.name.replaceFirstChar(Char::titlecase)) }
+                    names.map { it.replace("{VARIANT}", variant.name.capitalize()) }
                 disableTasks(variantAwareNames)
             }
         }
@@ -186,13 +186,22 @@ private val androidAppLintTasksToDisableExceptOneVariant
     )
 
 /**
- * Lint tasks disabled for JVM-only modules since this is aggregated at app level..
+ * Lint tasks disabled for JVM-only modules since this is aggregated at app level.
  */
 private val lintTasksToDisableJvm
     get() = listOf(
         "lint",
+        "lintJvm",
+        "lintReportJvm",
+        "copyJvmLintReports",
         "lintFix",
+        "lintFixJvm",
         "updateLintBaseline",
+        "updateLintBaselineJvm",
+        "lintVital",
+        "lintVitalJvm",
+        "lintVitalAnalyzeJvmMain",
+        "lintVitalReportJvm",
     )
 
 /**

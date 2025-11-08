@@ -1,8 +1,8 @@
 package io.github.thomaskioko.gradle.plugins.extensions
 
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
-import java.io.File
 import org.gradle.api.Project
+import java.io.File
 
 public abstract class AppExtension(private val project: Project) {
     public fun applicationId(applicationId: String) {

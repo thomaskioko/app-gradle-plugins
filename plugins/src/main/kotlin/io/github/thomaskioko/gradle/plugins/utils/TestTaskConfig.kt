@@ -12,13 +12,13 @@ internal fun Test.defaultTestSetup() {
 
     reports.html.outputLocation.set(
         project.rootProject.layout.buildDirectory.dir(
-            projectNameProvider.map { "reports/tests/$it" }
-        )
+            projectNameProvider.map { "reports/tests/$it" },
+        ),
     )
     reports.junitXml.outputLocation.set(
         project.rootProject.layout.buildDirectory.dir(
-            projectNameProvider.map { "reports/tests/$it" }
-        )
+            projectNameProvider.map { "reports/tests/$it" },
+        ),
     )
 
     maxParallelForks = project.providers.systemProperty("test.maxParallelForks")

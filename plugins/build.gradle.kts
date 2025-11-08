@@ -40,7 +40,7 @@ dependencies {
 
     compileOnly(libs.baselineprofile.gradlePlugin)
     compileOnly(libs.skie.gradle.plugin)
-    compileOnly(libs.spotless.plugin)
+    compileOnly(libs.spotless.gradle.plugin)
     implementation(libs.gradle.doctor.gradle.plugin)
     runtimeOnly(libs.compose.compiler.gradle.plugin)
 }
@@ -98,7 +98,7 @@ gradlePlugin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
+    publishToMavenCentral(automaticRelease = false)
     if (providers.gradleProperty("maven.central.publish").orNull == "true") {
         signAllPublications()
     }

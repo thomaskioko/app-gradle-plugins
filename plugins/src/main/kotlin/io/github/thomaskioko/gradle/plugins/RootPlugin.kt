@@ -22,7 +22,6 @@ public abstract class RootPlugin : Plugin<Project> {
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
         configureGradleDoctor()
-
     }
 
     @Suppress("UnstableApiUsage")
@@ -67,7 +66,6 @@ public abstract class RootPlugin : Plugin<Project> {
                              * Fail on any `JAVA_HOME` issues.
                              */
                             failOnError.set(booleanProperty("java.toolchains.strict", false))
-
                         }
                     }
                 }
@@ -154,4 +152,3 @@ public abstract class RootPlugin : Plugin<Project> {
         }
     }
 }
-
