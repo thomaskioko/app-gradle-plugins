@@ -98,7 +98,7 @@ gradlePlugin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
+    publishToMavenCentral(automaticRelease = false)
     if (providers.gradleProperty("maven.central.publish").orNull == "true") {
         signAllPublications()
     }
