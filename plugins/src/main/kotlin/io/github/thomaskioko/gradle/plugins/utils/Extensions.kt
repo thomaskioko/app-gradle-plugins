@@ -8,6 +8,7 @@ import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -16,14 +17,12 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
-import org.gradle.api.provider.Provider
 
 internal val Project.baseExtension: BaseExtension
     get() = extensions.getByType(BaseExtension::class.java)
 
 internal val Project.androidExtension: AndroidExtension
     get() = baseExtension.extensions.getByType(AndroidExtension::class.java)
-
 
 /**
  * This function provides a convenient way to configure the Kotlin Multiplatform plugin using a lambda expression.
@@ -58,7 +57,6 @@ internal fun Project.android(block: CommonExtension<*, *, *, *, *, *>.() -> Unit
         it.block()
     }
 }
-
 
 /**
  * This function simplifies the process of configuring an Android application module by providing a type-safe builder pattern.
@@ -141,7 +139,14 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.jvmCompilerOptions(block: K
  * Throws an error if the package name is missing or empty in the Gradle properties.
  */
 internal fun Project.getPackageNameProvider(): Provider<String> =
-    stringProperty("package.name").map { 
-        it.takeIf { it.isNotBlank() } 
+    stringProperty("package.name").map {
+        it.takeIf { it.isNotBlank() }
             ?: error("Required property 'package.name' is missing or empty in gradle.properties. Add: package.name=com.yourcompany.yourapp")
     }
+
+/**
+ * Capitalizes the first character of this string.
+ *
+ * @return A new string with the first character converted to title case.
+ */
+internal fun String.capitalize() = replaceFirstChar { it.titlecase() }

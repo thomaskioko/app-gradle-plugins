@@ -62,8 +62,7 @@ private fun <T : Any> Project.addDependencyInternal(
     }
 }
 
-internal fun Project.addKspDependencyForAllTargets(dependency: Provider<MinimalExternalModuleDependency>) =
-    addKspDependencyForAllTargets("", dependency)
+internal fun Project.addKspDependencyForAllTargets(dependency: Provider<MinimalExternalModuleDependency>) = addKspDependencyForAllTargets("", dependency)
 
 private fun Project.addKspDependencyForAllTargets(
     configurationNameSuffix: String,
@@ -75,8 +74,7 @@ private fun Project.addKspDependencyForAllTargets(
     }
 }
 
-private fun Project.isKmpProject(): Boolean =
-    extensions.findByType(KotlinMultiplatformExtension::class.java) != null
+private fun Project.isKmpProject(): Boolean = extensions.findByType(KotlinMultiplatformExtension::class.java) != null
 
 private fun Project.addKspDependencyForKmp(
     configurationNameSuffix: String,
