@@ -12,7 +12,7 @@ kotlin = "2.2.21"
 kotlinPoet = "2.2.0"
 ksp="2.3.2"
 moko-resources = "0.25.1"
-publish = "0.34.0"
+publish = "0.35.0"
 skie = "0.10.6"
 spotless = "8.0.0"
 
