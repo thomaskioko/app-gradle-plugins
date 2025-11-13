@@ -23,10 +23,11 @@
       ]
     },
     {
-      "groupName": "Kotlin & KSP",
+      "groupName": "Kotlin, KSP & Skie",
       "matchPackagePatterns": [
         "org.jetbrains.kotlin",
-        "com.google.devtools.ksp"
+        "com.google.devtools.ksp",
+        "co.touchlab.skie"
       ]
     }
   ]
