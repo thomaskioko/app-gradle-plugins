@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+## 0.3.2
+- Added `useSkie()` to DSL
+- Group  Kotlin, KSP & Skie in Renovate
+- Enable Kotlin/Native binary size optimization (Experimental) - Reduces release binary size
+- Simplify DisableTasks and fix library lint configuration
+
+
 ## 0.3.0
 - CI/CD automation
 - Enable tests in multiplatform by default
