@@ -4,19 +4,41 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Project
 
 /**
- * Disables Android application tasks based on debugOnly mode.
+ * Task disabling utilities compatible with AGP 8.3+
+ * Last updated: 2025-01-13
  *
- * When debugOnly=true: Disables release variants, most lint tasks, compose reports, and device tests.
- * When debugOnly=false: Only disables specific lint analyze tasks for non-debug variants.
+ * Design principles:
+ * - Preserves task graph integrity using onlyIf { false }
+ * - Handles missing tasks gracefully with findByName
+ * - Skips processing during IDE sync to prevent configuration issues
+ */
+
+/** Default variant to keep active during debug-only builds */
+private const val DEFAULT_ACTIVE_VARIANT = "debug"
+
+/** Minimum supported AGP version for task name compatibility */
+private const val MIN_AGP_VERSION = "8.3.0"
+
+/**
+ * Disables Android application tasks.
+ *
+ * Always disables:
+ * - Lint tasks for non-debug variants (avoid duplicate work)
+ *
+ * When debugOnly=true, additionally disables:
+ * - Release variant assembly, bundling, and installation
+ * - Compose compiler reports
+ * - Device/connected tests
  */
 internal fun Project.disableAndroidApplicationTasks() {
+    // Always disable lint for non-debug variants
+    disableAndroidTasks(androidAppLintTasksToDisableExceptOneVariant, DEFAULT_ACTIVE_VARIANT)
+
+    // Conditionally disable builds and tests
     if (isDebugOnlyBuild()) {
-        disableAndroidTasks(androidAppTasksToDisableForDebugOnly, "debug")
-        disableAndroidTasks(androidAppLintTasksToDisableExceptOneVariant, "debug")
+        disableAndroidTasks(androidAppTasksToDisableForDebugOnly, DEFAULT_ACTIVE_VARIANT)
         disableTasks(composeTasksToDisableForDebugOnly)
         disableTasks(testTasksToDisableForDebugOnly)
-    } else {
-        disableAndroidTasks(androidAppLintTasksToDisableExceptOneVariant, "debug")
     }
 }
 
@@ -24,22 +46,27 @@ internal fun Project.disableAndroidApplicationTasks() {
  * Disables Android library tasks.
  *
  * Always disables:
- * - AAR bundling tasks (libraries consumed as individual elements by AGP)
- * - Most lint reporting tasks (aggregated at app level)
+ * - Assembly and AAR bundling for non-debug variants (libraries consumed as individual elements by AGP)
+ * - All lint reporting and fixing tasks (lint is aggregated at app level)
+ * - Lint analysis for non-debug variants (avoid duplicate work)
  *
  * When debugOnly=true, additionally disables:
- * - All library lint tasks
- * - Release variant tasks
  * - Compose compiler reports
  */
 internal fun Project.disableAndroidLibraryTasks() {
-    disableAndroidTasks(androidLibraryTasksToDisable, "debug")
+    // Always disable AAR tasks for non-debug variants
+    disableAndroidTasks(androidLibraryTasksToDisable, DEFAULT_ACTIVE_VARIANT)
+
+    // Always disable lint reports - aggregated at app level
+    disableAndroidTasks(androidLibraryLintTasksToDisable, DEFAULT_ACTIVE_VARIANT)
+
+    // Always disable lint analysis for non-debug variants
+    disableAndroidTasks(androidLibraryLintTasksToDisableExceptOneVariant, DEFAULT_ACTIVE_VARIANT)
+
+    // Conditionally disable compose reports
     if (isDebugOnlyBuild()) {
-        disableAndroidTasks(androidLibraryLintTasksToDisable, "debug")
-        disableAndroidTasks(androidLibraryTasksToDisableForDebugOnly, "debug")
         disableTasks(composeTasksToDisableForDebugOnly)
     }
-    disableAndroidTasks(androidLibraryLintTasksToDisableExceptOneVariant, "debug")
 }
 
 /**
@@ -92,8 +119,9 @@ private fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Stri
     extensions.configure<AndroidComponentsExtension<*, *, *>>("androidComponents") { components ->
         components.onVariants { variant ->
             if (variant.name != variantToKeep) {
-                val variantAwareNames =
-                    names.map { it.replace("{VARIANT}", variant.name.capitalize()) }
+                val variantAwareNames = names.map { taskName ->
+                    taskName.replace("{VARIANT}", variant.name.replaceFirstChar { it.uppercase() })
+                }
                 disableTasks(variantAwareNames)
             }
         }
@@ -106,25 +134,27 @@ private fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Stri
  * @param names List of exact task names to disable
  *
  * Safety features:
- * - Skips during IDE sync to prevent build tool conflicts
- * - Sets task.enabled = false to prevent execution
- * - Clears dependencies to break task dependency chains
- * - Updates description to indicate disabled state
- *
- * This is the foundation method used by all other task disabling functions.
+ * - Skips during IDE sync to prevent build tool conflicts (AGP 8.3+ requirement)
+ * - Preserves task graph integrity using onlyIf predicate
+ * - Handles missing tasks gracefully with findByName
  */
 private fun Project.disableTasks(names: List<String>) {
-    // since AGP 8.3 the tasks.named will fail during project sync
-    if (providers.systemProperty("idea.sync.active").getOrElse("false").toBoolean()) {
-        return
-    }
+    if (names.isEmpty()) return
+
+    // Skip during IDE sync to prevent configuration issues with AGP 8.3+
+    val isIdeSyncing = providers.systemProperty("idea.sync.active")
+        .map { it.equals("true", ignoreCase = true) }
+        .orElse(false)
+        .get()
+
+    if (isIdeSyncing) return
 
     afterEvaluate {
         names.forEach { name ->
             tasks.findByName(name)?.let { task ->
+                task.onlyIf { false }
                 task.enabled = false
-                task.description = "DISABLED"
-                task.setDependsOn(mutableListOf<Any>())
+                task.description = "DISABLED: ${task.description ?: "No description"}"
             }
         }
     }
@@ -144,20 +174,19 @@ private val androidLibraryTasksToDisable = listOf(
  * Lint tasks disabled for Android libraries when debugOnly=true.
  * Removes lint reporting from libraries since we have aggregated reporting at the app level.
  */
-private val androidLibraryLintTasksToDisable
-    get() = listOf(
-        // report
-        "lint",
-        "lint{VARIANT}",
-        "lintReport{VARIANT}",
-        "copy{VARIANT}LintReports",
-        // fix
-        "lintFix",
-        "lintFix{VARIANT}",
-        // baseline
-        "updateLintBaseline",
-        "updateLintBaseline{VARIANT}",
-    )
+private val androidLibraryLintTasksToDisable = listOf(
+    // report
+    "lint",
+    "lint{VARIANT}",
+    "lintReport{VARIANT}",
+    "copy{VARIANT}LintReports",
+    // fix
+    "lintFix",
+    "lintFix{VARIANT}",
+    // baseline
+    "updateLintBaseline",
+    "updateLintBaseline{VARIANT}",
+)
 
 /**
  * Lint analyze tasks disabled for all variants except one (typically debug is kept).
@@ -171,38 +200,36 @@ private val androidLibraryLintTasksToDisableExceptOneVariant = listOf(
 /**
  * Lint tasks disabled for all variants except one (typically debug is kept) in Android apps.
  */
-private val androidAppLintTasksToDisableExceptOneVariant
-    get() = listOf(
-        // analyze
-        "lintAnalyze{VARIANT}",
-        // report
-        "lint{VARIANT}",
-        "lintReport{VARIANT}",
-        "copy{VARIANT}LintReports",
-        // fix
-        "lintFix{VARIANT}",
-        // baseline
-        "updateLintBaseline{VARIANT}",
-    )
+private val androidAppLintTasksToDisableExceptOneVariant = listOf(
+    // analyze
+    "lintAnalyze{VARIANT}",
+    // report
+    "lint{VARIANT}",
+    "lintReport{VARIANT}",
+    "copy{VARIANT}LintReports",
+    // fix
+    "lintFix{VARIANT}",
+    // baseline
+    "updateLintBaseline{VARIANT}",
+)
 
 /**
  * Lint tasks disabled for JVM-only modules since this is aggregated at app level.
  */
-private val lintTasksToDisableJvm
-    get() = listOf(
-        "lint",
-        "lintJvm",
-        "lintReportJvm",
-        "copyJvmLintReports",
-        "lintFix",
-        "lintFixJvm",
-        "updateLintBaseline",
-        "updateLintBaselineJvm",
-        "lintVital",
-        "lintVitalJvm",
-        "lintVitalAnalyzeJvmMain",
-        "lintVitalReportJvm",
-    )
+private val lintTasksToDisableJvm = listOf(
+    "lint",
+    "lintJvm",
+    "lintReportJvm",
+    "copyJvmLintReports",
+    "lintFix",
+    "lintFixJvm",
+    "updateLintBaseline",
+    "updateLintBaselineJvm",
+    "lintVital",
+    "lintVitalJvm",
+    "lintVitalAnalyzeJvmMain",
+    "lintVitalReportJvm",
+)
 
 /**
  * Disables all release variant tasks including:
@@ -214,15 +241,6 @@ private val androidAppTasksToDisableForDebugOnly = listOf(
     "assemble{VARIANT}",
     "bundle{VARIANT}",
     "install{VARIANT}",
-)
-
-/**
- * Disables release variant assembly and bundling that aren't needed during
- * debug-only development cycles.
- */
-private val androidLibraryTasksToDisableForDebugOnly = listOf(
-    "assemble{VARIANT}",
-    "bundle{VARIANT}Aar",
 )
 
 /**
