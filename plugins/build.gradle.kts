@@ -95,6 +95,11 @@ gradlePlugin {
         id = "io.github.thomaskioko.gradle.plugins.resource.generator"
         implementationClass = "io.github.thomaskioko.gradle.plugins.ResourceGeneratorPlugin"
     }
+
+    plugins.create("buildConfigGeneratorPlugin") {
+        id = "io.github.thomaskioko.gradle.plugins.buildconfig"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.BuildConfigGeneratorPlugin"
+    }
 }
 
 mavenPublishing {
