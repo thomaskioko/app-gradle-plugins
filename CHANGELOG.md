@@ -1,6 +1,22 @@
 Change Log
 ==========
 
+## 0.4.0
+- Add "io.github.thomaskioko.gradle.plugins.buildconfig" plugin. Helps us read keys from `local.properties`
+
+**Usage**
+```kotlin
+
+buildConfig {
+
+    packageName.set("com.thomaskioko.tvmaniac.core.base")
+    booleanField("IS_DEBUG", true)
+    buildConfigField("TMDB_API_KEY")
+    buildConfigField("CLIENT_ID")
+    buildConfigField("CLIENT_SECRET")
+}
+```
+
 ## 0.3.2
 - Added `useSkie()` to DSL
 - Group  Kotlin, KSP & Skie in Renovate
