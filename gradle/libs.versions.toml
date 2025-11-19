@@ -14,7 +14,7 @@ ksp="2.3.2"
 moko-resources = "0.25.1"
 publish = "0.35.0"
 skie = "0.10.8"
-spotless = "8.0.0"
+spotless = "8.1.0"
 
 [libraries]
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
