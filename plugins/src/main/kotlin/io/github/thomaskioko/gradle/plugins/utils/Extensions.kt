@@ -149,4 +149,4 @@ internal fun Project.getPackageNameProvider(): Provider<String> =
  *
  * @return A new string with the first character converted to title case.
  */
-internal fun String.capitalize() = replaceFirstChar { it.titlecase() }
+internal fun String.capitalizeFirst() = replaceFirstChar { it.titlecase() }
