@@ -11,7 +11,9 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -29,26 +31,34 @@ public abstract class MokoResourceGeneratorTask
     layout: ProjectLayout,
 ) : DefaultTask() {
 
-    init {
-        outputs.cacheIf { true }
-        description = "Generates resource sealed classes from Moko resources"
-        group = "build"
-    }
+    @get:Input
+    public abstract val resourcePackage: Property<String>
 
     @get:Incremental
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
-        .convention(layout.buildDirectory.file("generated/moko-resources/commonMain/src/com/thomaskioko/tvmaniac/i18n/MR.kt"))
 
     @get:OutputDirectory
     public val commonMainOutput: DirectoryProperty = objectFactory.directoryProperty()
         .convention(layout.buildDirectory.dir("generated/resources"))
 
+    init {
+        description = "Generates resource sealed classes from Moko resources"
+        group = "build"
+        mokoGeneratedFile.convention(
+            resourcePackage.flatMap { pkg ->
+                val packagePath = pkg.replace('.', '/')
+                layout.buildDirectory.file("generated/moko-resources/commonMain/src/$packagePath/MR.kt")
+            },
+        )
+    }
+
     @TaskAction
     public fun generate(inputChanges: InputChanges) {
         val outputDir = commonMainOutput.get().asFile
         val mrFile = mokoGeneratedFile.get().asFile
+        val packageName = resourcePackage.get()
 
         if (!mrFile.exists()) {
             logger.warn("MR.kt file not found at ${mrFile.absolutePath}")
@@ -68,15 +78,17 @@ public abstract class MokoResourceGeneratorTask
         outputDir.deleteRecursively()
         outputDir.mkdirs()
 
-        val mrClass = ClassName("com.thomaskioko.tvmaniac.i18n", "MR")
+        val mrClass = ClassName(packageName, "MR")
         val (stringKeys, pluralKeys) = readKeysFromMRFile(mrFile)
 
         stringResourceKeyFileSpec(
+            packageName = packageName,
             stringKeys = stringKeys,
             mrClass = mrClass,
         ).writeTo(outputDir)
 
         pluralsResourceKeyFileSpec(
+            packageName = packageName,
             pluralKeys = pluralKeys,
             mrClass = mrClass,
         ).writeTo(outputDir)
@@ -134,19 +146,26 @@ public abstract class MokoResourceGeneratorTask
     }
 
     private fun stringResourceKeyFileSpec(
+        packageName: String,
         stringKeys: List<String>,
         mrClass: ClassName,
-    ): FileSpec = FileSpec.builder("com.thomaskioko.tvmaniac.i18n", "StringResourceKey")
+    ): FileSpec = FileSpec.builder(packageName, "StringResourceKey")
         .addType(
             TypeSpec.classBuilder("StringResourceKey")
                 .addModifiers(KModifier.SEALED)
                 .primaryConstructor(
                     FunSpec.constructorBuilder()
-                        .addParameter("resourceId", ClassName("dev.icerock.moko.resources", "StringResource"))
+                        .addParameter(
+                            "resourceId",
+                            ClassName("dev.icerock.moko.resources", "StringResource"),
+                        )
                         .build(),
                 )
                 .addProperty(
-                    PropertySpec.builder("resourceId", ClassName("dev.icerock.moko.resources", "StringResource"))
+                    PropertySpec.builder(
+                        "resourceId",
+                        ClassName("dev.icerock.moko.resources", "StringResource"),
+                    )
                         .initializer("resourceId")
                         .build(),
                 )
@@ -154,7 +173,7 @@ public abstract class MokoResourceGeneratorTask
                     stringKeys.map { key ->
                         TypeSpec.objectBuilder(toPascalCase(key))
                             .addModifiers(KModifier.DATA)
-                            .superclass(ClassName("com.thomaskioko.tvmaniac.i18n", "StringResourceKey"))
+                            .superclass(ClassName(packageName, "StringResourceKey"))
                             .addSuperclassConstructorParameter("%T.strings.%N", mrClass, key)
                             .build()
                     },
@@ -164,19 +183,26 @@ public abstract class MokoResourceGeneratorTask
         .build()
 
     private fun pluralsResourceKeyFileSpec(
+        packageName: String,
         pluralKeys: List<String>,
         mrClass: ClassName,
-    ): FileSpec = FileSpec.builder("com.thomaskioko.tvmaniac.i18n", "PluralsResourceKey")
+    ): FileSpec = FileSpec.builder(packageName, "PluralsResourceKey")
         .addType(
             TypeSpec.classBuilder("PluralsResourceKey")
                 .addModifiers(KModifier.SEALED)
                 .primaryConstructor(
                     FunSpec.constructorBuilder()
-                        .addParameter("resourceId", ClassName("dev.icerock.moko.resources", "PluralsResource"))
+                        .addParameter(
+                            "resourceId",
+                            ClassName("dev.icerock.moko.resources", "PluralsResource"),
+                        )
                         .build(),
                 )
                 .addProperty(
-                    PropertySpec.builder("resourceId", ClassName("dev.icerock.moko.resources", "PluralsResource"))
+                    PropertySpec.builder(
+                        "resourceId",
+                        ClassName("dev.icerock.moko.resources", "PluralsResource"),
+                    )
                         .initializer("resourceId")
                         .build(),
                 )
@@ -184,7 +210,7 @@ public abstract class MokoResourceGeneratorTask
                     pluralKeys.map { key ->
                         TypeSpec.objectBuilder(toPascalCase(key))
                             .addModifiers(KModifier.DATA)
-                            .superclass(ClassName("com.thomaskioko.tvmaniac.i18n", "PluralsResourceKey"))
+                            .superclass(ClassName(packageName, "PluralsResourceKey"))
                             .addSuperclassConstructorParameter("%T.plurals.%N", mrClass, key)
                             .build()
                     },
