@@ -44,7 +44,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
-    public fun useSkies(
+    public fun useSkie(
         defaultArgumentInterop: Boolean = false,
         suspendInterop: Boolean = true,
         flowInterop: Boolean = true,
@@ -156,7 +156,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
     @JvmOverloads
     public fun addIosTargetsWithXcFramework(
         frameworkName: String,
-        applyPlugin: Boolean = true,
         configure: KotlinNativeTarget.(Framework) -> Unit = { },
     ) {
         val xcFramework = XCFrameworkConfig(project, frameworkName)
