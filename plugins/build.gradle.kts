@@ -42,7 +42,6 @@ dependencies {
     compileOnly(libs.skie.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
     implementation(libs.gradle.doctor.gradle.plugin)
-    runtimeOnly(libs.compose.compiler.gradle.plugin)
 }
 
 gradlePlugin {
