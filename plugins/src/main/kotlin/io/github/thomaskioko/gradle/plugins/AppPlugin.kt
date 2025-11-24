@@ -41,10 +41,23 @@ public abstract class AppPlugin : Plugin<Project> {
 
                 val keyStoreFile = target.stringProperty("releaseStoreFile")
                 if (keyStoreFile.isPresent) {
+                    val requiredProps = listOf(
+                        "releaseStorePassword",
+                        "releaseKeyAlias",
+                        "releaseKeyPassword",
+                    )
+                    val missingProps = requiredProps.filter {
+                        !target.stringProperty(it).isPresent
+                    }
+
+                    require(missingProps.isEmpty()) {
+                        "Release signing requires these properties in gradle.properties or local.properties: ${missingProps.joinToString()}"
+                    }
+
                     register("release") {
                         it.storeFile = target.rootProject.file(keyStoreFile.get())
                         it.storePassword = target.stringProperty("releaseStorePassword").get()
-                        it.keyAlias = target.stringProperty("rReleaseKeyAlias").get()
+                        it.keyAlias = target.stringProperty("releaseKeyAlias").get()
                         it.keyPassword = target.stringProperty("releaseKeyPassword").get()
                         it.enableV3Signing = true
                         it.enableV4Signing = true
