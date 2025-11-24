@@ -2,11 +2,69 @@ package io.github.thomaskioko.gradle.plugins
 
 import com.autonomousapps.DependencyAnalysisExtension
 import com.osacky.doctor.DoctorExtension
+import io.github.thomaskioko.gradle.plugins.DependencyExclusions.incorrectConfiguration
+import io.github.thomaskioko.gradle.plugins.DependencyExclusions.unusedDependencies
+import io.github.thomaskioko.gradle.plugins.DependencyExclusions.usedTransitive
 import io.github.thomaskioko.gradle.plugins.utils.booleanProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 import org.gradle.jvm.toolchain.JvmVendorSpec
+
+/**
+ * Dependency exclusion lists for dependency analysis plugin.
+ * Extracted as constants to avoid recreating these lists for each project configuration.
+ */
+private object DependencyExclusions {
+    val incorrectConfiguration = listOf(
+        "org.jetbrains.kotlin:kotlin-stdlib",
+        "androidx.core:core-ktx",
+        "androidx.lifecycle:lifecycle-runtime-ktx",
+        "io.coil-kt:coil-compose",
+    )
+
+    val unusedDependencies = listOf(
+        "io.coil-kt:coil-compose",
+        "io.coil-kt:coil-compose-base",
+        "androidx.compose.foundation:foundation",
+    )
+
+    val usedTransitive = listOf(
+        // Common Kotlin dependencies
+        "org.jetbrains.kotlin:kotlin-stdlib",
+        // Common Compose dependencies
+        "androidx.compose.animation:animation",
+        "androidx.compose.material:material-icons-core",
+        "androidx.compose.ui:ui-tooling-preview",
+        "androidx.compose.ui:ui",
+        // Common libraries
+        "androidx.lifecycle:lifecycle-runtime-compose",
+        "androidx.lifecycle:lifecycle-runtime",
+        "libs.kotlinx.collections",
+        "libs.coroutines.core",
+        "libs.moko.resources",
+        "libs.moko.resources.compose",
+        "libs.androidx.compose.material.icons",
+        // Common Android libraries
+        "androidx.activity:activity",
+        "androidx.paging:paging-common",
+        "androidx.sqlite:sqlite",
+        "androidx.datastore:datastore-core",
+        // Additional dependencies from the report
+        "com.squareup.okhttp3:okhttp",
+        "libs.kotlinx.serialization.json",
+        "libs.sqldelight.driver.android",
+        "libs.sqldelight.runtime",
+        "libs.sqldelight.driver.jvm",
+        "libs.decompose.decompose",
+        "libs.androidx.paging.common",
+        // Common test dependencies
+        "junit:junit",
+        "androidx.junit",
+        "libs.androidx.junit",
+        "io.kotest:kotest-assertions-shared",
+    )
+}
 
 /**
  * `RootPlugin` is a base Gradle plugin that configures common settings for all subprojects.
@@ -79,12 +137,9 @@ public abstract class RootPlugin : Plugin<Project> {
                 issues.all { project ->
 
                     project.onIncorrectConfiguration {
-                        it.exclude(
-                            "org.jetbrains.kotlin:kotlin-stdlib",
-                            "androidx.core:core-ktx",
-                            "androidx.lifecycle:lifecycle-runtime-ktx",
-                            "io.coil-kt:coil-compose",
-                        )
+                        incorrectConfiguration.forEach { dep ->
+                            it.exclude(dep)
+                        }
                     }
 
                     project.onRedundantPlugins {
@@ -93,59 +148,16 @@ public abstract class RootPlugin : Plugin<Project> {
 
                     project.onUnusedDependencies {
                         it.severity("fail")
-
-                        it.exclude(
-                            "io.coil-kt:coil-compose",
-                            "io.coil-kt:coil-compose-base",
-                            // Exclude androidx.compose.foundation which is used for layout components
-                            "androidx.compose.foundation:foundation",
-                        )
+                        unusedDependencies.forEach { dep ->
+                            it.exclude(dep)
+                        }
                     }
 
                     project.onUsedTransitiveDependencies {
                         it.severity("warn")
-
-                        // Exclude commonly used transitive dependencies that are showing up in the report
-                        it.exclude(
-                            // Common Kotlin dependencies
-                            "org.jetbrains.kotlin:kotlin-stdlib",
-
-                            // Common Compose dependencies
-                            "androidx.compose.animation:animation",
-                            "androidx.compose.material:material-icons-core",
-                            "androidx.compose.ui:ui-tooling-preview",
-                            "androidx.compose.ui:ui",
-
-                            // Common libraries
-                            "androidx.lifecycle:lifecycle-runtime-compose",
-                            "androidx.lifecycle:lifecycle-runtime",
-                            "libs.kotlinx.collections",
-                            "libs.coroutines.core",
-                            "libs.moko.resources",
-                            "libs.moko.resources.compose",
-                            "libs.androidx.compose.material.icons",
-
-                            // Common Android libraries
-                            "androidx.activity:activity",
-                            "androidx.paging:paging-common",
-                            "androidx.sqlite:sqlite",
-                            "androidx.datastore:datastore-core",
-
-                            // Additional dependencies from the report
-                            "com.squareup.okhttp3:okhttp",
-                            "libs.kotlinx.serialization.json",
-                            "libs.sqldelight.driver.android",
-                            "libs.sqldelight.runtime",
-                            "libs.sqldelight.driver.jvm",
-                            "libs.decompose.decompose",
-                            "libs.androidx.paging.common",
-
-                            // Common test dependencies
-                            "junit:junit",
-                            "androidx.junit",
-                            "libs.androidx.junit",
-                            "io.kotest:kotest-assertions-shared",
-                        )
+                        usedTransitive.forEach { dep ->
+                            it.exclude(dep)
+                        }
                     }
                 }
             }
