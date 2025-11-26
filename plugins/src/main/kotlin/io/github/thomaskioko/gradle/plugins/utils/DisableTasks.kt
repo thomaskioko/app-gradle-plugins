@@ -16,9 +16,6 @@ import org.gradle.api.Project
 /** Default variant to keep active during debug-only builds */
 private const val DEFAULT_ACTIVE_VARIANT = "debug"
 
-/** Minimum supported AGP version for task name compatibility */
-private const val MIN_AGP_VERSION = "8.3.0"
-
 /**
  * Disables Android application tasks.
  *
@@ -120,7 +117,7 @@ private fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Stri
         components.onVariants { variant ->
             if (variant.name != variantToKeep) {
                 val variantAwareNames = names.map { taskName ->
-                    taskName.replace("{VARIANT}", variant.name.replaceFirstChar { it.uppercase() })
+                    taskName.replace("{VARIANT}", variant.name.capitalizeFirst())
                 }
                 disableTasks(variantAwareNames)
             }
@@ -145,17 +142,15 @@ private fun Project.disableTasks(names: List<String>) {
     val isIdeSyncing = providers.systemProperty("idea.sync.active")
         .map { it.equals("true", ignoreCase = true) }
         .orElse(false)
-        .get()
 
-    if (isIdeSyncing) return
+    val taskNamesToDisable = names.toSet()
 
-    afterEvaluate {
-        names.forEach { name ->
-            tasks.findByName(name)?.let { task ->
-                task.onlyIf { false }
-                task.enabled = false
-                task.description = "DISABLED: ${task.description ?: "No description"}"
-            }
+    tasks.configureEach { task ->
+        if (task.name in taskNamesToDisable) {
+            // Defer IDE sync check to execution time for configuration cache compatibility
+            task.onlyIf { !isIdeSyncing.get() }
+            task.enabled = false
+            task.description = "DISABLED: ${task.description ?: "No description"}"
         }
     }
 }

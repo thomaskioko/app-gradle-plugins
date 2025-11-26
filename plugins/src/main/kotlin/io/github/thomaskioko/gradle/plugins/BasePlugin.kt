@@ -80,7 +80,6 @@ public abstract class BasePlugin : Plugin<Project> {
                     freeCompilerArgs.addAll(
                         "-Xjvm-default=all",
                         "-Xassertions=jvm",
-                        "-Xconsistent-data-class-copy-visibility",
                     )
 
                     if (!isAndroid) {

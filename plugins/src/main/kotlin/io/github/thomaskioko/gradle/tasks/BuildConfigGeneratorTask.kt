@@ -31,7 +31,6 @@ public abstract class BuildConfigGeneratorTask
 ) : DefaultTask() {
 
     init {
-        outputs.cacheIf { true }
         description = "Generates BuildConfig.kt with compile-time constants"
         group = "build"
     }
@@ -72,9 +71,15 @@ public abstract class BuildConfigGeneratorTask
     public fun generate() {
         val outputDir = outputDirectory.get().asFile
         val pkg = packageName.get()
-        val customStrings = stringFields.getOrElse(emptyMap())
-        val customBooleans = booleanFields.getOrElse(emptyMap())
-        val customInts = intFields.getOrElse(emptyMap())
+
+        // Validate package name format
+        require(pkg.matches(Regex("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"))) {
+            "Invalid package name: '$pkg'. Package names must start with a lowercase letter and contain only lowercase letters, numbers, underscores, and dots."
+        }
+
+        val customStrings = stringFields.get()
+        val customBooleans = booleanFields.get()
+        val customInts = intFields.get()
 
         outputDir.deleteRecursively()
         outputDir.mkdirs()

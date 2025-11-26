@@ -83,7 +83,7 @@ internal fun Project.androidSetup() {
             it.targetSdk = getVersion("android-target").toInt()
         }
 
-        // default all features to false, they will be enabled through TvManiacAndroidExtension
+        // default all features to false, they will be enabled through AndroidExtension
         buildFeatures {
             viewBinding = false
             resValues = false
