@@ -31,28 +31,29 @@ public abstract class MokoResourceGeneratorTask
     layout: ProjectLayout,
 ) : DefaultTask() {
 
+    init {
+        description = "Generates resource sealed classes from Moko resources"
+        group = "build"
+    }
+
     @get:Input
-    public abstract val resourcePackage: Property<String>
+    public val resourcePackage: Property<String> = objectFactory.property(String::class.java)
+        .convention("com.thomaskioko.tvmaniac.i18n")
 
     @get:Incremental
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
-
-    @get:OutputDirectory
-    public val commonMainOutput: DirectoryProperty = objectFactory.directoryProperty()
-        .convention(layout.buildDirectory.dir("generated/resources"))
-
-    init {
-        description = "Generates resource sealed classes from Moko resources"
-        group = "build"
-        mokoGeneratedFile.convention(
+        .convention(
             resourcePackage.flatMap { pkg ->
                 val packagePath = pkg.replace('.', '/')
                 layout.buildDirectory.file("generated/moko-resources/commonMain/src/$packagePath/MR.kt")
             },
         )
-    }
+
+    @get:OutputDirectory
+    public val commonMainOutput: DirectoryProperty = objectFactory.directoryProperty()
+        .convention(layout.buildDirectory.dir("generated/resources"))
 
     @TaskAction
     public fun generate(inputChanges: InputChanges) {
