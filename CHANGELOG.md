@@ -1,13 +1,16 @@
 Change Log
 ==========
 
-## 0.4.1
+## 0.4.2
 - Rename `useSkies()` to `useSkie()`
 - Fix typo in release key alias property (`rReleaseKeyAlias` → `releaseKeyAlias`)
 - Make `MokoResourceGeneratorTask` package name configurable via `resourcePackage` property
 - Improve configuration cache compatibility and task disabling performance
 - Add validation for release signing properties and BuildConfig package name
 - Remove duplicate `-Xconsistent-data-class-copy-visibility` compiler argument
+
+## 0.4.1
+- Dependency updates.
 
 ## 0.4.0
 - Add "io.github.thomaskioko.gradle.plugins.buildconfig" plugin. Helps us read keys from `local.properties`
