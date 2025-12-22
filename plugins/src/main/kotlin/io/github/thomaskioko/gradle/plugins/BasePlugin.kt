@@ -69,6 +69,7 @@ public abstract class BasePlugin : Plugin<Project> {
                     "-Xcontext-parameters",
                     "-Xcontext-sensitive-resolution",
                     "-Xannotation-target-all",
+                    "-Xreturn-value-checker=full",
                     // opt in to experimental apis
                     "-opt-in=kotlin.time.ExperimentalTime",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
