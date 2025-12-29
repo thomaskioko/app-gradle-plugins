@@ -1,6 +1,6 @@
 [versions]
 java-target = "21"
-java-toolchain = "21"
+java-toolchain = "25"
 ktlint = "1.4.0"
 
 agp = "8.13.1"
