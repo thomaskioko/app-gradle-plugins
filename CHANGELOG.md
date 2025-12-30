@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## 0.4.3 *(2025-12-30)*
+- Enable return-value-checker.
+- Enable `explicitApi` by default and remove it from base extension.
+- Update java-toolchain version to 25.
+- Dependency updates.
+
 ## 0.4.2
 - Rename `useSkies()` to `useSkie()`
 - Fix typo in release key alias property (`rReleaseKeyAlias` → `releaseKeyAlias`)
