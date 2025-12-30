@@ -30,12 +30,6 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
-    public fun explicitApi() {
-        project.kotlin {
-            explicitApi()
-        }
-    }
-
     public fun optIn(vararg classes: String) {
         project.kotlin {
             compilerOptions {

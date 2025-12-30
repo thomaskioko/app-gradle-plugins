@@ -46,6 +46,8 @@ public abstract class BasePlugin : Plugin<Project> {
 
     private fun Project.configureKotlin() {
         kotlin {
+            explicitApi()
+
             jvmToolchain { toolchain ->
                 toolchain.languageVersion.set(javaToolchainVersion)
                 toolchain.vendor.set(JvmVendorSpec.AZUL)
@@ -69,6 +71,7 @@ public abstract class BasePlugin : Plugin<Project> {
                     "-Xcontext-parameters",
                     "-Xcontext-sensitive-resolution",
                     "-Xannotation-target-all",
+                    "-Xreturn-value-checker=full",
                     // opt in to experimental apis
                     "-opt-in=kotlin.time.ExperimentalTime",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",

@@ -1,34 +1,35 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    ":disableRateLimiting",
-    ":semanticCommitsDisabled"
-  ],
-  "platformCommit": true,
-  "rebaseWhen": "conflicted",
-  "gitAuthor": "Renovate Bot <renovate-bot@github.com>",
-  "ignorePaths": [
-    "**/.ruby-version"
-  ],
-  "packageRules": [
-    {
-      "matchDatasources": [
-        "maven"
-      ],
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-        "https://dl.google.com/android/maven2",
-        "https://plugins.gradle.org/m2"
-      ]
-    },
-    {
-      "groupName": "Kotlin, KSP & Skie",
-      "matchPackagePatterns": [
-        "org.jetbrains.kotlin",
-        "com.google.devtools.ksp",
-        "co.touchlab.skie"
-      ]
-    }
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        ":disableRateLimiting",
+        ":semanticCommitsDisabled"
+    ],
+    "labels": ["renovate"],
+    "platformCommit": true,
+    "rebaseWhen": "conflicted",
+    "gitAuthor": "Renovate Bot <renovate-bot@github.com>",
+    "ignorePaths": [
+        "**/.ruby-version"
+    ],
+    "packageRules": [
+        {
+            "matchDatasources": [
+                "maven"
+            ],
+            "registryUrls": [
+                "https://repo.maven.apache.org/maven2",
+                "https://dl.google.com/android/maven2",
+                "https://plugins.gradle.org/m2"
+            ]
+        },
+        {
+            "groupName": "Kotlin, KSP & Skie",
+            "matchPackagePatterns": [
+                "org.jetbrains.kotlin",
+                "com.google.devtools.ksp",
+                "co.touchlab.skie"
+            ]
+        }
+    ]
 }
