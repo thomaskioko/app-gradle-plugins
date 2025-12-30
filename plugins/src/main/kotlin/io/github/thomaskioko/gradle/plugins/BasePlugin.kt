@@ -46,6 +46,8 @@ public abstract class BasePlugin : Plugin<Project> {
 
     private fun Project.configureKotlin() {
         kotlin {
+            explicitApi()
+
             jvmToolchain { toolchain ->
                 toolchain.languageVersion.set(javaToolchainVersion)
                 toolchain.vendor.set(JvmVendorSpec.AZUL)
