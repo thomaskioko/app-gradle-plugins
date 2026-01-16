@@ -7,6 +7,7 @@ import com.android.build.api.dsl.LibraryAndroidResources
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
 import io.github.thomaskioko.gradle.plugins.utils.android
+import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import io.github.thomaskioko.gradle.plugins.utils.setupCompose
@@ -29,8 +30,10 @@ public abstract class AndroidExtension(private val project: Project) {
     }
 
     public fun enableBuildConfig() {
-        project.android {
-            buildFeatures.buildConfig = true
+        project.androidLibrary {
+            buildFeatures {
+                buildConfig = true
+            }
         }
     }
 
@@ -47,8 +50,10 @@ public abstract class AndroidExtension(private val project: Project) {
     public fun useRoborazzi() {
         project.plugins.apply("io.github.takahirom.roborazzi")
 
-        project.android {
-            testOptions.unitTests.isIncludeAndroidResources = true
+        project.androidLibrary {
+            testOptions {
+                unitTests.isIncludeAndroidResources = true
+            }
         }
 
         project.dependencies.apply {
@@ -89,7 +94,7 @@ public abstract class AndroidExtension(private val project: Project) {
         apiLevel: Int = 34,
         systemImageSource: String = "aosp",
     ) {
-        project.android {
+        project.androidLibrary {
             testOptions {
                 managedDevices {
                     allDevices.register(deviceName, ManagedVirtualDevice::class.java) {

@@ -2,7 +2,9 @@ package io.github.thomaskioko.gradle.plugins.utils
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
@@ -52,7 +54,7 @@ internal fun Project.composeCompiler(block: ComposeCompilerGradlePluginExtension
  * @param block A lambda receiver of type [CommonExtension], used to perform configurations
  * applied to the Android Gradle Plugin for the project.
  */
-internal fun Project.android(block: CommonExtension<*, *, *, *, *, *>.() -> Unit) {
+internal fun Project.android(block: CommonExtension.() -> Unit) {
     extensions.configure(CommonExtension::class.java) {
         it.block()
     }
@@ -64,6 +66,28 @@ internal fun Project.android(block: CommonExtension<*, *, *, *, *, *>.() -> Unit
 internal fun Project.androidApp(block: ApplicationExtension.() -> Unit) {
     extensions.configure(ApplicationExtension::class.java) {
         it.block()
+    }
+}
+
+/**
+ * Configures the Android Gradle Plugin for a library module.
+ * This provides access to LibraryExtension-specific features like buildFeatures.
+ */
+internal fun Project.androidLibrary(block: LibraryExtension.() -> Unit) {
+    extensions.configure(LibraryExtension::class.java) {
+        it.block()
+    }
+}
+
+/**
+ * Configures the KotlinMultiplatformAndroidLibraryExtension for the project.
+ * This is used when configuring the Android target in a KMP project.
+ */
+internal fun Project.androidMultiplatform(block: KotlinMultiplatformAndroidLibraryExtension.() -> Unit) {
+    kotlinMultiplatform {
+        extensions.configure(KotlinMultiplatformAndroidLibraryExtension::class.java) {
+            it.block()
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 package io.github.thomaskioko.gradle.plugins
 
-import com.android.build.api.dsl.androidLibrary
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
@@ -22,7 +22,7 @@ public abstract class AndroidMultiplatformPlugin : Plugin<Project> {
 @Suppress("UnstableApiUsage")
 private fun Project.configureAndroidKotlinMultiplatform() {
     kotlinMultiplatform {
-        androidLibrary {
+        extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
             namespace = pathBasedAndroidNamespace()
             compileSdk = getVersion("android-compile").toInt()
             minSdk = getVersion("android-min").toInt()
