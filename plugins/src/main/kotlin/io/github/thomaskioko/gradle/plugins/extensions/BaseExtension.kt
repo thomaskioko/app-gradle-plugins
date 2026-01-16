@@ -122,7 +122,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         project.plugins.apply(AndroidMultiplatformPlugin::class.java)
 
         project.kotlinMultiplatform {
-            // Access the KotlinMultiplatformAndroidLibraryTarget directly (AGP 9.0 pattern)
             extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
                 if (enableAndroidResources) {
                     androidResources.enable = true
