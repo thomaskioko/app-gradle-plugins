@@ -9,7 +9,6 @@ import co.touchlab.skie.configuration.SuspendInterop
 import co.touchlab.skie.plugin.configuration.SkieExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.LibraryExtension
-import com.android.build.api.dsl.androidLibrary
 import io.github.thomaskioko.gradle.plugins.AndroidMultiplatformPlugin
 import io.github.thomaskioko.gradle.plugins.AndroidPlugin
 import io.github.thomaskioko.gradle.plugins.utils.addBundleImplementationDependency
@@ -113,7 +112,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         androidExtension.configure()
     }
 
-    @Suppress("UnstableApiUsage")
     @JvmOverloads
     public fun addAndroidMultiplatformTarget(
         withDeviceTestBuilder: Boolean = false,
@@ -124,8 +122,11 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         project.plugins.apply(AndroidMultiplatformPlugin::class.java)
 
         project.kotlinMultiplatform {
-            androidLibrary {
-                experimentalProperties["android.experimental.kmp.enableAndroidResources"] = enableAndroidResources
+            // Access the KotlinMultiplatformAndroidLibraryTarget directly (AGP 9.0 pattern)
+            extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
+                if (enableAndroidResources) {
+                    androidResources.enable = true
+                }
 
                 if (withDeviceTestBuilder) {
                     withDeviceTestBuilder {
@@ -136,8 +137,8 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
                 }
 
                 if (withJava) {
+                    withJava()
                     jvmCompilerOptions {
-                        withJava()
                         jvmTarget.set(project.jvmTarget)
                     }
                 }

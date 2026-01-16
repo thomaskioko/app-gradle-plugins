@@ -7,6 +7,7 @@ import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.android
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
+import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.configure
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
@@ -46,7 +47,7 @@ public abstract class AndroidPlugin : Plugin<Project> {
 
     @Suppress("UnstableApiUsage")
     private fun Project.configureUnitTests() {
-        android {
+        androidLibrary {
             testOptions {
                 unitTests.all(Test::defaultTestSetup)
             }
@@ -82,14 +83,15 @@ internal fun Project.androidSetup() {
         (defaultConfig as? ApplicationDefaultConfig)?.let {
             it.targetSdk = getVersion("android-target").toInt()
         }
+    }
 
+    androidLibrary {
         // default all features to false, they will be enabled through AndroidExtension
         buildFeatures {
             viewBinding = false
             resValues = false
             buildConfig = false
             aidl = false
-            renderScript = false
             shaders = false
         }
 
