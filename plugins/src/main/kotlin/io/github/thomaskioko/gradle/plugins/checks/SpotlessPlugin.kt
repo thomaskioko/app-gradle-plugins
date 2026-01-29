@@ -28,8 +28,7 @@ public class SpotlessPlugin : Plugin<Project> {
                             "android" to "true",
                         ),
                     )
-                    it.target("**/*.kt")
-                    it.targetExclude("${layout.buildDirectory}/**/*.kt")
+                    it.target("src/**/*.kt")
                 }
 
                 kotlinGradle {
@@ -37,15 +36,10 @@ public class SpotlessPlugin : Plugin<Project> {
                     it.target("*.kts")
                 }
 
-                // Only configure XML formatting for projects that actually have XML files
-                if (shouldConfigureXmlFormatting(project)) {
-                    format("xml") {
-                        it.target("src/**/*.xml")
-                        it.targetExclude("**/build/", ".idea/")
-                        it.trimTrailingWhitespace()
-                        it.endWithNewline()
-                    }
+                format("xml") {
+                    it.target("src/**/*.xml")
                 }
+
             }
         }
     }
