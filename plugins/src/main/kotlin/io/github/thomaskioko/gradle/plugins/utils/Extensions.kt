@@ -92,6 +92,27 @@ internal fun Project.androidMultiplatform(block: KotlinMultiplatformAndroidLibra
 }
 
 /**
+ * Configures common Android settings shared across all Android project types:
+ * namespace, compileSdk, minSdk, and lint.
+ */
+internal fun Project.configureCommonAndroid() {
+    android {
+        namespace = pathBasedAndroidNamespace()
+        compileSdk = getVersion("android-compile").toInt()
+        defaultConfig.minSdk = getVersion("android-min").toInt()
+        lint.configure(project)
+    }
+}
+
+@Suppress("UnstableApiUsage")
+internal fun KotlinMultiplatformAndroidLibraryTarget.configureCommonAndroid(project: Project) {
+    namespace = project.pathBasedAndroidNamespace()
+    compileSdk = project.getVersion("android-compile").toInt()
+    minSdk = project.getVersion("android-min").toInt()
+    lint.configure(project)
+}
+
+/**
  * This function provides a concise way to customize the Android build process, including variant configuration and artifact management.
  */
 internal fun Project.androidComponents(block: AndroidComponentsExtension<*, *, *>.() -> Unit) {
@@ -174,3 +195,23 @@ internal fun Project.getPackageNameProvider(): Provider<String> =
  * @return A new string with the first character converted to title case.
  */
 internal fun String.capitalizeFirst() = replaceFirstChar { it.titlecase() }
+
+/**
+ * Generates an Android namespace based on the project's path structure.
+ * Converts the Gradle project path to a valid namespace format.
+ */
+internal fun Project.pathBasedAndroidNamespace(): String {
+    val transformedPath = path.drop(1)
+        .split(":")
+        .mapIndexed { index, pathElement ->
+            val parts = pathElement.split("-")
+            if (index == 0) {
+                parts.joinToString(separator = ".")
+            } else {
+                parts.joinToString(separator = "")
+            }
+        }
+        .joinToString(separator = ".")
+
+    return "${getPackageNameProvider().get()}.$transformedPath"
+}

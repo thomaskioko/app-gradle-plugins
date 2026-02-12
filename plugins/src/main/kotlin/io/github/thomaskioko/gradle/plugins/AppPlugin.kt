@@ -3,7 +3,6 @@ package io.github.thomaskioko.gradle.plugins
 import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
-import io.github.thomaskioko.gradle.plugins.utils.androidExtension
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidApplicationTasks
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
@@ -19,9 +18,11 @@ public abstract class AppPlugin : Plugin<Project> {
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
 
-        target.androidExtension.enableBuildConfig()
-
         target.androidApp {
+            buildFeatures {
+                buildConfig = true
+            }
+
             defaultConfig {
                 versionCode = target.getVersion("app-version-code").toInt()
                 versionName = target.getVersion("app-version-name")
@@ -78,12 +79,6 @@ public abstract class AppPlugin : Plugin<Project> {
 
             lint {
                 baseline = target.file("lint-baseline.xml")
-            }
-
-            @Suppress("UnstableApiUsage")
-            testOptions {
-                // include test resources in app module to be able to test the manifest
-                unitTests.isIncludeAndroidResources = true
             }
         }
 

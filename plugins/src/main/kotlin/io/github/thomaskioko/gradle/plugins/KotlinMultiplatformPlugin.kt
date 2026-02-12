@@ -1,8 +1,12 @@
 package io.github.thomaskioko.gradle.plugins
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
+import io.github.thomaskioko.gradle.plugins.utils.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
 import io.github.thomaskioko.gradle.plugins.utils.disableMultiplatformTasks
+import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
@@ -14,13 +18,18 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("org.jetbrains.kotlin.multiplatform")
+        target.plugins.apply("com.android.kotlin.multiplatform.library")
         target.plugins.apply(BasePlugin::class.java)
 
         target.kotlinMultiplatform {
             applyDefaultHierarchyTemplate()
 
-            if (target.pluginManager.hasPlugin("com.android.library")) {
-                androidTarget()
+            extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
+                configureCommonAndroid(target)
+
+                val desugarLibrary = target.getDependencyOrNull("android-desugarJdkLibs")
+                target.dependencies.addIfNotNull("coreLibraryDesugaring", desugarLibrary)
+                enableCoreLibraryDesugaring = true
             }
 
             jvm()
@@ -56,7 +65,6 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
         }
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
-
         target.disableMultiplatformTasks()
     }
 }
