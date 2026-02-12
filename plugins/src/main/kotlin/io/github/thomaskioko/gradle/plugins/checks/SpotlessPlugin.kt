@@ -39,7 +39,6 @@ public class SpotlessPlugin : Plugin<Project> {
                 format("xml") {
                     it.target("src/**/*.xml")
                 }
-
             }
         }
     }
