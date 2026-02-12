@@ -55,11 +55,6 @@ gradlePlugin {
         implementationClass = "io.github.thomaskioko.gradle.plugins.AndroidPlugin"
     }
 
-    plugins.create("androidMultiplatformPlugin") {
-        id = "io.github.thomaskioko.gradle.plugins.android.multiplatform"
-        implementationClass = "io.github.thomaskioko.gradle.plugins.AndroidMultiplatformPlugin"
-    }
-
     plugins.create("jvmPlugin") {
         id = "io.github.thomaskioko.gradle.plugins.jvm"
         implementationClass = "io.github.thomaskioko.gradle.plugins.JvmPlugin"

@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## 0.5.0 *(2026-02-12)*
+- Migrate to gradle 9.0
+- Delete `AndroidMultiplatformPlugin` plugin. We now only need `KotlinMultiplatformPlugin`
+- Remove `org.jetbrains.kotlin.android`
+- Delete deprecated androidTarget support.
+
 ## 0.4.3 *(2025-12-30)*
 - Enable return-value-checker.
 - Enable `explicitApi` by default and remove it from base extension.
