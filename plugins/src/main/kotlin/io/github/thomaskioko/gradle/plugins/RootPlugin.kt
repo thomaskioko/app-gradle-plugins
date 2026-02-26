@@ -40,11 +40,11 @@ private object DependencyExclusions {
         // Common libraries
         "androidx.lifecycle:lifecycle-runtime-compose",
         "androidx.lifecycle:lifecycle-runtime",
-        "libs.kotlinx.collections",
-        "libs.coroutines.core",
-        "libs.moko.resources",
-        "libs.moko.resources.compose",
-        "libs.androidx.compose.material.icons",
+        "org.jetbrains.kotlinx:kotlinx-collections-immutable",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+        "dev.icerock.moko:resources",
+        "dev.icerock.moko:resources-compose",
+        "androidx.compose.material:material-icons-extended",
         // Common Android libraries
         "androidx.activity:activity",
         "androidx.paging:paging-common",
@@ -52,16 +52,15 @@ private object DependencyExclusions {
         "androidx.datastore:datastore-core",
         // Additional dependencies from the report
         "com.squareup.okhttp3:okhttp",
-        "libs.kotlinx.serialization.json",
-        "libs.sqldelight.driver.android",
-        "libs.sqldelight.runtime",
-        "libs.sqldelight.driver.jvm",
-        "libs.decompose.decompose",
-        "libs.androidx.paging.common",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json",
+        "app.cash.sqldelight:android-driver",
+        "app.cash.sqldelight:runtime",
+        "app.cash.sqldelight:sqlite-driver",
+        "com.arkivanov.decompose:decompose",
+        "androidx.paging:paging-common",
         // Common test dependencies
         "junit:junit",
-        "androidx.junit",
-        "libs.androidx.junit",
+        "androidx.test.ext:junit",
         "io.kotest:kotest-assertions-shared",
     )
 }
@@ -133,13 +132,16 @@ public abstract class RootPlugin : Plugin<Project> {
 
     private fun Project.configureDependencyAnalysis() {
         extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
+            analysis.useTypesafeProjectAccessors(true)
+
             analysis.issues { issues ->
                 issues.all { project ->
+                    project.onAny {
+                        it.severity("fail")
+                    }
 
                     project.onIncorrectConfiguration {
-                        incorrectConfiguration.forEach { dep ->
-                            it.exclude(dep)
-                        }
+                        it.exclude(*incorrectConfiguration.toTypedArray())
                     }
 
                     project.onRedundantPlugins {
@@ -147,18 +149,45 @@ public abstract class RootPlugin : Plugin<Project> {
                     }
 
                     project.onUnusedDependencies {
-                        it.severity("fail")
-                        unusedDependencies.forEach { dep ->
-                            it.exclude(dep)
-                        }
+                        it.exclude(*unusedDependencies.toTypedArray())
                     }
 
                     project.onUsedTransitiveDependencies {
                         it.severity("warn")
-                        usedTransitive.forEach { dep ->
-                            it.exclude(dep)
-                        }
+                        it.exclude(*usedTransitive.toTypedArray())
                     }
+                }
+            }
+
+            analysis.structure { structure ->
+                structure.ignoreKtx(true)
+
+                structure.bundle("androidx-compose-runtime") {
+                    it.primary("androidx.compose.runtime:runtime")
+                    it.includeGroup("androidx.compose.runtime")
+                }
+                structure.bundle("androidx-compose-ui") {
+                    it.primary("androidx.compose.ui:ui")
+                    it.includeGroup("androidx.compose.ui")
+                    it.includeDependency("androidx.compose.runtime:runtime-saveable")
+                }
+                structure.bundle("androidx-compose-foundation") {
+                    it.primary("androidx.compose.foundation:foundation")
+                    it.includeGroup("androidx.compose.animation")
+                    it.includeGroup("androidx.compose.foundation")
+                }
+                structure.bundle("androidx-compose-material") {
+                    it.primary("androidx.compose.material:material")
+                    it.includeGroup("androidx.compose.material")
+                }
+                structure.bundle("androidx-compose-material3") {
+                    it.primary("androidx.compose.material3:material3")
+                    it.includeGroup("androidx.compose.material3")
+                }
+
+                structure.bundle("coil") {
+                    it.primary("io.coil-kt:coil-compose")
+                    it.includeGroup("io.coil-kt")
                 }
             }
         }
