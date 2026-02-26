@@ -70,9 +70,19 @@ public abstract class BasePlugin : Plugin<Project> {
                     // Enable 2.2.0 feature previews
                     "-Xcontext-parameters",
                     "-Xcontext-sensitive-resolution",
+                    // Enable using @all:... annotation use site target
+                    // https://kotlinlang.org/docs/annotations.html#all-meta-target
                     "-Xannotation-target-all",
+                    // Enable unused return value checks for annotated methods
+                    // TODO: change to full which changes it from opt-out by adding @IgnorableReturnValue instead of opt-in by adding @MustUseReturnValues
+                    // https://kotlinlang.org/docs/whatsnew23.html#unused-return-value-checker
                     "-Xreturn-value-checker=check",
+                    // Makes it possible to use reified exception types in catch clauses
+                    // https://kotlinlang.org/docs/whatsnew2220.html#support-for-reified-types-in-catch-clauses
+                    "-Xallow-reified-type-in-catch",
                     // opt in to experimental apis
+                    // https://kotlinlang.org/docs/whatsnew23.html#explicit-backing-fields
+                    "-Xexplicit-backing-fields",
                     "-opt-in=kotlin.time.ExperimentalTime",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                 )
