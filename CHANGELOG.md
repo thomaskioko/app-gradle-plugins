@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## 0.5.1 *(2026-02-26)*
+- Enable new compiler features: explicit backing fields, reified types in catch clauses, and `@all:` annotation target.
+- Dependency updates.
+
+
 ## 0.5.0 *(2026-02-12)*
 - Migrate to gradle 9.0
 - Delete `AndroidMultiplatformPlugin` plugin. We now only need `KotlinMultiplatformPlugin`
