@@ -27,12 +27,14 @@ private object DependencyExclusions {
         "io.coil-kt:coil-compose",
         "io.coil-kt:coil-compose-base",
         "androidx.compose.foundation:foundation",
+        "androidx.compose.material:material",
     )
 
     val usedTransitive = listOf(
         // Common Kotlin dependencies
         "org.jetbrains.kotlin:kotlin-stdlib",
         // Common Compose dependencies
+        "androidx.compose.material:material",
         "androidx.compose.animation:animation",
         "androidx.compose.material:material-icons-core",
         "androidx.compose.ui:ui-tooling-preview",
@@ -176,9 +178,9 @@ public abstract class RootPlugin : Plugin<Project> {
                     it.includeGroup("androidx.compose.animation")
                     it.includeGroup("androidx.compose.foundation")
                 }
-                structure.bundle("androidx-compose-material") {
-                    it.primary("androidx.compose.material:material")
-                    it.includeGroup("androidx.compose.material")
+                structure.bundle("androidx-compose-material-icons") {
+                    it.primary("androidx.compose.material:material-icons-core")
+                    it.includeDependency("androidx.compose.material:material-icons-extended")
                 }
                 structure.bundle("androidx-compose-material3") {
                     it.primary("androidx.compose.material3:material3")
