@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.5.2 *(2026-02-27)*
+- Fix dependency analysis plugin configuration for KMP projects.
+- Replace deprecated `-Xjvm-default` compiler flag with `-jvm-default`.
+
 ## 0.5.1 *(2026-02-26)*
 - Enable new compiler features: explicit backing fields, reified types in catch clauses, and `@all:` annotation target.
 - Dependency updates.
