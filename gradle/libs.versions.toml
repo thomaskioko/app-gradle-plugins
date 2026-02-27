@@ -4,7 +4,7 @@ java-toolchain = "25"
 ktlint = "1.4.0"
 
 agp = "9.0.1"
-app-gradle-plugins = "0.5.0"
+app-gradle-plugins = "0.5.1"
 baselineprofile = "1.4.1"
 dependency-analysis = "3.6.1"
 gradle-doctor = "0.12.1"
