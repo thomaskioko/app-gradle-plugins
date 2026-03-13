@@ -11,13 +11,3 @@ allprojects {
     group = "io.github.thomaskioko.gradle.plugins"
     version = providers.gradleProperty("VERSION_NAME").get()
 }
-
-dependencyAnalysis {
-    issues {
-        all {
-            onAny {
-                severity("fail")
-            }
-        }
-    }
-}

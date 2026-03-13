@@ -18,13 +18,13 @@ spotless = "8.3.0"
 
 [libraries]
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
-moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
-moko-resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko-resources" }
 spotless-gradle-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
 
 # Build logic dependencies
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+android-gradle-plugin-api = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }

@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-gradle-plugin")
+    id("com.autonomousapps.dependency-analysis")
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.publish)
 }
@@ -29,19 +30,20 @@ kotlin {
 
 dependencies {
     api(libs.kotlin.gradle.plugin)
-    implementation(libs.android.gradle.plugin)
+    api(libs.kotlin.gradle.plugin.api)
+    api(libs.android.gradle.plugin.api)
+
+    runtimeOnly(libs.android.gradle.plugin)
+
     implementation(libs.compose.compiler.gradle.plugin)
     implementation(libs.dependency.analysis.gradle.plugin)
-    implementation(libs.kotlin.gradle.plugin.api)
     implementation(libs.ksp.gradle)
-    implementation(libs.kotlinpoet.ksp)
-    implementation(libs.moko.resources)
-    implementation(libs.moko.resources.generator)
+    implementation(libs.kotlinpoet)
+    implementation(libs.gradle.doctor.gradle.plugin)
 
     compileOnly(libs.baselineprofile.gradlePlugin)
     compileOnly(libs.skie.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
-    implementation(libs.gradle.doctor.gradle.plugin)
 }
 
 gradlePlugin {
