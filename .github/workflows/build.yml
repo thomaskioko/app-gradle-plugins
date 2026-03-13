@@ -61,3 +61,18 @@ jobs:
 
       - name: Validate plugin descriptors
         run: ./gradlew validatePlugins --stacktrace
+
+  dependency-health:
+    name: Dependency Health
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Check dependency health
+        run: ./gradlew buildHealth --no-configuration-cache
