@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.6.0 *(2026-03-24)*
+- Add release automation tasks (`bumpVersion`, `release`).
+- Dependency updates.
+
 ## 0.5.1 *(2026-02-26)*
 - Enable new compiler features: explicit backing fields, reified types in catch clauses, and `@all:` annotation target.
 - Fix dependency analysis plugin configuration for KMP projects.
