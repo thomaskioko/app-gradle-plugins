@@ -101,10 +101,10 @@ public abstract class ReleaseTask @Inject constructor(
     git("add", changelog.absolutePath)
     git("commit", "-m", "release: $tag")
     git("tag", "-a", tag, "-m", "Release $tag")
+    git("push", "origin", branch, "--tags")
 
     logger.lifecycle("$currentVersion -> ${result.versionName} (BUILD_NUMBER = ${result.buildNumber})")
-    logger.lifecycle("Created commit and tag: $tag")
-    logger.lifecycle("Push with: git push origin $branch --tags")
+    logger.lifecycle("Pushed $tag to origin/$branch.")
   }
 
   private fun runInteractive() {
