@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.6.1 *(2026-03-24)*
+- Push release tags to origin automatically during release.
+
 ## 0.6.0 *(2026-03-24)*
 - Add release automation tasks (`bumpVersion`, `release`).
 - Dependency updates.
