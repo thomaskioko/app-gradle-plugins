@@ -44,6 +44,10 @@ dependencies {
     compileOnly(libs.baselineprofile.gradlePlugin)
     compileOnly(libs.skie.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
+    implementation(libs.mordant.core)
+
+    testImplementation(libs.junit)
+    testImplementation(gradleTestKit())
 }
 
 gradlePlugin {

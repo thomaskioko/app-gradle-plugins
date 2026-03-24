@@ -1,6 +1,9 @@
 [versions]
+clikt = "5.1.0"
+mordant = "3.0.2"
 java-target = "21"
 java-toolchain = "25"
+junit = "4.13.2"
 ktlint = "1.4.0"
 
 agp = "9.1.0"
@@ -17,6 +20,7 @@ skie = "0.10.10"
 spotless = "8.4.0"
 
 [libraries]
+mordant-core = { module = "com.github.ajalt.mordant:mordant-core", version.ref = "mordant" }
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
 spotless-gradle-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
@@ -32,6 +36,7 @@ dependency-analysis-gradle-plugin = { module = "com.autonomousapps:dependency-an
 gradle-doctor-gradle-plugin = { group = "com.osacky.doctor", name = "doctor-plugin", version.ref = "gradle-doctor" }
 skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin", version.ref = "skie" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin",  version.ref = "ksp" }
+junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]
 app-root = { id = "io.github.thomaskioko.gradle.plugins.root",  version.ref = "app-gradle-plugins" }
