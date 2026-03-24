@@ -1,13 +1,17 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
+import io.github.thomaskioko.gradle.plugins.utils.Versioning
+import io.github.thomaskioko.gradle.plugins.utils.Versioning.compute
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidApplicationTasks
-import io.github.thomaskioko.gradle.plugins.utils.getVersion
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
+import io.github.thomaskioko.gradle.plugins.utils.parseKeyValueFile
 import io.github.thomaskioko.gradle.plugins.utils.stringProperty
+import io.github.thomaskioko.gradle.tasks.release.BumpVersionTask
+import io.github.thomaskioko.gradle.tasks.release.ReleaseTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -18,14 +22,50 @@ public abstract class AppPlugin : Plugin<Project> {
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
 
+        val versionFile = target.rootProject.file("version.txt")
+        target.tasks.register("bumpVersion", BumpVersionTask::class.java) {
+            it.versionFile.set(versionFile)
+            it.bumpType.convention(
+                target.stringProperty("type").orElse("minor"),
+            )
+        }
+
+        val changelogFile = target.rootProject.file("CHANGELOG.md")
+        val cliffConfig = target.rootProject.file("cliff.toml")
+        target.tasks.register("release", ReleaseTask::class.java) {
+            it.versionFile.set(versionFile)
+            it.changelogFile.set(changelogFile)
+            it.cliffConfigFile.set(cliffConfig)
+            it.projectDir.set(target.rootProject.layout.projectDirectory)
+            it.bumpType.convention(
+                target.stringProperty("type").orElse("minor"),
+            )
+            it.beta.convention(
+                target.stringProperty("beta").map { true }.orElse(false),
+            )
+            it.interactive.convention(
+                target.stringProperty("i").map { true }.orElse(false),
+            )
+            it.dryRun.convention(
+                target.stringProperty("dryRun").map { true }.orElse(false),
+            )
+        }
+
         target.androidApp {
             buildFeatures {
                 buildConfig = true
             }
 
+            val versionProps = target.parseKeyValueFile("version.txt")
+            val resolvedVersionName = requireNotNull(versionProps["VERSION_NUMBER"]) {
+                "VERSION_NUMBER not found in version.txt. Ensure version.txt exists at the project root."
+            }
+
+            val versionSuffix = target.stringProperty("app.versionSuffix").orElse("-beta").get()
+
             defaultConfig {
-                versionCode = target.getVersion("app-version-code").toInt()
-                versionName = target.getVersion("app-version-name")
+                versionCode = compute(resolvedVersionName)
+                versionName = resolvedVersionName + versionSuffix
                 manifestPlaceholders["appAuthRedirectScheme"] = "app"
             }
 

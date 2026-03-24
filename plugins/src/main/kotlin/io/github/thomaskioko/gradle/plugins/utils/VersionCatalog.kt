@@ -48,6 +48,22 @@ internal fun Project.getBundleDependencies(name: String): Provider<ExternalModul
  */
 internal fun Project.getDependencyOrNull(name: String): Provider<MinimalExternalModuleDependency>? = libs.findLibrary(name).orElseGet { null }
 
+/**
+ * Parses a key-value file (e.g., `version.txt`) from the root project directory.
+ * Lines must be in `KEY = VALUE` format. Lines starting with `//` are treated as comments.
+ * Returns an empty map if the file does not exist.
+ */
+internal fun Project.parseKeyValueFile(fileName: String): Map<String, String> {
+    val file = rootProject.file(fileName)
+    if (!file.exists()) return emptyMap()
+    return file.readLines()
+        .filter { it.contains("=") && !it.trimStart().startsWith("//") }
+        .associate { line ->
+            val (key, value) = line.split("=", limit = 2).map { it.trim() }
+            key to value
+        }
+}
+
 internal val Project.javaTarget: String
     get() = getVersion("java-target")
 
