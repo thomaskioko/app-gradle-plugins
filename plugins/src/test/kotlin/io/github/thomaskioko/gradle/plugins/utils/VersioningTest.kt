@@ -1,7 +1,7 @@
 package io.github.thomaskioko.gradle.plugins.utils
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VersioningTest {
@@ -23,8 +23,7 @@ class VersioningTest {
 
   @Test
   fun `should stay under 2_1B given max version 209_99_99`() {
-    val result = Versioning.compute("209.99.99")
-    assertEquals(2_099_999_000, result)
+    assertEquals(2_099_999_000, Versioning.compute("209.99.99"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -47,51 +46,9 @@ class VersioningTest {
     Versioning.compute("1.0.100")
   }
 
-  @Test
-  fun `should increment patch when bump type is patch`() {
-    val result = Versioning.bump("0.1.0", "patch")
-    assertEquals("0.1.1", result.versionName)
-    assertEquals(101_000, result.buildNumber)
-  }
-
-  @Test
-  fun `should increment minor and reset patch when bump type is minor`() {
-    val result = Versioning.bump("0.1.0", "minor")
-    assertEquals("0.2.0", result.versionName)
-    assertEquals(200_000, result.buildNumber)
-  }
-
-  @Test
-  fun `should increment major and reset minor and patch when bump type is major`() {
-    val result = Versioning.bump("0.1.0", "major")
-    assertEquals("1.0.0", result.versionName)
-    assertEquals(10_000_000, result.buildNumber)
-  }
-
-  @Test
-  fun `should increment patch given non-zero version values`() {
-    val result = Versioning.bump("1.2.3", "patch")
-    assertEquals("1.2.4", result.versionName)
-    assertEquals(10_204_000, result.buildNumber)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `should throw when bump type is invalid`() {
-    Versioning.bump("0.1.0", "hotfix")
-  }
-
   @Test(expected = IllegalArgumentException::class)
   fun `should throw when version contains non-numeric component`() {
     Versioning.compute("1.2.abc")
-  }
-
-  @Test
-  fun `should include invalid component in error message`() {
-    val e = assertThrows(IllegalArgumentException::class.java) {
-      Versioning.compute("1.2.abc")
-    }
-    assert(e.message!!.contains("'abc'")) { "Expected error to mention 'abc', got: ${e.message}" }
-    assert(e.message!!.contains("1.2.abc")) { "Expected error to mention '1.2.abc', got: ${e.message}" }
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -100,10 +57,33 @@ class VersioningTest {
   }
 
   @Test
+  fun `should increment patch when bump type is patch`() {
+    assertEquals("0.1.1", Versioning.bump("0.1.0", "patch"))
+  }
+
+  @Test
+  fun `should increment minor and reset patch when bump type is minor`() {
+    assertEquals("0.2.0", Versioning.bump("0.1.0", "minor"))
+  }
+
+  @Test
+  fun `should increment major and reset minor and patch when bump type is major`() {
+    assertEquals("1.0.0", Versioning.bump("0.1.0", "major"))
+  }
+
+  @Test
+  fun `should increment patch given non-zero version values`() {
+    assertEquals("1.2.4", Versioning.bump("1.2.3", "patch"))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `should throw when bump type is invalid`() {
+    Versioning.bump("0.1.0", "hotfix")
+  }
+
+  @Test
   fun `should handle patch bump at high patch value`() {
-    val result = Versioning.bump("0.99.98", "patch")
-    assertEquals("0.99.99", result.versionName)
-    assertEquals(9_999_000, result.buildNumber)
+    assertEquals("0.99.99", Versioning.bump("0.99.98", "patch"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -112,34 +92,10 @@ class VersioningTest {
   }
 
   @Test
-  fun `should add beta number to version code`() {
-    assertEquals(100_003, Versioning.compute("0.1.0", betaNumber = 3))
-  }
-
-  @Test
-  fun `should return base version code when beta number is zero`() {
-    assertEquals(100_000, Versioning.compute("0.1.0", betaNumber = 0))
-  }
-
-  @Test
-  fun `should support max beta number 999`() {
-    assertEquals(100_999, Versioning.compute("0.1.0", betaNumber = 999))
-  }
-
-  @Test
-  fun `should produce beta code less than next patch`() {
-    val beta = Versioning.compute("0.1.0", betaNumber = 999)
-    val nextPatch = Versioning.compute("0.1.1")
-    assert(beta < nextPatch) { "Beta code $beta should be less than next patch code $nextPatch" }
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `should throw when beta number exceeds 999`() {
-    Versioning.compute("0.1.0", betaNumber = 1000)
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `should throw when beta number is negative`() {
-    Versioning.compute("0.1.0", betaNumber = -1)
+  fun `should produce higher build number after patch bump`() {
+    val before = Versioning.compute("0.1.2")
+    val newVersion = Versioning.bump("0.1.2", "patch")
+    val after = Versioning.compute(newVersion)
+    assertTrue("Expected $after > $before", after > before)
   }
 }

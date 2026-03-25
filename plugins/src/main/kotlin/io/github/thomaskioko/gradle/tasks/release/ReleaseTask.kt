@@ -59,7 +59,7 @@ public abstract class ReleaseTask @Inject constructor(
     if (interactive.get()) {
       runInteractive()
     } else {
-      val validTypes = setOf("major", "minor", "patch")
+      val validTypes = setOf("major", "minor", "patch", "beta")
       require(bumpType.get() in validTypes) {
         "Invalid bump type '${bumpType.get()}'. Must be one of: ${validTypes.joinToString()}"
       }
@@ -73,10 +73,37 @@ public abstract class ReleaseTask @Inject constructor(
 
     val content = file.readText()
     val currentVersion = parseVersion(content, file.path)
-    val result = Versioning.bump(currentVersion, bumpType.get())
-    val isBeta = beta.get()
+    val currentBuild = parseBuildNumber(content, file.path)
+    val type = bumpType.get()
+    val isBetaBump = type == "beta"
+    val isBeta = beta.get() || isBetaBump
     val branch = currentBranch()
-    val tag = buildTag(result.versionName, isBeta, branch)
+
+    val newVersion: String
+    val newBuild: Int
+
+    if (isBetaBump) {
+      val baseBuild = Versioning.compute(currentVersion)
+      require(currentBuild >= baseBuild) {
+        "BUILD_NUMBER ($currentBuild) is less than the base for version $currentVersion ($baseBuild). " +
+          "Run 'bumpVersion -Ptype=patch' to reset, or fix version.txt manually."
+      }
+      newVersion = currentVersion
+      newBuild = currentBuild + 1
+      require(newBuild <= baseBuild + 999) {
+        "Beta number exceeded 999 for version $currentVersion. Bump patch/minor/major to continue."
+      }
+    } else {
+      newVersion = Versioning.bump(currentVersion, type)
+      newBuild = Versioning.compute(newVersion)
+    }
+
+    val tag = if (isBetaBump) {
+      val betaIteration = newBuild - Versioning.compute(currentVersion)
+      "v$currentVersion-beta.$betaIteration"
+    } else {
+      buildTag(newVersion, isBeta, branch)
+    }
 
     runChecks(file.toRelativeString(projectDir.get().asFile), tag, isBeta, branch) { label, block ->
       block()
@@ -88,11 +115,11 @@ public abstract class ReleaseTask @Inject constructor(
     }
 
     if (dryRun.get()) {
-      printDryRun(currentVersion, result, tag)
+      printDryRun(currentVersion, newVersion, tag)
       return
     }
 
-    writeVersionFile(file, content, result)
+    writeVersionFile(file, content, newVersion, newBuild)
 
     val changelog = changelogFile.get().asFile
     generateChangelog(changelog, tag)
@@ -103,7 +130,7 @@ public abstract class ReleaseTask @Inject constructor(
     git("tag", "-a", tag, "-m", "Release $tag")
     git("push", "origin", branch, "--tags")
 
-    logger.lifecycle("$currentVersion -> ${result.versionName} (BUILD_NUMBER = ${result.buildNumber})")
+    logger.lifecycle("$currentVersion -> $newVersion (BUILD_NUMBER = $newBuild)")
     logger.lifecycle("Pushed $tag to origin/$branch.")
   }
 
@@ -114,10 +141,11 @@ public abstract class ReleaseTask @Inject constructor(
 
     val content = file.readText()
     val currentVersion = parseVersion(content, file.path)
+    val currentBuild = parseBuildNumber(content, file.path)
     val isBeta = beta.get()
     val branch = currentBranch()
 
-    terminal.println("Current version: $currentVersion")
+    terminal.println("Current version: $currentVersion (BUILD_NUMBER = $currentBuild)")
 
     val recentTags = recentReleaseTags()
     if (recentTags.isNotEmpty()) {
@@ -132,14 +160,36 @@ public abstract class ReleaseTask @Inject constructor(
     }
 
     val bumpType = promptBumpType(terminal)
-    val result = Versioning.bump(currentVersion, bumpType)
-    val tag = buildTag(result.versionName, isBeta, branch)
+    val isBetaBump = bumpType == "beta"
+
+    val newVersion: String
+    val newBuild: Int
+    val tag: String
+
+    if (isBetaBump) {
+      val baseBuild = Versioning.compute(currentVersion)
+      require(currentBuild >= baseBuild) {
+        "BUILD_NUMBER ($currentBuild) is less than the base for version $currentVersion ($baseBuild). " +
+          "Run 'bumpVersion -Ptype=patch' to reset, or fix version.txt manually."
+      }
+      newVersion = currentVersion
+      newBuild = currentBuild + 1
+      require(newBuild <= baseBuild + 999) {
+        "Beta number exceeded 999 for version $currentVersion. Bump patch/minor/major to continue."
+      }
+      val betaIteration = newBuild - baseBuild
+      tag = "v$currentVersion-beta.$betaIteration"
+    } else {
+      newVersion = Versioning.bump(currentVersion, bumpType)
+      newBuild = Versioning.compute(newVersion)
+      tag = buildTag(newVersion, isBeta || isBetaBump, branch)
+    }
 
     val existingTag = gitOutput("tag", "--list", tag)
     require(existingTag.isBlank()) { "Tag '$tag' already exists." }
 
     terminal.println("")
-    terminal.println("  $currentVersion → ${result.versionName}  (BUILD_NUMBER = ${result.buildNumber})")
+    terminal.println("  $currentVersion → $newVersion (BUILD_NUMBER = $newBuild)")
     terminal.println("")
 
     if (dryRun.get()) {
@@ -172,7 +222,7 @@ public abstract class ReleaseTask @Inject constructor(
       return
     }
 
-    writeVersionFile(file, content, result)
+    writeVersionFile(file, content, newVersion, newBuild)
 
     val changelog = changelogFile.get().asFile
     generateChangelog(changelog, tag)
@@ -198,8 +248,8 @@ public abstract class ReleaseTask @Inject constructor(
     }
   }
 
-  private fun printDryRun(currentVersion: String, result: Versioning.BumpResult, tag: String) {
-    logger.lifecycle("$currentVersion → ${result.versionName} (BUILD_NUMBER = ${result.buildNumber})")
+  private fun printDryRun(currentVersion: String, newVersion: String, tag: String) {
+    logger.lifecycle("$currentVersion → $newVersion")
     logger.lifecycle("Tag: $tag")
 
     val preview = previewChangelog(tag)
@@ -217,13 +267,20 @@ public abstract class ReleaseTask @Inject constructor(
     return match.groupValues[1]
   }
 
-  private fun writeVersionFile(file: File, content: String, result: Versioning.BumpResult) {
+  private fun parseBuildNumber(content: String, path: String): Int {
+    val match = Versioning.BUILD_REGEX.find(content)
+      ?: error("BUILD_NUMBER not found in $path")
+    return match.groupValues[1].toIntOrNull()
+      ?: error("BUILD_NUMBER is not a valid integer in $path")
+  }
+
+  private fun writeVersionFile(file: File, content: String, newVersion: String, newBuild: Int) {
     require(Versioning.BUILD_REGEX.containsMatchIn(content)) {
       "BUILD_NUMBER not found in ${file.path}"
     }
     val updated = content
-      .replace(Versioning.VERSION_REGEX, "VERSION_NUMBER = ${result.versionName}")
-      .replace(Versioning.BUILD_REGEX, "BUILD_NUMBER = ${result.buildNumber}")
+      .replace(Versioning.VERSION_REGEX, "VERSION_NUMBER = $newVersion")
+      .replace(Versioning.BUILD_REGEX, "BUILD_NUMBER = $newBuild")
     file.writeText(updated)
   }
 
@@ -282,9 +339,9 @@ public abstract class ReleaseTask @Inject constructor(
       .take(5)
 
   private fun promptBumpType(terminal: Terminal): String {
-    val validTypes = listOf("major", "minor", "patch")
+    val validTypes = listOf("major", "minor", "patch", "beta")
     return terminal.prompt(
-      prompt = "Bump type (major/minor/patch)",
+      prompt = "Bump type (major/minor/patch/beta)",
       default = "minor",
       convert = { input: String ->
         val normalized = input.trim().lowercase()
