@@ -1,8 +1,6 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
-import io.github.thomaskioko.gradle.plugins.utils.Versioning
-import io.github.thomaskioko.gradle.plugins.utils.Versioning.compute
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
@@ -60,11 +58,14 @@ public abstract class AppPlugin : Plugin<Project> {
             val resolvedVersionName = requireNotNull(versionProps["VERSION_NUMBER"]) {
                 "VERSION_NUMBER not found in version.txt. Ensure version.txt exists at the project root."
             }
+            val resolvedBuildNumber = requireNotNull(versionProps["BUILD_NUMBER"]?.toIntOrNull()) {
+                "BUILD_NUMBER not found or not a valid integer in version.txt."
+            }
 
             val versionSuffix = target.stringProperty("app.versionSuffix").orElse("-beta").get()
 
             defaultConfig {
-                versionCode = compute(resolvedVersionName)
+                versionCode = resolvedBuildNumber
                 versionName = resolvedVersionName + versionSuffix
                 manifestPlaceholders["appAuthRedirectScheme"] = "app"
             }
@@ -114,6 +115,9 @@ public abstract class AppPlugin : Plugin<Project> {
 
                 named("release") {
                     it.signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+                    it.ndk.debugSymbolLevel = "FULL"
+                    it.isMinifyEnabled = true // Enables code-related app optimization.
+                    it.isShrinkResources = true // Enables resource shrinking.
                 }
             }
 
