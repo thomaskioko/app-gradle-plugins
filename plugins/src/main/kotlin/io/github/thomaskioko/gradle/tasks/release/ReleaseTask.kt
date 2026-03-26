@@ -76,11 +76,7 @@ public abstract class ReleaseTask @Inject constructor(
     val currentBuild = parseBuildNumber(content, file.path)
     val type = bumpType.get()
     val isBetaBump = type == "beta"
-    val isBeta = beta.get() || isBetaBump
     val branch = currentBranch()
-
-    val newVersion: String
-    val newBuild: Int
 
     if (isBetaBump) {
       val baseBuild = Versioning.compute(currentVersion)
@@ -88,22 +84,31 @@ public abstract class ReleaseTask @Inject constructor(
         "BUILD_NUMBER ($currentBuild) is less than the base for version $currentVersion ($baseBuild). " +
           "Run 'bumpVersion -Ptype=patch' to reset, or fix version.txt manually."
       }
-      newVersion = currentVersion
-      newBuild = currentBuild + 1
+      val newBuild = currentBuild + 1
       require(newBuild <= baseBuild + 999) {
         "Beta number exceeded 999 for version $currentVersion. Bump patch/minor/major to continue."
       }
-    } else {
-      newVersion = Versioning.bump(currentVersion, type)
-      newBuild = Versioning.compute(newVersion)
+
+      if (dryRun.get()) {
+        logger.lifecycle("$currentVersion beta (BUILD_NUMBER = $currentBuild -> $newBuild)")
+        logger.lifecycle("Dry run complete. No files modified, no commits created.")
+        return
+      }
+
+      writeVersionFile(file, content, currentVersion, newBuild)
+      git("add", file.absolutePath)
+      git("commit", "-m", "chore: bump beta build number to $newBuild")
+      git("push", "origin", branch)
+
+      logger.lifecycle("$currentVersion beta (BUILD_NUMBER = $currentBuild -> $newBuild)")
+      logger.lifecycle("Pushed to origin/$branch.")
+      return
     }
 
-    val tag = if (isBetaBump) {
-      val betaIteration = newBuild - Versioning.compute(currentVersion)
-      "v$currentVersion-beta.$betaIteration"
-    } else {
-      buildTag(newVersion, isBeta, branch)
-    }
+    val isBeta = beta.get()
+    val newVersion = Versioning.bump(currentVersion, type)
+    val newBuild = Versioning.compute(newVersion)
+    val tag = buildTag(newVersion, isBeta, branch)
 
     runChecks(file.toRelativeString(projectDir.get().asFile), tag, isBeta, branch) { label, block ->
       block()
@@ -162,34 +167,54 @@ public abstract class ReleaseTask @Inject constructor(
     val bumpType = promptBumpType(terminal)
     val isBetaBump = bumpType == "beta"
 
-    val newVersion: String
-    val newBuild: Int
-    val tag: String
-
     if (isBetaBump) {
       val baseBuild = Versioning.compute(currentVersion)
       require(currentBuild >= baseBuild) {
         "BUILD_NUMBER ($currentBuild) is less than the base for version $currentVersion ($baseBuild). " +
           "Run 'bumpVersion -Ptype=patch' to reset, or fix version.txt manually."
       }
-      newVersion = currentVersion
-      newBuild = currentBuild + 1
+      val newBuild = currentBuild + 1
       require(newBuild <= baseBuild + 999) {
         "Beta number exceeded 999 for version $currentVersion. Bump patch/minor/major to continue."
       }
-      val betaIteration = newBuild - baseBuild
-      tag = "v$currentVersion-beta.$betaIteration"
-    } else {
-      newVersion = Versioning.bump(currentVersion, bumpType)
-      newBuild = Versioning.compute(newVersion)
-      tag = buildTag(newVersion, isBeta || isBetaBump, branch)
+
+      terminal.println("")
+      terminal.println("  $currentVersion beta (BUILD_NUMBER = $currentBuild -> $newBuild)")
+      terminal.println("")
+
+      if (dryRun.get()) {
+        terminal.println("Dry run complete. No files modified, no commits created.")
+        return
+      }
+
+      val confirmed = YesNoPrompt(
+        prompt = "Bump build number and push?",
+        terminal = terminal,
+      ).ask() == true
+
+      if (!confirmed) {
+        terminal.println("Aborted.")
+        return
+      }
+
+      writeVersionFile(file, content, currentVersion, newBuild)
+      git("add", file.absolutePath)
+      git("commit", "-m", "chore: bump beta build number to $newBuild")
+      git("push", "origin", branch)
+
+      terminal.println("Pushed to origin/$branch.")
+      return
     }
+
+    val newVersion = Versioning.bump(currentVersion, bumpType)
+    val newBuild = Versioning.compute(newVersion)
+    val tag = buildTag(newVersion, isBeta, branch)
 
     val existingTag = gitOutput("tag", "--list", tag)
     require(existingTag.isBlank()) { "Tag '$tag' already exists." }
 
     terminal.println("")
-    terminal.println("  $currentVersion → $newVersion (BUILD_NUMBER = $newBuild)")
+    terminal.println("  $currentVersion -> $newVersion (BUILD_NUMBER = $newBuild)")
     terminal.println("")
 
     if (dryRun.get()) {
