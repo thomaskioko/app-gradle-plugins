@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.6.3 *(2026-03-26)*
+- Remove Tag publishing from beta builds
+
 ## 0.6.2 *(2026-03-25)*
 - Add support for beta version bumps.
 - Update `AppPlugin` to use `BUILD_NUMBER` and enable release optimizations.
