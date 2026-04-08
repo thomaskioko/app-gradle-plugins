@@ -60,6 +60,14 @@ public abstract class AndroidExtension(protected val project: Project) {
         }
     }
 
+    public fun useComposeTests() {
+        project.dependencies.apply {
+            add("testImplementation", project.getDependency("androidx-compose-ui-test"))
+            add("testImplementation", project.getDependency("robolectric"))
+            add("testRuntimeOnly", project.getDependency("androidx-compose-ui-test-manifest"))
+        }
+    }
+
     /**
      * Configures baseline profiles for optimizing runtime performance. Only applied on release builds.
      *
