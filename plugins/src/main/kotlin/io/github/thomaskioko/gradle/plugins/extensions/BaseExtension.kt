@@ -9,6 +9,8 @@ import co.touchlab.skie.configuration.SuspendInterop
 import co.touchlab.skie.plugin.configuration.SkieExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
+import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
+import dev.zacsweers.metro.gradle.MetroPluginExtension
 import io.github.thomaskioko.gradle.plugins.utils.addBundleImplementationDependency
 import io.github.thomaskioko.gradle.plugins.utils.addImplementationDependency
 import io.github.thomaskioko.gradle.plugins.utils.addKspDependencyForAllTargets
@@ -64,10 +66,15 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
+    @OptIn(ExperimentalMetroGradleApi::class)
     public fun useMetro() {
         project.plugins.apply("dev.zacsweers.metro")
 
         project.addImplementationDependency(project.getDependency("metro-runtime"))
+
+        project.extensions.configure(MetroPluginExtension::class.java) {
+            it.generateContributionProviders.set(true)
+        }
     }
 
     public fun useSerialization() {
