@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-## 0.6.5 *(2026-04-09)*
+## 0.6.6 *(2026-04-09)*
 - Fix iOS test crashes for modules using moko resources.
 - Copy moko resource bundles to iOS test binaries so localization tests run on iOS.
 - Optimize `MokoResourceGeneratorTask`: remove dead incremental logic, reduce duplication, scope compile dependency to `commonMain`.
