@@ -73,14 +73,14 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
     }
 
     private fun configureMokoResourceBundleCopy(project: Project) {
+        val buildDir = project.layout.buildDirectory
         project.tasks.withType(KotlinNativeLink::class.java).configureEach { linkTask ->
+            val tempDir = buildDir.dir("tmp/mokoResourceBundles/${linkTask.name}").get().asFile
             linkTask.doLast("copyMokoResourceBundles") {
                 CopyMokoResourceBundlesTask.copyBundles(
                     klibs = linkTask.libraries.plus(linkTask.sources),
                     outputDir = linkTask.outputFile.get().parentFile,
-                    tempDir = project.layout.buildDirectory
-                        .dir("tmp/mokoResourceBundles/${linkTask.name}")
-                        .get().asFile,
+                    tempDir = tempDir,
                     logger = linkTask.logger,
                 )
             }
