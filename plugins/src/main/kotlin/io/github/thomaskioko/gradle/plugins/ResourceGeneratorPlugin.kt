@@ -4,7 +4,7 @@ import io.github.thomaskioko.gradle.tasks.MokoResourceGeneratorTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 public class ResourceGeneratorPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -19,14 +19,23 @@ public class ResourceGeneratorPlugin : Plugin<Project> {
             }
         }
 
-        target.tasks.withType(KotlinCompile::class.java).configureEach { task ->
-            task.dependsOn(generateStringsTask)
-        }
-
         target.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
             target.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlin ->
                 kotlin.sourceSets.named("commonMain") { sourceSet ->
                     sourceSet.kotlin.srcDir(generateStringsTask.map { it.commonMainOutput })
+                }
+
+                // Wire dependency only to compilations that include commonMain
+                kotlin.targets.configureEach { kmpTarget ->
+                    kmpTarget.compilations.configureEach { compilation ->
+                        if (compilation.defaultSourceSet.dependsOn.any { it.name == "commonMain" } ||
+                            compilation.defaultSourceSet.name == "commonMain"
+                        ) {
+                            compilation.compileTaskProvider.configure { task ->
+                                task.dependsOn(generateStringsTask)
+                            }
+                        }
+                    }
                 }
             }
         }

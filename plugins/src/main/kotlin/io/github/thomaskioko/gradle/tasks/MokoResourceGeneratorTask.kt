@@ -4,6 +4,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.gradle.api.DefaultTask
@@ -19,8 +20,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.work.Incremental
-import org.gradle.work.InputChanges
 import java.io.File
 import javax.inject.Inject
 
@@ -40,7 +39,6 @@ public abstract class MokoResourceGeneratorTask
     public val resourcePackage: Property<String> = objectFactory.property(String::class.java)
         .convention("com.thomaskioko.tvmaniac.i18n")
 
-    @get:Incremental
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
@@ -56,7 +54,7 @@ public abstract class MokoResourceGeneratorTask
         .convention(layout.buildDirectory.dir("generated/resources"))
 
     @TaskAction
-    public fun generate(inputChanges: InputChanges) {
+    public fun generate() {
         val outputDir = commonMainOutput.get().asFile
         val mrFile = mokoGeneratedFile.get().asFile
         val packageName = resourcePackage.get()
@@ -66,16 +64,6 @@ public abstract class MokoResourceGeneratorTask
             return
         }
 
-        // Only regenerate if input has changed or output doesn't exist
-        if (inputChanges.isIncremental) {
-            val hasChanges = inputChanges.getFileChanges(mokoGeneratedFile).iterator().hasNext()
-            if (!hasChanges && outputDir.exists() && outputDir.listFiles()?.isNotEmpty() == true) {
-                logger.debug("Skipping generation - no changes detected")
-                return
-            }
-        }
-
-        // Clean and recreate output directory
         outputDir.deleteRecursively()
         outputDir.mkdirs()
 
@@ -95,7 +83,7 @@ public abstract class MokoResourceGeneratorTask
         ).writeTo(outputDir)
     }
 
-    private fun readKeysFromMRFile(mrFile: File): Pair<List<String>, List<String>> {
+    internal fun readKeysFromMRFile(mrFile: File): Pair<List<String>, List<String>> {
         val stringKeys = mutableListOf<String>()
         val pluralKeys = mutableListOf<String>()
         var isInStringsObject = false
@@ -142,81 +130,87 @@ public abstract class MokoResourceGeneratorTask
             ?.trim()
     }
 
-    private fun toPascalCase(name: String): String {
+    internal fun toPascalCase(name: String): String {
         return name.split('_').joinToString("") { it.replaceFirstChar { c -> c.uppercaseChar() } }
     }
 
-    private fun stringResourceKeyFileSpec(
+    internal fun stringResourceKeyFileSpec(
         packageName: String,
         stringKeys: List<String>,
         mrClass: ClassName,
-    ): FileSpec = FileSpec.builder(packageName, "StringResourceKey")
-        .addType(
-            TypeSpec.classBuilder("StringResourceKey")
-                .addModifiers(KModifier.SEALED)
-                .primaryConstructor(
-                    FunSpec.constructorBuilder()
-                        .addParameter(
-                            "resourceId",
-                            ClassName("dev.icerock.moko.resources", "StringResource"),
-                        )
-                        .build(),
-                )
-                .addProperty(
-                    PropertySpec.builder(
-                        "resourceId",
-                        ClassName("dev.icerock.moko.resources", "StringResource"),
-                    )
-                        .initializer("resourceId")
-                        .build(),
-                )
-                .addTypes(
-                    stringKeys.map { key ->
-                        TypeSpec.objectBuilder(toPascalCase(key))
-                            .addModifiers(KModifier.DATA)
-                            .superclass(ClassName(packageName, "StringResourceKey"))
-                            .addSuperclassConstructorParameter("%T.strings.%N", mrClass, key)
-                            .build()
-                    },
-                )
-                .build(),
-        )
-        .build()
+    ): FileSpec = resourceKeyFileSpec(
+        packageName = packageName,
+        className = "StringResourceKey",
+        resourceTypeName = "StringResource",
+        mrAccessor = "strings",
+        keys = stringKeys,
+        mrClass = mrClass,
+    )
 
-    private fun pluralsResourceKeyFileSpec(
+    internal fun pluralsResourceKeyFileSpec(
         packageName: String,
         pluralKeys: List<String>,
         mrClass: ClassName,
-    ): FileSpec = FileSpec.builder(packageName, "PluralsResourceKey")
-        .addType(
-            TypeSpec.classBuilder("PluralsResourceKey")
-                .addModifiers(KModifier.SEALED)
-                .primaryConstructor(
-                    FunSpec.constructorBuilder()
-                        .addParameter(
-                            "resourceId",
-                            ClassName("dev.icerock.moko.resources", "PluralsResource"),
-                        )
-                        .build(),
-                )
-                .addProperty(
-                    PropertySpec.builder(
-                        "resourceId",
-                        ClassName("dev.icerock.moko.resources", "PluralsResource"),
+    ): FileSpec = resourceKeyFileSpec(
+        packageName = packageName,
+        className = "PluralsResourceKey",
+        resourceTypeName = "PluralsResource",
+        mrAccessor = "plurals",
+        keys = pluralKeys,
+        mrClass = mrClass,
+    )
+
+    private fun resourceKeyFileSpec(
+        packageName: String,
+        className: String,
+        resourceTypeName: String,
+        mrAccessor: String,
+        keys: List<String>,
+        mrClass: ClassName,
+    ): FileSpec {
+        val resourceType = ClassName(MOKO_RESOURCES_PACKAGE, resourceTypeName)
+        val lazyResourceType = LAZY_CLASS.parameterizedBy(resourceType)
+
+        return FileSpec.builder(packageName, className)
+            .addType(
+                TypeSpec.classBuilder(className)
+                    .addModifiers(KModifier.SEALED)
+                    .primaryConstructor(
+                        FunSpec.constructorBuilder()
+                            .addParameter("resourceProvider", lazyResourceType)
+                            .build(),
                     )
-                        .initializer("resourceId")
-                        .build(),
-                )
-                .addTypes(
-                    pluralKeys.map { key ->
-                        TypeSpec.objectBuilder(toPascalCase(key))
-                            .addModifiers(KModifier.DATA)
-                            .superclass(ClassName(packageName, "PluralsResourceKey"))
-                            .addSuperclassConstructorParameter("%T.plurals.%N", mrClass, key)
-                            .build()
-                    },
-                )
-                .build(),
-        )
-        .build()
+                    .addProperty(
+                        PropertySpec.builder("resourceId", resourceType)
+                            .getter(
+                                FunSpec.getterBuilder()
+                                    .addStatement("return resourceProvider.value")
+                                    .build(),
+                            )
+                            .build(),
+                    )
+                    .addProperty(
+                        PropertySpec.builder("resourceProvider", lazyResourceType)
+                            .initializer("resourceProvider")
+                            .addModifiers(KModifier.PRIVATE)
+                            .build(),
+                    )
+                    .addTypes(
+                        keys.map { key ->
+                            TypeSpec.objectBuilder(toPascalCase(key))
+                                .addModifiers(KModifier.DATA)
+                                .superclass(ClassName(packageName, className))
+                                .addSuperclassConstructorParameter("lazy { %T.$mrAccessor.%N }", mrClass, key)
+                                .build()
+                        },
+                    )
+                    .build(),
+            )
+            .build()
+    }
+
+    private companion object {
+        const val MOKO_RESOURCES_PACKAGE = "dev.icerock.moko.resources"
+        val LAZY_CLASS = ClassName("kotlin", "Lazy")
+    }
 }

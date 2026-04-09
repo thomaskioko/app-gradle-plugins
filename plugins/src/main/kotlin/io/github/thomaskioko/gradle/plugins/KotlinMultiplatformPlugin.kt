@@ -10,10 +10,12 @@ import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
+import io.github.thomaskioko.gradle.tasks.CopyMokoResourceBundlesTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 
 public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -66,5 +68,22 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
         target.disableMultiplatformTasks()
+
+        configureMokoResourceBundleCopy(target)
+    }
+
+    private fun configureMokoResourceBundleCopy(project: Project) {
+        project.tasks.withType(KotlinNativeLink::class.java).configureEach { linkTask ->
+            linkTask.doLast("copyMokoResourceBundles") {
+                CopyMokoResourceBundlesTask.copyBundles(
+                    klibs = linkTask.libraries.plus(linkTask.sources),
+                    outputDir = linkTask.outputFile.get().parentFile,
+                    tempDir = project.layout.buildDirectory
+                        .dir("tmp/mokoResourceBundles/${linkTask.name}")
+                        .get().asFile,
+                    logger = linkTask.logger,
+                )
+            }
+        }
     }
 }
