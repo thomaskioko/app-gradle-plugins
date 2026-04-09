@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+## 0.6.5 *(2026-04-09)*
+- Fix iOS test crashes for modules using moko resources.
+- Copy moko resource bundles to iOS test binaries so localization tests run on iOS.
+- Optimize `MokoResourceGeneratorTask`: remove dead incremental logic, reduce duplication, scope compile dependency to `commonMain`.
+- Add golden file tests for moko resource code generation.
+
+## 0.6.4 *(2026-04-01)*
+- Add Metro Gradle plugin and configure contribution providers.
+- Add support for Compose UI tests.
+- Dependency updates.
+
 ## 0.6.3 *(2026-03-26)*
 - Remove Tag publishing from beta builds
 
