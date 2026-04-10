@@ -84,9 +84,6 @@ scaffold {
     // Enable Kotlin Inject for dependency injection
     useKotlinInject()
 
-    // Enable SKIE for Swift interop
-    useSkie()
-
     // Enable Metro for DI
     useMetro()
 }

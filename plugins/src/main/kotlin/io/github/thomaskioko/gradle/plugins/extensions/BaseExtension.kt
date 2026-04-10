@@ -1,12 +1,5 @@
 package io.github.thomaskioko.gradle.plugins.extensions
 
-import co.touchlab.skie.configuration.DefaultArgumentInterop
-import co.touchlab.skie.configuration.EnumInterop
-import co.touchlab.skie.configuration.FlowInterop
-import co.touchlab.skie.configuration.SealedInterop
-import co.touchlab.skie.configuration.SuppressSkieWarning
-import co.touchlab.skie.configuration.SuspendInterop
-import co.touchlab.skie.plugin.configuration.SkieExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
 import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
@@ -38,34 +31,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
-    public fun useSkie(
-        defaultArgumentInterop: Boolean = false,
-        suspendInterop: Boolean = true,
-        flowInterop: Boolean = true,
-        enumInterop: Boolean = true,
-        sealedInterop: Boolean = true,
-        suppressSkieWarning: Boolean = true,
-    ) {
-        project.plugins.apply("co.touchlab.skie")
-
-        project.extensions.configure(SkieExtension::class.java) { extension ->
-            extension.analytics {
-                it.disableUpload.set(true)
-            }
-
-            extension.features {
-                it.group {
-                    DefaultArgumentInterop.Enabled(defaultArgumentInterop)
-                    SuspendInterop.Enabled(suspendInterop)
-                    FlowInterop.Enabled(flowInterop)
-                    EnumInterop.Enabled(enumInterop)
-                    SealedInterop.Enabled(sealedInterop)
-                    SuppressSkieWarning.NameCollision(suppressSkieWarning)
-                }
-            }
-        }
-    }
-
     @OptIn(ExperimentalMetroGradleApi::class)
     public fun useMetro() {
         project.plugins.apply("dev.zacsweers.metro")
@@ -73,7 +38,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         project.addImplementationDependency(project.getDependency("metro-runtime"))
 
         project.extensions.configure(MetroPluginExtension::class.java) {
-            it.generateContributionProviders.set(true)
+            it.generateContributionProviders.set(false) //Temporarily disable
         }
     }
 
