@@ -1,8 +1,3 @@
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
-
-rootProject.name = "app-gradle-plugins"
-
 pluginManagement {
     repositories {
         google {
@@ -17,6 +12,12 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+
     repositories {
         google {
             content {
@@ -28,8 +29,4 @@ dependencyResolutionManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
-
-includeBuild("plugins")
+rootProject.name = "plugins"

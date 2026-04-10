@@ -7,7 +7,6 @@ junit = "4.13.2"
 ktlint = "1.4.0"
 
 agp = "9.1.0"
-app-gradle-plugins = "0.6.4"
 baselineprofile = "1.4.1"
 dependency-analysis = "3.6.1"
 gradle-doctor = "0.12.1"
@@ -38,8 +37,9 @@ ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin
 junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]
-app-root = { id = "io.github.thomaskioko.gradle.plugins.root",  version.ref = "app-gradle-plugins" }
-app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless",  version.ref = "app-gradle-plugins" }
+app-root = { id = "io.github.thomaskioko.gradle.plugins.root" }
+app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

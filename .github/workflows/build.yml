@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Validate plugin descriptors
-        run: ./gradlew validatePlugins --stacktrace
+        run: ./gradlew :plugins:validatePlugins --stacktrace
 
   dependency-health:
     name: Dependency Health
