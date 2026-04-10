@@ -14,6 +14,8 @@ import io.github.thomaskioko.gradle.tasks.CopyMokoResourceBundlesTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
+import io.github.thomaskioko.gradle.plugins.utils.capitalizeFirst
+import org.jetbrains.kotlin.gradle.plugin.KotlinTargetWithTests
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 
@@ -67,9 +69,29 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
         }
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
+        target.configureMultiplatformTests()
         target.disableMultiplatformTasks()
 
         configureMokoResourceBundleCopy(target)
+    }
+
+    private fun Project.configureMultiplatformTests() {
+        kotlinMultiplatform {
+            targets.withType(KotlinTargetWithTests::class.java).configureEach { target ->
+                target.compilations.configureEach { compilation ->
+                    if (compilation.name.contains("test", ignoreCase = true)) {
+                        val aggregateTaskName = when (target.name) {
+                            "iosSimulatorArm64" -> BasePlugin.IOS_TEST
+                            else -> BasePlugin.LINUX_TEST
+                        }
+                        val testTaskName = "${target.name}${compilation.name.capitalizeFirst()}"
+                        tasks.named(aggregateTaskName).configure {
+                            it.dependsOn(tasks.named(testTaskName))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun configureMokoResourceBundleCopy(project: Project) {

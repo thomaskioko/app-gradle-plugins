@@ -13,6 +13,7 @@ import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
+import io.github.thomaskioko.gradle.plugins.utils.capitalizeFirst
 import io.github.thomaskioko.gradle.plugins.utils.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidLibraryTasks
@@ -73,6 +74,14 @@ public abstract class AndroidPlugin : Plugin<Project> {
                 selector().withBuildType("release"),
             ) {
                 (it as? HasUnitTestBuilder)?.enableUnitTest = false
+            }
+
+            onVariants { variant ->
+                if (variant.buildType == "debug") {
+                    tasks.named(BasePlugin.LINUX_TEST).configure { task ->
+                        task.dependsOn("test${variant.name.capitalizeFirst()}UnitTest")
+                    }
+                }
             }
         }
     }
