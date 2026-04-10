@@ -2,10 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-gradle-plugin")
-    id("com.autonomousapps.dependency-analysis")
+    alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.publish)
 }
+
+group = providers.gradleProperty("GROUP").get()
+version = providers.gradleProperty("VERSION_NAME").get()
 
 tasks {
     validatePlugins {
