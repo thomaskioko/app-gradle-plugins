@@ -16,7 +16,6 @@ kotlinPoet = "2.3.0"
 ksp="2.3.6"
 metro = "0.13.2"
 publish = "0.36.0"
-skie = "0.10.11"
 spotless = "8.4.0"
 
 [libraries]
@@ -35,7 +34,6 @@ kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin
 dependency-analysis-gradle-plugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependency-analysis" }
 gradle-doctor-gradle-plugin = { group = "com.osacky.doctor", name = "doctor-plugin", version.ref = "gradle-doctor" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
-skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin", version.ref = "skie" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin",  version.ref = "ksp" }
 junit = { module = "junit:junit", version.ref = "junit" }
 

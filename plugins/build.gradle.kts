@@ -43,7 +43,6 @@ dependencies {
 
     compileOnly(libs.baselineprofile.gradlePlugin)
     compileOnly(libs.metro.gradle.plugin)
-    compileOnly(libs.skie.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
     implementation(libs.mordant.core)
 
