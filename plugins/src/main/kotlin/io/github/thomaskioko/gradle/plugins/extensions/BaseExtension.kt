@@ -1,12 +1,5 @@
 package io.github.thomaskioko.gradle.plugins.extensions
 
-import co.touchlab.skie.configuration.DefaultArgumentInterop
-import co.touchlab.skie.configuration.EnumInterop
-import co.touchlab.skie.configuration.FlowInterop
-import co.touchlab.skie.configuration.SealedInterop
-import co.touchlab.skie.configuration.SuppressSkieWarning
-import co.touchlab.skie.configuration.SuspendInterop
-import co.touchlab.skie.plugin.configuration.SkieExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
 import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi

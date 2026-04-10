@@ -27,9 +27,7 @@
             "groupName": "Kotlin, KSP & Skie",
             "matchPackagePatterns": [
                 "org.jetbrains.kotlin",
-                "com.google.devtools.ksp",
-                "co.touchlab.skie"
-            ]
+                "com.google.devtools.ksp"
         }
     ]
 }
