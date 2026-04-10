@@ -78,9 +78,20 @@ public abstract class RootPlugin : Plugin<Project> {
 
         plugins.apply("com.autonomousapps.dependency-analysis")
 
+        configureAggregateTestTasks()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
         configureGradleDoctor()
+    }
+
+    private fun Project.configureAggregateTestTasks() {
+        val linuxTest = tasks.register(BasePlugin.LINUX_TEST)
+        val macTest = tasks.register(BasePlugin.IOS_TEST)
+
+        tasks.register(BasePlugin.ALL_TEST) {
+            it.dependsOn(linuxTest)
+            it.dependsOn(macTest)
+        }
     }
 
     @Suppress("UnstableApiUsage")

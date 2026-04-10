@@ -1,5 +1,4 @@
 [versions]
-clikt = "5.1.0"
 mordant = "3.0.2"
 java-target = "21"
 java-toolchain = "25"
@@ -22,7 +21,6 @@ mordant-core = { module = "com.github.ajalt.mordant:mordant-core", version.ref =
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
 spotless-gradle-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
 
 # Build logic dependencies
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }

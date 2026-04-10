@@ -10,6 +10,7 @@ import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.tasks.Jar
 import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -17,6 +18,12 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 public abstract class BasePlugin : Plugin<Project> {
+    public companion object {
+        public const val LINUX_TEST: String = "linuxTest"
+        public const val IOS_TEST: String = "iosTest"
+        public const val ALL_TEST: String = "ciTest"
+    }
+
     override fun apply(target: Project) {
         target.plugins.apply("io.github.thomaskioko.gradle.plugins.spotless")
 
@@ -25,6 +32,21 @@ public abstract class BasePlugin : Plugin<Project> {
         target.makeJarsReproducible()
         target.configureJava()
         target.configureKotlin()
+        target.configureTests()
+    }
+
+    private fun Project.configureTests() {
+        tasks.withType(Test::class.java).configureEach {
+            it.failOnNoDiscoveredTests.set(false)
+        }
+
+        val linuxTest = tasks.register(LINUX_TEST)
+        val macTest = tasks.register(IOS_TEST)
+
+        tasks.register(ALL_TEST) {
+            it.dependsOn(linuxTest)
+            it.dependsOn(macTest)
+        }
     }
 
     private fun Project.makeJarsReproducible() {
