@@ -26,6 +26,10 @@ dependencies {
     testImplementation(libs.kotlin.compiler.embeddable)
 }
 
+configurations.testRuntimeClasspath {
+    exclude(group = "org.jetbrains", module = "annotations")
+}
+
 tasks.named<Test>("test") {
     jvmArgs(
         "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
