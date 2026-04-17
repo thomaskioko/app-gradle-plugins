@@ -76,3 +76,6 @@ jobs:
 
       - name: Check dependency health
         run: ./gradlew buildHealth --no-configuration-cache
+
+      - name: Check dependency health (codegen)
+        run: ./gradlew -p codegen buildHealth

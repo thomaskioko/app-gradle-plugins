@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.publish)
 }
 
-group = providers.gradleProperty("GROUP").get()
-version = providers.gradleProperty("VERSION_NAME").get()
+group = property("GROUP").toString()
+version = property("VERSION_NAME").toString()
 
 tasks {
     validatePlugins {
@@ -107,36 +107,36 @@ gradlePlugin {
 
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
-    if (providers.gradleProperty("maven.central.publish").orNull == "true") {
+    if (findProperty("maven.central.publish")?.toString() == "true") {
         signAllPublications()
     }
 
     pom {
-        name.set(providers.gradleProperty("POM_NAME").get())
-        description.set(providers.gradleProperty("POM_DESCRIPTION").get())
-        inceptionYear.set(providers.gradleProperty("INCEPTION_YEAR").get())
-        url.set(providers.gradleProperty("POM_URL").get())
+        name.set(property("POM_NAME").toString())
+        description.set(property("POM_DESCRIPTION").toString())
+        inceptionYear.set(property("INCEPTION_YEAR").toString())
+        url.set(property("POM_URL").toString())
 
         licenses {
             license {
-                name.set(providers.gradleProperty("POM_LICENSE_NAME").get())
-                url.set(providers.gradleProperty("POM_LICENSE_URL").get())
-                distribution.set(providers.gradleProperty("POM_LICENSE_DIST").get())
+                name.set(property("POM_LICENSE_NAME").toString())
+                url.set(property("POM_LICENSE_URL").toString())
+                distribution.set(property("POM_LICENSE_DIST").toString())
             }
         }
 
         developers {
             developer {
-                id.set(providers.gradleProperty("POM_DEVELOPER_ID").get())
-                name.set(providers.gradleProperty("POM_DEVELOPER_NAME").get())
-                url.set(providers.gradleProperty("POM_DEVELOPER_URL").get())
+                id.set(property("POM_DEVELOPER_ID").toString())
+                name.set(property("POM_DEVELOPER_NAME").toString())
+                url.set(property("POM_DEVELOPER_URL").toString())
             }
         }
 
         scm {
-            url.set(providers.gradleProperty("POM_SCM_URL").get())
-            connection.set(providers.gradleProperty("POM_SCM_CONNECTION").get())
-            developerConnection.set(providers.gradleProperty("POM_SCM_DEV_CONNECTION").get())
+            url.set(property("POM_SCM_URL").toString())
+            connection.set(property("POM_SCM_CONNECTION").toString())
+            developerConnection.set(property("POM_SCM_DEV_CONNECTION").toString())
         }
     }
 }
