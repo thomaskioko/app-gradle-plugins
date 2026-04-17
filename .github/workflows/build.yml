@@ -75,4 +75,12 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Check dependency health
-        run: ./gradlew buildHealth --no-configuration-cache
+        run: ./gradlew buildHealthAll --no-configuration-cache
+
+      - name: Upload dependency health reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-health-reports
+          path: |
+            **/build/reports/dependency-analysis/

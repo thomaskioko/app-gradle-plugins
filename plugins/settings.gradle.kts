@@ -1,31 +1,11 @@
-pluginManagement {
-    repositories {
-        google {
-            content {
-                includeGroupByRegex(".*google.*")
-                includeGroupByRegex(".*android.*")
-            }
-        }
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
+apply(from = "../gradle/repositories.settings.gradle.kts")
+apply(from = "../gradle/publishing.settings.gradle.kts")
 
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             from(files("../gradle/libs.versions.toml"))
         }
-    }
-
-    repositories {
-        google {
-            content {
-                includeGroupByRegex(".*google.*")
-                includeGroupByRegex(".*android.*")
-            }
-        }
-        mavenCentral()
     }
 }
 

@@ -56,6 +56,12 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         project.addKspDependencyForAllTargets(project.getDependency("kotlinInject-anvil-compiler"))
     }
 
+    public fun useCodegen() {
+        project.configureProcessing()
+        project.addImplementationDependency(project.getDependency("codegen-annotations"))
+        project.addKspDependencyForAllTargets(project.getDependency("codegen-processor"))
+    }
+
     public fun android(configure: AndroidExtension.() -> Unit) {
         val androidExtension = extensions.findByType(AndroidExtension::class.java)
             ?: throw IllegalStateException("Android extension not found. Did you call addAndroidTarget()?")

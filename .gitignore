@@ -23,3 +23,10 @@ local.properties
 
 # Maven Central credentials (should never be committed)
 gradle.properties.local
+
+/.kotlin
+tasks
+
+# Claude skills — untracked while iterating; remove once stable
+.claude/skills/
+CLAUDE.md
