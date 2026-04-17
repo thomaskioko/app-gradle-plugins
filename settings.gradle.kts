@@ -10,4 +10,6 @@ plugins {
 }
 
 includeBuild("plugins")
-includeBuild("codegen")
+includeBuild("codegen") {
+    name = "codegen-plugins"
+}
