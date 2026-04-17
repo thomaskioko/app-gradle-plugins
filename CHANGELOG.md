@@ -1,9 +1,11 @@
 Change Log
 ==========
 
+## 0.7.0 *(2026-04-17)*
+- Introduce a KSP-based navigation codegen that eliminates per-destination DI boilerplate in Metro + Decompose KMP projects.
+
 ## 0.6.7 *(2026-04-10)*
 - Remove SKIE DSL
-
 
 ## 0.6.6 *(2026-04-09)*
 - Fix iOS test crashes for modules using moko resources.
