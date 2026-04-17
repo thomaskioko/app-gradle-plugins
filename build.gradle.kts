@@ -14,3 +14,10 @@ tasks.register("publishLocal") {
     dependsOn(gradle.includedBuild("codegen").task(":codegen-annotations:publishToMavenLocal"))
     dependsOn(gradle.includedBuild("codegen").task(":codegen-processor:publishToMavenLocal"))
 }
+
+tasks.register("buildHealthAll") {
+    group = "verification"
+    description = "Run buildHealth across plugins + codegen composite builds."
+    dependsOn(gradle.includedBuild("plugins").task(":buildHealth"))
+    dependsOn(gradle.includedBuild("codegen").task(":buildHealth"))
+}
