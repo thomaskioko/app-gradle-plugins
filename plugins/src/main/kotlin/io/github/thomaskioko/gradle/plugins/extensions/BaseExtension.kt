@@ -57,6 +57,11 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
     }
 
     public fun useCodegen() {
+        // Codegen relies on Metro's annotation processing, so we can apply the Metro plugin and configure it first
+        if(!project.plugins.hasPlugin("dev.zacsweers.metro")) {
+            useMetro()
+        }
+
         project.configureProcessing()
         project.addImplementationDependency(project.getDependency("codegen-annotations"))
         project.addKspDependencyForAllTargets(project.getDependency("codegen-processor"))
