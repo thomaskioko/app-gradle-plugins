@@ -1,7 +1,7 @@
 # Navigation Codegen
 
 KSP-based code generation for Kotlin Multiplatform navigation destinations built on Metro DI and Decompose. Eliminates the
-per-destination graph + binding boilerplate for screens, tabs, and modal sheets (bottom sheets, dialogs, or overlays) in a Metro-based navigation stack.
+per-destination graph + binding boilerplate for screens, tabs, and modal sheets (bottom sheets, dialogs, or overlays) in a Metro-based navigation stack, and the per-screen renderer binding boilerplate on the Android Compose layer.
 
 ## Docs
 

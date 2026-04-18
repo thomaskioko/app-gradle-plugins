@@ -250,3 +250,124 @@ public interface EpisodeDetailSheetDestinationBinding {
 Notice the shape is parallel to `@NavScreen`: a `@ContributesTo(parentScope)` interface whose companion contributes two `@IntoSet` providers. `SheetChildFactory` feeds the `Set<SheetChildFactory>` multibinding that the root presenter walks when the sheet slot activates. `SheetConfigBinding<*>` feeds the polymorphic `KSerializer<SheetConfig>` used by Decompose's `childSlot`, so the sheet slot survives process death without any central registry.
 
 The processor supports multiple `@Assisted` parameters for sheets. It maps each assisted constructor parameter to a route property by type and order.
+
+## Shape 5: `@ScreenUi`
+
+Use this shape on the Android `@Composable` that renders a root-stack screen. The annotation generates the small `ScreenContent` binding that joins the composable to the `Set<ScreenContent>` multibinding the root Compose stack iterates to pick the right renderer. One annotation replaces a small but entirely mechanical binding file per composable.
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.debug.ui
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.debug.presenter.DebugPresenter
+import io.github.thomaskioko.codegen.annotations.ScreenUi
+
+@ScreenUi(presenter = DebugPresenter::class, parentScope = ActivityScope::class)
+@Composable
+public fun DebugMenuScreen(
+    presenter: DebugPresenter,
+    modifier: Modifier = Modifier,
+) {
+    // ...
+}
+```
+
+### Generated: `DebugMenuScreenUiBinding.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.debug.ui.di
+
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.debug.presenter.DebugPresenter
+import com.thomaskioko.tvmaniac.debug.ui.DebugMenuScreen
+import com.thomaskioko.tvmaniac.navigation.ScreenDestination
+import com.thomaskioko.tvmaniac.navigation.ui.ScreenContent
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
+
+@BindingContainer
+@ContributesTo(ActivityScope::class)
+public object DebugMenuScreenUiBinding {
+    @Provides
+    @IntoSet
+    public fun provideDebugMenuScreenContent(): ScreenContent = ScreenContent(
+        matches = { (it as? ScreenDestination<*>)?.presenter is DebugPresenter },
+        content = { child, modifier ->
+            DebugMenuScreen(
+                presenter = (child as ScreenDestination<*>).presenter as DebugPresenter,
+                modifier = modifier,
+            )
+        },
+    )
+}
+```
+
+Notice the `@BindingContainer + public object` shape rather than the `interface + companion object` used by `@NavScreen` output. The Android-only `ui` source set does not pick up authored `@Provides @IntoSet` declarations inside an interface companion unless Metro's `generateContributionProviders` is enabled, which is disabled in the shared scaffold. The generator targets the object form so the contribution is discovered without that flag. See the note in [annotations.md](annotations.md#screenui) for details.
+
+### Function shape invariant
+
+The annotated function must accept exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator calls them by name, so renaming either breaks the generated code at compile time.
+
+## Shape 6: `@SheetUi`
+
+Use this shape on the Android `@Composable` that renders a modal sheet. Parallel to `@ScreenUi`, but contributes a `SheetContent` into `Set<SheetContent>` instead of a `ScreenContent` into `Set<ScreenContent>`.
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.episodedetail.ui
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.presentation.episodedetail.EpisodeSheetPresenter
+import io.github.thomaskioko.codegen.annotations.SheetUi
+
+@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)
+@Composable
+public fun EpisodeSheet(
+    presenter: EpisodeSheetPresenter,
+    modifier: Modifier = Modifier,
+) {
+    // ...
+}
+```
+
+### Generated: `EpisodeSheetUiBinding.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.episodedetail.ui.di
+
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.episodedetail.ui.EpisodeSheet
+import com.thomaskioko.tvmaniac.navigation.SheetDestination
+import com.thomaskioko.tvmaniac.navigation.ui.SheetContent
+import com.thomaskioko.tvmaniac.presentation.episodedetail.EpisodeSheetPresenter
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
+
+@BindingContainer
+@ContributesTo(ActivityScope::class)
+public object EpisodeSheetUiBinding {
+    @Provides
+    @IntoSet
+    public fun provideEpisodeSheetContent(): SheetContent = SheetContent(
+        matches = { (it as? SheetDestination<*>)?.presenter is EpisodeSheetPresenter },
+        content = { child ->
+            EpisodeSheet(
+                presenter = (child as SheetDestination<*>).presenter as EpisodeSheetPresenter,
+            )
+        },
+    )
+}
+```
+
+The sheet renderer receives no `Modifier`. `SheetContent.content` is `@Composable (SheetChild) -> Unit`; the modal presentation (`ModalBottomSheet` or similar) is set up inside the composable body. The annotated function still accepts a `modifier: Modifier = Modifier` parameter for consistency with other composables, but the generator does not forward it.
