@@ -49,7 +49,6 @@ Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` mod
    }
 
    scaffold {
-       useMetro()
        useCodegen()
 
        android {
