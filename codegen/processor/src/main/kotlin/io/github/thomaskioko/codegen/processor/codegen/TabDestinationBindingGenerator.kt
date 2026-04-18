@@ -6,19 +6,22 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.STAR
-import com.squareup.kotlinpoet.TypeSpec
 import io.github.thomaskioko.codegen.processor.data.TabData
 import io.github.thomaskioko.codegen.processor.util.ComponentContext
-import io.github.thomaskioko.codegen.processor.util.FOUR_SPACE_INDENT
 import io.github.thomaskioko.codegen.processor.util.IntoSet
 import io.github.thomaskioko.codegen.processor.util.Provides
 import io.github.thomaskioko.codegen.processor.util.TabChild
 import io.github.thomaskioko.codegen.processor.util.TabDestination
-import io.github.thomaskioko.codegen.processor.util.contributesTo
 
 internal object TabDestinationBindingGenerator {
-    fun generate(data: TabData): FileSpec {
-        val provideDestinationFun = FunSpec.builder("provide${data.baseName}TabDestination")
+    fun generate(data: TabData): FileSpec = contributingBindingFile(
+        bindingName = data.bindingClassName,
+        parentScope = data.parentScope,
+        destinationFun(data),
+    )
+
+    private fun destinationFun(data: TabData): FunSpec =
+        FunSpec.builder("provide${data.baseName}TabDestination")
             .addModifiers(KModifier.PUBLIC)
             .addAnnotation(Provides)
             .addAnnotation(IntoSet)
@@ -51,21 +54,4 @@ internal object TabDestinationBindingGenerator {
                     .build(),
             )
             .build()
-
-        val companion = TypeSpec.companionObjectBuilder()
-            .addModifiers(KModifier.PUBLIC)
-            .addFunction(provideDestinationFun)
-            .build()
-
-        val bindingInterface = TypeSpec.interfaceBuilder(data.bindingClassName)
-            .addModifiers(KModifier.PUBLIC)
-            .addAnnotation(contributesTo(data.parentScope))
-            .addType(companion)
-            .build()
-
-        return FileSpec.builder(data.bindingClassName)
-            .indent(FOUR_SPACE_INDENT)
-            .addType(bindingInterface)
-            .build()
-    }
 }

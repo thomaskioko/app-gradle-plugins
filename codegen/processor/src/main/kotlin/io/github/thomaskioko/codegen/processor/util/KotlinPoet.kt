@@ -13,6 +13,9 @@ internal fun contributesTo(scope: ClassName): AnnotationSpec =
         .addMember("%T::class", scope)
         .build()
 
+internal fun bindingContainer(): AnnotationSpec =
+    AnnotationSpec.builder(BindingContainer).build()
+
 internal fun graphExtension(scope: ClassName): AnnotationSpec =
     AnnotationSpec.builder(GraphExtension)
         .addMember("%T::class", scope)

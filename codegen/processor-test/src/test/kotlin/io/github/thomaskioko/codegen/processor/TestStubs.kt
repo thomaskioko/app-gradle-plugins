@@ -125,11 +125,44 @@ internal object TestStubs {
         @Target(AnnotationTarget.CLASS)
         public annotation class ContributesBinding(val scope: KClass<*>)
 
+        @Target(AnnotationTarget.CLASS)
+        public annotation class BindingContainer
+
         @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
         public annotation class Provides
 
         @Target(AnnotationTarget.FUNCTION)
         public annotation class IntoSet
+    """.trimIndent()
+
+    val composeUi = "ComposeUi.kt" to """
+        package androidx.compose.ui
+
+        public interface Modifier {
+            public companion object : Modifier
+        }
+
+        @Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.PROPERTY_GETTER)
+        public annotation class Composable
+    """.trimIndent()
+
+    val navigationUi = "NavigationUi.kt" to """
+        package com.thomaskioko.tvmaniac.navigation.ui
+
+        import androidx.compose.ui.Composable
+        import androidx.compose.ui.Modifier
+        import com.thomaskioko.tvmaniac.navigation.RootChild
+        import com.thomaskioko.tvmaniac.navigation.SheetChild
+
+        public class ScreenContent(
+            public val matches: (RootChild) -> Boolean,
+            public val content: @Composable (RootChild, Modifier) -> Unit,
+        )
+
+        public class SheetContent(
+            public val matches: (SheetChild) -> Boolean,
+            public val content: @Composable (SheetChild) -> Unit,
+        )
     """.trimIndent()
 
     val baseStubs: List<Pair<String, String>> = listOf(
@@ -141,4 +174,6 @@ internal object TestStubs {
     )
 
     val tabStubs: List<Pair<String, String>> = baseStubs + listOf(homeNav, homeConfig)
+
+    val uiStubs: List<Pair<String, String>> = baseStubs + listOf(composeUi, navigationUi)
 }

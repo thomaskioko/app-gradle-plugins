@@ -1,6 +1,6 @@
 # Annotation Reference
 
-The annotations live in the `codegen-annotations` artifact under the package `io.github.thomaskioko.codegen.annotations`. All three have `SOURCE` retention and target classes only. This reference walks through each annotation, what it marks, what the processor emits, and the invariants the processor checks.
+The annotations live in the `codegen-annotations` artifact under the package `io.github.thomaskioko.codegen.annotations`. All five have `SOURCE` retention. Three (`@NavScreen`, `@TabScreen`, `@NavSheet`) target presenter classes in the shared KMP layer and generate Metro `@GraphExtension`s plus navigation bindings. Two (`@ScreenUi`, `@SheetUi`) target `@Composable` functions in Android `ui` modules and generate the platform-side renderer bindings consumed by the `Set<ScreenContent>` / `Set<SheetContent>` multibindings. This reference walks through each annotation, what it marks, what the processor emits, and the invariants the processor checks.
 
 
 ## `@NavScreen`
@@ -102,6 +102,56 @@ For `FooSheetPresenter` annotated with `route = FooSheetConfig::class`, the proc
 The sheet binding mirrors the `@NavScreen` pair. The child factory matches on the generic `SheetConfig` marker, casts to the feature's config type, and dispatches through the graph's assisted factory. The config binding feeds the polymorphic `KSerializer<SheetConfig>` used by Decompose's `childSlot`, so the sheet slot survives process death without a central registry.
 
 
+## `@ScreenUi`
+
+Marks a `@Composable` screen function as the Android-side renderer for a root-stack presenter. Unlike the three annotations above, this one targets the composable function directly so the generated binding lives in the same module as the composable it calls. No cross-module KSP emission is needed.
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class ScreenUi(
+    val presenter: KClass<*>,
+    val parentScope: KClass<*>,
+)
+```
+
+The `presenter` parameter names the presenter type this screen renders. The processor uses it to build the `matches` predicate that tests whether the active `RootChild` is a `ScreenDestination<*>` wrapping an instance of that type, and to cast the presenter before forwarding it to the composable.
+
+The `parentScope` parameter names the DI scope the generated binding is contributed to. In Tv Maniac this is `ActivityScope::class`.
+
+### Processor behavior
+
+The annotated function must match the signature `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The processor does not enforce the `Modifier` parameter name or default, but the generated code calls the composable with `presenter = ..., modifier = modifier`, so the function must accept both in that order with those names.
+
+### Generated files
+
+For a composable `com.example.feature.ui.FooScreen` with `@ScreenUi(presenter = FooPresenter::class, parentScope = ActivityScope::class)`, the processor emits one file into `com.example.feature.ui.di`.
+
+`FooScreenUiBinding.kt` is a `@BindingContainer @ContributesTo(ActivityScope::class) object` that `@Provides @IntoSet` a single `ScreenContent`. The `matches` lambda tests `(it as? ScreenDestination<*>)?.presenter is FooPresenter`. The `content` lambda casts the child and invokes `FooScreen(presenter = ..., modifier = modifier)`.
+
+The `@BindingContainer + object` shape is deliberate. Hand-authored `@Provides @IntoSet` inside an `interface + companion object` requires Metro's `generateContributionProviders` flag to be enabled, which is disabled in the shared scaffold. Codegen-emitted bindings for the KMP presenter layer get away with the interface form because they are picked up by a separate code path. Bindings emitted into Android-only `ui` modules would silently produce an empty multibinding if the interface form were used, so the generator targets the object form instead.
+
+
+## `@SheetUi`
+
+Marks a `@Composable` sheet function as the Android-side renderer for a modal sheet presenter. Parallel to `@ScreenUi`, but targets the sheet-side multibinding `Set<SheetContent>` instead of the screen-side `Set<ScreenContent>`.
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class SheetUi(
+    val presenter: KClass<*>,
+    val parentScope: KClass<*>,
+)
+```
+
+The parameters have the same meaning as on `@ScreenUi`. The generated `matches` predicate tests for a `SheetDestination<*>` (not `ScreenDestination<*>`), and the `content` lambda invokes the composable with `presenter` only. The sheet renderer does not receive a `Modifier` because `SheetContent.content` is `@Composable (SheetChild) -> Unit`; the sheet lays itself out via its own `ModalBottomSheet` (or equivalent) in the composable body.
+
+### Generated files
+
+For `EpisodeSheet` annotated with `@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)`, the processor emits `EpisodeSheetUiBinding.kt`. Shape mirrors `@ScreenUi` output, differing only in return type (`SheetContent` vs `ScreenContent`) and the absence of the `modifier` forwarding.
+
+
 ## Required consumer primitives
 
 The generated code references fully qualified names that the consumer project must provide. These are hardcoded in the processor's `util/External.kt`, grouped below by the role they play.
@@ -111,5 +161,7 @@ The root destination shape pulls from `com.thomaskioko.tvmaniac.navigation`: `Na
 The sheet shape reuses that package for `SheetConfig` (the sheet config supertype), `SheetChild` (Decompose sheet child marker), `SheetDestination` (generic sheet wrapper), `SheetChildFactory` (sheet destination factory interface), and `SheetConfigBinding` (Metro multibinding entry for sheet configs).
 
 Tabs live under `com.thomaskioko.tvmaniac.home.nav`: `TabDestination` is the tab factory interface and `TabChild` is the generic tab wrapper. Finally, `com.thomaskioko.tvmaniac.core.base.ActivityScope` is the default parent scope referenced by the generated binding contributions.
+
+The platform-side UI renderer types live under `com.thomaskioko.tvmaniac.navigation.ui`: `ScreenContent` carries a `matches` predicate and a `@Composable (RootChild, Modifier) -> Unit` content lambda, and `SheetContent` does the same for `SheetChild`. The generated `@ScreenUi` / `@SheetUi` bindings also reference `androidx.compose.ui.Modifier` because the screen variant forwards a modifier into the composable.
 
 The processor is opinionated about these names. Consumers other than Tv Maniac would need to adjust `util/External.kt` to match their navigation primitives.

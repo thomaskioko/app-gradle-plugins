@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.7.2 *(2026-04-18)*
+- Add support for UI renderer bindings
+
 ## 0.7.1 *(2026-04-17)*
 - Introduce a KSP-based navigation codegen that eliminates per-destination DI boilerplate in Metro + Decompose KMP projects.
 

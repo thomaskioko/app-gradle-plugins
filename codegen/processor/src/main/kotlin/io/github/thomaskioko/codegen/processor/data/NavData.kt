@@ -17,36 +17,29 @@ internal sealed interface NavData {
         get() = graphClassName.nestedClass("Factory")
 }
 
-internal data class SimpleScreenData(
+/**
+ * A root-stack screen. When [factory] is `null` the presenter is plain `@Inject` and the graph
+ * exposes it directly; when non-`null` the presenter is `@AssistedInject` with exactly one
+ * `@Assisted` constructor parameter whose name equals [routeProperty] on the route class.
+ */
+internal data class ScreenData(
     override val presenterClass: ClassName,
     override val baseName: String,
     override val packageName: String,
     override val parentScope: ClassName,
     override val scope: ClassName,
     val route: ClassName,
+    val factory: ClassName? = null,
+    val routeProperty: String? = null,
 ) : NavData {
+    val isParameterized: Boolean
+        get() = factory != null
     override val graphClassName: ClassName = ClassName(packageName, "${baseName}ScreenGraph")
     override val graphFactoryFunName: String = "create${baseName}Graph"
     override val bindingClassName: ClassName = ClassName(packageName, "${baseName}NavDestinationBinding")
-    override val graphPropertyType: ClassName = presenterClass
-    override val graphPropertyName: String = presenterAccessor(baseName)
-}
-
-internal data class ParameterizedScreenData(
-    override val presenterClass: ClassName,
-    override val baseName: String,
-    override val packageName: String,
-    override val parentScope: ClassName,
-    override val scope: ClassName,
-    val route: ClassName,
-    val factory: ClassName,
-    val routeProperty: String,
-) : NavData {
-    override val graphClassName: ClassName = ClassName(packageName, "${baseName}ScreenGraph")
-    override val graphFactoryFunName: String = "create${baseName}Graph"
-    override val bindingClassName: ClassName = ClassName(packageName, "${baseName}NavDestinationBinding")
-    override val graphPropertyType: ClassName = factory
-    override val graphPropertyName: String = factoryAccessor(baseName)
+    override val graphPropertyType: ClassName = factory ?: presenterClass
+    override val graphPropertyName: String =
+        if (isParameterized) factoryAccessor(baseName) else presenterAccessor(baseName)
 }
 
 internal data class TabData(
