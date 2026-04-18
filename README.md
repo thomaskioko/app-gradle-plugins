@@ -81,9 +81,6 @@ scaffold {
     // Enable serialization support
     useSerialization()
 
-    // Enable Kotlin Inject for dependency injection
-    useKotlinInject()
-
     // Enable Metro for DI
     useMetro()
 }
@@ -306,12 +303,7 @@ The `useCompose()` configuration:
 ### Dependency Injection
 
 Built-in support for Kotlin Inject and Metro:
-- `useKotlinInject()` - Applies KSP processor and configures for all targets
 - `useMetro()` - Applies Metro plugin and adds runtime dependency
-
-### Swift Interop
-
-Built-in SKIE support via `useSkie()` with configurable interop options for suspend functions, flows, enums, and sealed classes.
 
 
 ## License
