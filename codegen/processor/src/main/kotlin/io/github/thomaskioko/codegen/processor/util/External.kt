@@ -10,6 +10,7 @@ internal val ContributesTo: ClassName = ClassName(METRO_PACKAGE, "ContributesTo"
 internal val GraphExtension: ClassName = ClassName(METRO_PACKAGE, "GraphExtension")
 internal val Provides: ClassName = ClassName(METRO_PACKAGE, "Provides")
 internal val IntoSet: ClassName = ClassName(METRO_PACKAGE, "IntoSet")
+internal val BindingContainer: ClassName = ClassName(METRO_PACKAGE, "BindingContainer")
 
 internal const val NAVIGATION_PACKAGE: String = "com.thomaskioko.tvmaniac.navigation"
 internal val NavRoute: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRoute")
@@ -22,6 +23,13 @@ internal val SheetDestination: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetD
 internal val SheetConfig: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetConfig")
 internal val SheetChildFactory: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetChildFactory")
 internal val SheetConfigBinding: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetConfigBinding")
+
+internal const val NAVIGATION_UI_PACKAGE: String = "com.thomaskioko.tvmaniac.navigation.ui"
+internal val ScreenContent: ClassName = ClassName(NAVIGATION_UI_PACKAGE, "ScreenContent")
+internal val SheetContent: ClassName = ClassName(NAVIGATION_UI_PACKAGE, "SheetContent")
+
+internal const val COMPOSE_UI_PACKAGE: String = "androidx.compose.ui"
+internal val Modifier: ClassName = ClassName(COMPOSE_UI_PACKAGE, "Modifier")
 
 internal const val HOME_NAV_PACKAGE: String = "com.thomaskioko.tvmaniac.home.nav"
 internal val TabDestination: ClassName = ClassName(HOME_NAV_PACKAGE, "TabDestination")
