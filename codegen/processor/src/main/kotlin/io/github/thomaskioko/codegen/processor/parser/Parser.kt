@@ -5,45 +5,32 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ksp.toClassName
 import io.github.thomaskioko.codegen.processor.Constants
 import io.github.thomaskioko.codegen.processor.data.AssistedParamMapping
-import io.github.thomaskioko.codegen.processor.data.ParameterizedScreenData
+import io.github.thomaskioko.codegen.processor.data.ScreenData
 import io.github.thomaskioko.codegen.processor.data.SheetData
-import io.github.thomaskioko.codegen.processor.data.SimpleScreenData
 import io.github.thomaskioko.codegen.processor.data.TabData
 
-internal fun parseSimpleScreenData(
+internal fun parseScreenData(
     presenter: KSClassDeclaration,
-    @Suppress("UNUSED_PARAMETER") logger: KSPLogger,
-): SimpleScreenData? {
-    val annotation = presenter.findAnnotation(Constants.NAV_SCREEN_FQN) ?: return null
-    val route = annotation.classArgument("route")
-    val parentScope = annotation.classArgument("parentScope")
-    return SimpleScreenData(
-        presenterClass = presenter.toClassName(),
-        baseName = presenter.baseName(),
-        packageName = presenter.diPackage(),
-        parentScope = parentScope,
-        scope = route,
-        route = route,
-    )
-}
-
-internal fun parseParameterizedScreenData(
-    presenter: KSClassDeclaration,
-    nestedFactory: KSClassDeclaration,
     logger: KSPLogger,
-): ParameterizedScreenData? {
+): ScreenData? {
     val annotation = presenter.findAnnotation(Constants.NAV_SCREEN_FQN) ?: return null
     val route = annotation.classArgument("route")
     val parentScope = annotation.classArgument("parentScope")
-    val routeProperty = inferSingleRouteProperty(presenter, route.simpleName, logger) ?: return null
-    return ParameterizedScreenData(
+    val nestedFactory = presenter.findNestedAssistedFactory()
+    val (factory, routeProperty) = if (nestedFactory == null) {
+        null to null
+    } else {
+        val property = inferSingleRouteProperty(presenter, route.simpleName, logger) ?: return null
+        nestedFactory.toClassName() to property
+    }
+    return ScreenData(
         presenterClass = presenter.toClassName(),
         baseName = presenter.baseName(),
         packageName = presenter.diPackage(),
         parentScope = parentScope,
         scope = route,
         route = route,
-        factory = nestedFactory.toClassName(),
+        factory = factory,
         routeProperty = routeProperty,
     )
 }
