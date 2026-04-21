@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.7.3 *(2026-04-21)*
+- Add `manifestPlaceholders` DSL
+
 ## 0.7.2 *(2026-04-18)*
 - Add support for UI renderer bindings
 
