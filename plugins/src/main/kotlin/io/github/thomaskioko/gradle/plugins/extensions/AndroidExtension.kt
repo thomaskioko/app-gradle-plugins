@@ -8,8 +8,10 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.android.build.api.dsl.TestExtension
 import com.android.build.api.dsl.TestOptions
+import com.android.build.api.variant.HasHostTests
 import io.github.thomaskioko.gradle.plugins.utils.android
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
+import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
@@ -48,6 +50,45 @@ public abstract class AndroidExtension(protected val project: Project) {
 
     public fun useCompose() {
         project.setupCompose()
+    }
+
+    /**
+     * Sets manifest placeholders on every variant. Works for both pure Android
+     * library modules and KMP Android library targets because it goes through
+     * the common `AndroidComponentsExtension.onVariants` variant API rather
+     * than the legacy `defaultConfig.manifestPlaceholders` DSL (which is
+     * absent on `KotlinMultiplatformAndroidLibraryExtension`).
+     *
+     * Typical use: overriding placeholders required by third-party library
+     * manifests (e.g. AppAuth's `${appAuthRedirectScheme}`) in a test module
+     * where the real value is not meaningful.
+     *
+     * Example:
+     * ```
+     * scaffold {
+     *     android {
+     *         manifestPlaceholders(mapOf("appAuthRedirectScheme" to "com.example.test"))
+     *     }
+     * }
+     * ```
+     */
+    public fun manifestPlaceholders(placeholders: Map<String, String>) {
+        project.androidComponents {
+            onVariants { variant ->
+                placeholders.forEach { (key, value) ->
+                    variant.manifestPlaceholders.put(key, value)
+                }
+                // Host test variants (KMP Android library `withHostTestBuilder`
+                // or AGP unit test) have their own manifest merge — the
+                // placeholders on the main variant do not propagate. Apply
+                // them explicitly to every host test component.
+                (variant as? HasHostTests)?.hostTests?.values?.forEach { hostTest ->
+                    placeholders.forEach { (key, value) ->
+                        hostTest.manifestPlaceholders.put(key, value)
+                    }
+                }
+            }
+        }
     }
 
     public fun useRoborazzi() {
