@@ -8,6 +8,7 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.android.build.api.dsl.TestExtension
 import com.android.build.api.dsl.TestOptions
+import com.android.build.api.variant.HasDeviceTests
 import com.android.build.api.variant.HasHostTests
 import io.github.thomaskioko.gradle.plugins.utils.android
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
@@ -85,6 +86,15 @@ public abstract class AndroidExtension(protected val project: Project) {
                 (variant as? HasHostTests)?.hostTests?.values?.forEach { hostTest ->
                     placeholders.forEach { (key, value) ->
                         hostTest.manifestPlaceholders.put(key, value)
+                    }
+                }
+                // Device test variants (KMP `withDeviceTestBuilder` or AGP
+                // androidTest) also merge their own manifests independently
+                // of the main variant. Apply placeholders so dependencies
+                // such as AppAuth resolve in instrumentation builds.
+                (variant as? HasDeviceTests)?.deviceTests?.values?.forEach { deviceTest ->
+                    placeholders.forEach { (key, value) ->
+                        deviceTest.manifestPlaceholders.put(key, value)
                     }
                 }
             }
