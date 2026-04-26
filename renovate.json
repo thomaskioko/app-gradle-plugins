@@ -1,7 +1,7 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
-        "config:base",
+        "config:recommended",
         ":disableRateLimiting",
         ":semanticCommitsDisabled"
     ],
@@ -25,9 +25,10 @@
         },
         {
             "groupName": "Kotlin, KSP & Skie",
-            "matchPackagePatterns": [
-                "org.jetbrains.kotlin",
-                "com.google.devtools.ksp"
+            "matchPackageNames": [
+                "org.jetbrains.kotlin*",
+                "com.google.devtools.ksp*"
+            ]
         }
     ]
 }
