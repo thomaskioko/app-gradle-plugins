@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.7.4 *(2026-04-25)*
+- Apply manifest placeholders to device tests
+
 ## 0.7.3 *(2026-04-21)*
 - Add `manifestPlaceholders` DSL
 
