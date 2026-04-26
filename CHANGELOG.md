@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## 0.7.5 *(2026-04-26)*
+- Apply [KT-42254](https://youtrack.jetbrains.com/issue/KT-42254) Kotlin/Native cache-disable workaround automatically in `addIosTargetsWithXcFramework`
+
 ## 0.7.4 *(2026-04-25)*
 - Apply manifest placeholders to device tests
 

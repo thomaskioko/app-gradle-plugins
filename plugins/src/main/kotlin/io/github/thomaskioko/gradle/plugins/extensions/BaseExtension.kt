@@ -21,6 +21,7 @@ import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
+import java.net.URI
 
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
     public fun optIn(vararg classes: String) {
@@ -182,6 +183,11 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
                 it.binaries.framework {
                     baseName = frameworkName
                     isStatic = true
+
+                    disableNativeCacheForCurrentKotlin(
+                        reason = "Kotlin/Native cache bug causes double runtime injection when linking multiple frameworks. See KT-42254.",
+                        issueUrl = URI("https://youtrack.jetbrains.com/issue/KT-42254"),
+                    )
 
                     xcFramework.add(this)
                     it.configure(this)

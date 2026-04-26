@@ -24,7 +24,7 @@
             ]
         },
         {
-            "groupName": "Kotlin, KSP & Skie",
+            "groupName": "Kotlin & KSP",
             "matchPackageNames": [
                 "org.jetbrains.kotlin*",
                 "com.google.devtools.ksp*"
