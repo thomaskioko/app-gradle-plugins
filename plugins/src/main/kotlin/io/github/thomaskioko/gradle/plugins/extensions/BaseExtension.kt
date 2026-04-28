@@ -77,8 +77,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
     @JvmOverloads
     public fun addAndroidTarget(
         enableAndroidResources: Boolean = false,
-        withHostTestBuilder: Boolean = false,
-        includeAndroidResources: Boolean = false,
         withDeviceTestBuilder: Boolean = false,
         withJava: Boolean = false,
         configure: AndroidExtension.() -> Unit = { },
@@ -88,12 +86,6 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
             extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
                 if (enableAndroidResources) {
                     androidResources.enable = true
-                }
-
-                if (withHostTestBuilder) {
-                    withHostTestBuilder {}.configure {
-                        isIncludeAndroidResources = includeAndroidResources
-                    }
                 }
 
                 if (withDeviceTestBuilder) {

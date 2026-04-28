@@ -87,9 +87,10 @@ public abstract class AndroidPlugin : Plugin<Project> {
     }
 
     private fun Project.disableAndroidTests() {
+        val androidExtension = baseExtension.extensions.getByName("android") as AndroidExtension
         androidComponents {
             beforeVariants {
-                if (it is HasAndroidTestBuilder) {
+                if (it is HasAndroidTestBuilder && !androidExtension.androidTestsEnabled) {
                     it.androidTest.enable = false
                 }
             }

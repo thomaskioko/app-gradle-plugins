@@ -21,6 +21,13 @@ import org.gradle.api.Project
 
 public abstract class AndroidExtension(protected val project: Project) {
 
+    internal var androidTestsEnabled: Boolean = false
+        private set
+
+    public fun enableAndroidTests() {
+        androidTestsEnabled = true
+    }
+
     public fun minSdkVersion(minSdkVersion: Int?) {
         if (minSdkVersion != null) {
             project.android {
