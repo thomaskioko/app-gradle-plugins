@@ -13,7 +13,7 @@ gradle-doctor = "0.12.1"
 kotlin = "2.3.21"
 kotlinPoet = "2.3.0"
 ksp="2.3.7"
-metro = "0.13.2"
+metro = "1.0.0"
 publish = "0.36.0"
 spotless = "8.4.0"
 
