@@ -199,7 +199,7 @@ public abstract class AndroidExtension(protected val project: Project) {
         deviceName: String = "pixel6Api34",
         device: String = "Pixel 6",
         apiLevel: Int = 34,
-        systemImageSource: String = "aosp",
+        systemImageSource: String = defaultSystemImageSource(),
     ) {
         val configureManagedDevices: TestOptions.() -> Unit = {
             managedDevices {
@@ -231,6 +231,20 @@ public abstract class AndroidExtension(protected val project: Project) {
         project.extensions.configure(LibraryExtension::class.java) { extension ->
             extension.configuration()
         }
+    }
+
+    private companion object {
+        /**
+         * Picks the headless-optimized AOSP Automated Test Device (ATD) image on x86_64 hosts
+         * (CI Linux runners) and falls back to plain AOSP on arm64 hosts (Apple Silicon), since
+         * Google does not publish ATD images for arm64. Override per call site when a project
+         * needs a different image source.
+         */
+        private fun defaultSystemImageSource(): String =
+            when (System.getProperty("os.arch")) {
+                "aarch64", "arm64" -> "aosp"
+                else -> "aosp_atd"
+            }
     }
 }
 
