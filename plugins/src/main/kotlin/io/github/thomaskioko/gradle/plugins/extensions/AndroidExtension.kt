@@ -21,6 +21,57 @@ import org.gradle.api.Project
 
 public abstract class AndroidExtension(protected val project: Project) {
 
+    internal var androidTestsEnabled: Boolean = false
+        private set
+
+    /**
+     * Opts a module into instrumentation tests and applies the project-wide test orchestrator
+     * conventions: animations off, ANDROIDX_TEST_ORCHESTRATOR execution, and an
+     * `androidTestUtil` dependency on `androidx-test-orchestrator` (resolved from the consumer's
+     * version catalog).
+     *
+     * @param testInstrumentationRunner Fully-qualified class name applied to
+     *   `defaultConfig.testInstrumentationRunner`. `null` leaves any existing value untouched.
+     * @param clearPackageData Pass-through to the orchestrator's `clearPackageData` runner argument.
+     *   `true` runs `pm clear <pkg>` between tests so each test starts from a fresh app state.
+     */
+    public fun enableAndroidTests(
+        testInstrumentationRunner: String? = null,
+        clearPackageData: Boolean = true,
+    ) {
+        androidTestsEnabled = true
+
+        project.dependencies.add(
+            "androidTestUtil",
+            project.getDependency("androidx-test-orchestrator"),
+        )
+
+        project.android {
+            if (testInstrumentationRunner != null) {
+                defaultConfig.testInstrumentationRunner = testInstrumentationRunner
+            }
+            defaultConfig.testInstrumentationRunnerArguments["clearPackageData"] = clearPackageData.toString()
+        }
+
+        val configureTestOrchestrator: TestOptions.() -> Unit = {
+            animationsDisabled = true
+            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        }
+
+        when {
+            project.plugins.hasPlugin("com.android.application") ->
+                project.androidApp { testOptions(configureTestOrchestrator) }
+
+            project.plugins.hasPlugin("com.android.library") ->
+                project.androidLibrary { testOptions(configureTestOrchestrator) }
+
+            project.plugins.hasPlugin("com.android.test") ->
+                project.extensions.configure(TestExtension::class.java) {
+                    it.testOptions(configureTestOrchestrator)
+                }
+        }
+    }
+
     public fun minSdkVersion(minSdkVersion: Int?) {
         if (minSdkVersion != null) {
             project.android {
@@ -148,7 +199,7 @@ public abstract class AndroidExtension(protected val project: Project) {
         deviceName: String = "pixel6Api34",
         device: String = "Pixel 6",
         apiLevel: Int = 34,
-        systemImageSource: String = "aosp",
+        systemImageSource: String = defaultSystemImageSource(),
     ) {
         val configureManagedDevices: TestOptions.() -> Unit = {
             managedDevices {
@@ -180,6 +231,20 @@ public abstract class AndroidExtension(protected val project: Project) {
         project.extensions.configure(LibraryExtension::class.java) { extension ->
             extension.configuration()
         }
+    }
+
+    private companion object {
+        /**
+         * Picks the headless-optimized AOSP Automated Test Device (ATD) image on x86_64 hosts
+         * (CI Linux runners) and falls back to plain AOSP on arm64 hosts (Apple Silicon), since
+         * Google does not publish ATD images for arm64. Override per call site when a project
+         * needs a different image source.
+         */
+        private fun defaultSystemImageSource(): String =
+            when (System.getProperty("os.arch")) {
+                "aarch64", "arm64" -> "aosp"
+                else -> "aosp_atd"
+            }
     }
 }
 

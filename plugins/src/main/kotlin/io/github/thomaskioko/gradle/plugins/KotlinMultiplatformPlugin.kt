@@ -31,6 +31,14 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
             extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
                 configureCommonAndroid(target)
 
+                val hasCommonTest = target.file("src/commonTest").exists()
+                val hasAndroidHostTest = target.file("src/androidHostTest").exists()
+                if (hasCommonTest || hasAndroidHostTest) {
+                    withHostTest {
+                        isIncludeAndroidResources = true
+                    }
+                }
+
                 val desugarLibrary = target.getDependencyOrNull("android-desugarJdkLibs")
                 target.dependencies.addIfNotNull("coreLibraryDesugaring", desugarLibrary)
                 enableCoreLibraryDesugaring = true
