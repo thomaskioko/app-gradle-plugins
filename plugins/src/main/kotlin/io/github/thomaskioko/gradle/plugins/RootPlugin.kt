@@ -5,7 +5,7 @@ import com.osacky.doctor.DoctorExtension
 import io.github.thomaskioko.gradle.plugins.DependencyExclusions.incorrectConfiguration
 import io.github.thomaskioko.gradle.plugins.DependencyExclusions.unusedDependencies
 import io.github.thomaskioko.gradle.plugins.DependencyExclusions.usedTransitive
-import io.github.thomaskioko.gradle.plugins.utils.booleanProperty
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
@@ -78,6 +78,7 @@ public abstract class RootPlugin : Plugin<Project> {
 
         plugins.apply("com.autonomousapps.dependency-analysis")
 
+        scaffoldProperties()
         configureAggregateTestTasks()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
@@ -135,7 +136,7 @@ public abstract class RootPlugin : Plugin<Project> {
                             /**
                              * Fail on any `JAVA_HOME` issues.
                              */
-                            failOnError.set(booleanProperty("java.toolchains.strict", false))
+                            failOnError.set(scaffoldProperties().javaToolchainsStrict)
                         }
                     }
                 }

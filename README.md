@@ -37,6 +37,17 @@ plugins {
 }
 ```
 
+## Required Setup
+
+Apply `io.github.thomaskioko.gradle.plugins.root` to the **root project's** `build.gradle.kts`. This is required — applying any other plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) without `root` on the root project throws a `GradleException` at apply-time.
+
+```kotlin
+// Root build.gradle.kts
+plugins {
+    id("io.github.thomaskioko.gradle.plugins.root")
+}
+```
+
 ## Plugin Types
 
 ### Kotlin Multiplatform Plugin
@@ -220,7 +231,7 @@ scaffold {
 
 ### Root Project Plugin
 
-Configures the root project with dependency analysis, version checks, and common tasks.
+Configures the root project with dependency analysis, the aggregate test tasks (`linuxTest`, `iosTest`, `ciTest`), version checks, and common tooling. **Required**: must be applied on the root project before any other plugin in this suite — see [Required Setup](#required-setup).
 
 ```kotlin
 plugins {

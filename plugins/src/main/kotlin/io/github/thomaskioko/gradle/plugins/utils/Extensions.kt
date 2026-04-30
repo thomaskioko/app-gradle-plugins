@@ -8,6 +8,8 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
+import io.github.thomaskioko.gradle.plugins.properties.PropertyKeys
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
@@ -184,9 +186,12 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.jvmCompilerOptions(block: K
  * Throws an error if the package name is missing or empty in the Gradle properties.
  */
 internal fun Project.getPackageNameProvider(): Provider<String> =
-    stringProperty("package.name").map {
+    scaffoldProperties().packageName.map {
         it.takeIf { it.isNotBlank() }
-            ?: error("Required property 'package.name' is missing or empty in gradle.properties. Add: package.name=com.yourcompany.yourapp")
+            ?: error(
+                "Required property '${PropertyKeys.PACKAGE_NAME}' is missing or empty in gradle.properties. " +
+                    "Add: ${PropertyKeys.PACKAGE_NAME}=com.yourcompany.yourapp",
+            )
     }
 
 /**

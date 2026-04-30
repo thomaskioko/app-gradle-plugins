@@ -1,5 +1,6 @@
 package io.github.thomaskioko.gradle.plugins.utils
 
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 
@@ -18,16 +19,12 @@ internal fun Project.booleanProperty(name: String, defaultValue: Boolean): Provi
 /**
  * Checks if debug-only build optimizations should be enabled.
  */
-internal fun Project.isDebugOnlyBuild(): Boolean {
-    return booleanProperty("app.debugOnly", false).get()
-}
+internal fun Project.isDebugOnlyBuild(): Boolean = scaffoldProperties().debugOnly.get()
 
 /**
  * Checks if iOS targets should be enabled in KMP compilation.
  */
 internal fun Project.isIosDebugBuildEnabled(): Boolean {
-    val debugOnlyProperty = isDebugOnlyBuild()
-    val enableIosProperty = booleanProperty("app.enableIos", false).get()
-
-    return enableIosProperty || !debugOnlyProperty
+    val properties = scaffoldProperties()
+    return properties.enableIos.get() || !properties.debugOnly.get()
 }

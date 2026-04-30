@@ -31,8 +31,6 @@ public abstract class AndroidPlugin : Plugin<Project> {
             target.plugins.apply("com.android.library")
         }
         target.plugins.apply(BasePlugin::class.java)
-        //TODO:: Move back to base plugin
-        target.plugins.apply("com.autonomousapps.dependency-analysis")
 
         target.baseExtension.extensions.create("android", AndroidExtension::class.java)
 
@@ -78,8 +76,8 @@ public abstract class AndroidPlugin : Plugin<Project> {
 
             onVariants { variant ->
                 if (variant.buildType == "debug") {
-                    tasks.named(BasePlugin.LINUX_TEST).configure { task ->
-                        task.dependsOn("test${variant.name.capitalizeFirst()}UnitTest")
+                    rootProject.tasks.named(BasePlugin.LINUX_TEST).configure { task ->
+                        task.dependsOn("${path}:test${variant.name.capitalizeFirst()}UnitTest")
                     }
                 }
             }

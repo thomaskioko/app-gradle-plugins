@@ -29,8 +29,8 @@ public abstract class JvmPlugin : Plugin<Project> {
 
         target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
 
-        target.tasks.named(BasePlugin.LINUX_TEST).configure {
-            it.dependsOn(target.tasks.named("test"))
+        target.rootProject.tasks.named(BasePlugin.LINUX_TEST).configure {
+            it.dependsOn("${target.path}:test")
         }
 
         target.disableKotlinLibraryTasks()

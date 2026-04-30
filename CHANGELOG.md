@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+## Unreleased
+
+### Breaking
+- `io.github.thomaskioko.gradle.plugins.root` is now **required** on the root project. Any subproject plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) throws `GradleException` at apply-time when `root` is missing on the root project. Add `id("io.github.thomaskioko.gradle.plugins.root")` to the root `build.gradle.kts` plugins block.
+- Removed per-subproject application of `com.autonomousapps.dependency-analysis` from `AndroidPlugin`. The plugin is applied only at the root via `RootPlugin`; consumers that previously relied on the leaked transitive must apply `RootPlugin` explicitly (see above).
+
+### Changed
+- Introduced typed `ScaffoldProperties` layer; all Gradle property keys consumed by the plugins are centralized in `PropertyKeys`.
+- Aggregate test tasks (`linuxTest`, `iosTest`, `ciTest`) are now registered only on the root project. Subproject plugins (`AndroidPlugin`, `JvmPlugin`, `KotlinMultiplatformPlugin`) attach their variant test tasks to the root aggregates via `dependsOn`.
+- Removed dead `SpotlessPlugin.shouldConfigureXmlFormatting` method.
+
 ## 0.7.5 *(2026-04-26)*
 - Apply [KT-42254](https://youtrack.jetbrains.com/issue/KT-42254) Kotlin/Native cache-disable workaround automatically in `addIosTargetsWithXcFramework`
 

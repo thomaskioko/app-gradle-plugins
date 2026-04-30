@@ -85,16 +85,16 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
 
     private fun Project.configureMultiplatformTests() {
         kotlinMultiplatform {
-            targets.withType(KotlinTargetWithTests::class.java).configureEach { target ->
-                target.compilations.configureEach { compilation ->
+            targets.withType(KotlinTargetWithTests::class.java).configureEach { kmpTarget ->
+                kmpTarget.compilations.configureEach { compilation ->
                     if (compilation.name.contains("test", ignoreCase = true)) {
-                        val aggregateTaskName = when (target.name) {
+                        val aggregateTaskName = when (kmpTarget.name) {
                             "iosSimulatorArm64" -> BasePlugin.IOS_TEST
                             else -> BasePlugin.LINUX_TEST
                         }
-                        val testTaskName = "${target.name}${compilation.name.capitalizeFirst()}"
-                        tasks.named(aggregateTaskName).configure {
-                            it.dependsOn(tasks.named(testTaskName))
+                        val testTaskName = "${kmpTarget.name}${compilation.name.capitalizeFirst()}"
+                        rootProject.tasks.named(aggregateTaskName).configure {
+                            it.dependsOn("${path}:$testTaskName")
                         }
                     }
                 }
