@@ -31,7 +31,9 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
             extensions.findByType(KotlinMultiplatformAndroidLibraryTarget::class.java)?.apply {
                 configureCommonAndroid(target)
 
-                if (target.file("src/commonTest").exists()) {
+                val hasCommonTest = target.file("src/commonTest").exists()
+                val hasAndroidHostTest = target.file("src/androidHostTest").exists()
+                if (hasCommonTest || hasAndroidHostTest) {
                     withHostTest {
                         isIncludeAndroidResources = true
                     }

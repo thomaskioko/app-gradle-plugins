@@ -24,8 +24,52 @@ public abstract class AndroidExtension(protected val project: Project) {
     internal var androidTestsEnabled: Boolean = false
         private set
 
-    public fun enableAndroidTests() {
+    /**
+     * Opts a module into instrumentation tests and applies the project-wide test orchestrator
+     * conventions: animations off, ANDROIDX_TEST_ORCHESTRATOR execution, and an
+     * `androidTestUtil` dependency on `androidx-test-orchestrator` (resolved from the consumer's
+     * version catalog).
+     *
+     * @param testInstrumentationRunner Fully-qualified class name applied to
+     *   `defaultConfig.testInstrumentationRunner`. `null` leaves any existing value untouched.
+     * @param clearPackageData Pass-through to the orchestrator's `clearPackageData` runner argument.
+     *   `true` runs `pm clear <pkg>` between tests so each test starts from a fresh app state.
+     */
+    public fun enableAndroidTests(
+        testInstrumentationRunner: String? = null,
+        clearPackageData: Boolean = true,
+    ) {
         androidTestsEnabled = true
+
+        project.dependencies.add(
+            "androidTestUtil",
+            project.getDependency("androidx-test-orchestrator"),
+        )
+
+        project.android {
+            if (testInstrumentationRunner != null) {
+                defaultConfig.testInstrumentationRunner = testInstrumentationRunner
+            }
+            defaultConfig.testInstrumentationRunnerArguments["clearPackageData"] = clearPackageData.toString()
+        }
+
+        val configureTestOrchestrator: TestOptions.() -> Unit = {
+            animationsDisabled = true
+            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        }
+
+        when {
+            project.plugins.hasPlugin("com.android.application") ->
+                project.androidApp { testOptions(configureTestOrchestrator) }
+
+            project.plugins.hasPlugin("com.android.library") ->
+                project.androidLibrary { testOptions(configureTestOrchestrator) }
+
+            project.plugins.hasPlugin("com.android.test") ->
+                project.extensions.configure(TestExtension::class.java) {
+                    it.testOptions(configureTestOrchestrator)
+                }
+        }
     }
 
     public fun minSdkVersion(minSdkVersion: Int?) {
