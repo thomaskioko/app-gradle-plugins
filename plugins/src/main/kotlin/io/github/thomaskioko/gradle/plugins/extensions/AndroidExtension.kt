@@ -6,19 +6,19 @@ import com.android.build.api.dsl.ApplicationAndroidResources
 import com.android.build.api.dsl.LibraryAndroidResources
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ManagedVirtualDevice
-import com.android.build.api.dsl.TestExtension
 import com.android.build.api.dsl.TestOptions
 import com.android.build.api.variant.HasDeviceTests
 import com.android.build.api.variant.HasHostTests
+import io.github.thomaskioko.gradle.plugins.setup.configureTestOptions
+import io.github.thomaskioko.gradle.plugins.setup.setupCompose
 import io.github.thomaskioko.gradle.plugins.utils.android
-import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
-import io.github.thomaskioko.gradle.plugins.utils.setupCompose
 import org.gradle.api.Project
 
+@ScaffoldDsl
 public abstract class AndroidExtension(protected val project: Project) {
 
     internal var androidTestsEnabled: Boolean = false
@@ -53,22 +53,9 @@ public abstract class AndroidExtension(protected val project: Project) {
             defaultConfig.testInstrumentationRunnerArguments["clearPackageData"] = clearPackageData.toString()
         }
 
-        val configureTestOrchestrator: TestOptions.() -> Unit = {
+        project.configureTestOptions {
             animationsDisabled = true
             execution = "ANDROIDX_TEST_ORCHESTRATOR"
-        }
-
-        when {
-            project.plugins.hasPlugin("com.android.application") ->
-                project.androidApp { testOptions(configureTestOrchestrator) }
-
-            project.plugins.hasPlugin("com.android.library") ->
-                project.androidLibrary { testOptions(configureTestOrchestrator) }
-
-            project.plugins.hasPlugin("com.android.test") ->
-                project.extensions.configure(TestExtension::class.java) {
-                    it.testOptions(configureTestOrchestrator)
-                }
         }
     }
 
@@ -201,7 +188,7 @@ public abstract class AndroidExtension(protected val project: Project) {
         apiLevel: Int = 34,
         systemImageSource: String = defaultSystemImageSource(),
     ) {
-        val configureManagedDevices: TestOptions.() -> Unit = {
+        project.configureTestOptions {
             managedDevices {
                 allDevices.register(deviceName, ManagedVirtualDevice::class.java) {
                     it.device = device
@@ -209,21 +196,6 @@ public abstract class AndroidExtension(protected val project: Project) {
                     it.systemImageSource = systemImageSource
                 }
             }
-        }
-
-        when {
-            project.plugins.hasPlugin("com.android.application") ->
-                project.androidApp { testOptions(configureManagedDevices) }
-
-            project.plugins.hasPlugin("com.android.library") ->
-                project.androidLibrary { testOptions(configureManagedDevices) }
-
-            project.plugins.hasPlugin("com.android.test") ->
-                project.extensions.configure(TestExtension::class.java) {
-                    it.testOptions(
-                        configureManagedDevices,
-                    )
-                }
         }
     }
 

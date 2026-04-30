@@ -2,70 +2,12 @@ package io.github.thomaskioko.gradle.plugins
 
 import com.autonomousapps.DependencyAnalysisExtension
 import com.osacky.doctor.DoctorExtension
-import io.github.thomaskioko.gradle.plugins.DependencyExclusions.incorrectConfiguration
-import io.github.thomaskioko.gradle.plugins.DependencyExclusions.unusedDependencies
-import io.github.thomaskioko.gradle.plugins.DependencyExclusions.usedTransitive
-import io.github.thomaskioko.gradle.plugins.utils.booleanProperty
+import io.github.thomaskioko.gradle.plugins.analysis.AnalysisExclusions
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 import org.gradle.jvm.toolchain.JvmVendorSpec
-
-/**
- * Dependency exclusion lists for dependency analysis plugin.
- * Extracted as constants to avoid recreating these lists for each project configuration.
- */
-private object DependencyExclusions {
-    val incorrectConfiguration = listOf(
-        "org.jetbrains.kotlin:kotlin-stdlib",
-        "androidx.core:core-ktx",
-        "androidx.lifecycle:lifecycle-runtime-ktx",
-        "io.coil-kt:coil-compose",
-    )
-
-    val unusedDependencies = listOf(
-        "io.coil-kt:coil-compose",
-        "io.coil-kt:coil-compose-base",
-        "androidx.compose.foundation:foundation",
-        "androidx.compose.material:material",
-    )
-
-    val usedTransitive = listOf(
-        // Common Kotlin dependencies
-        "org.jetbrains.kotlin:kotlin-stdlib",
-        // Common Compose dependencies
-        "androidx.compose.material:material",
-        "androidx.compose.animation:animation",
-        "androidx.compose.material:material-icons-core",
-        "androidx.compose.ui:ui-tooling-preview",
-        "androidx.compose.ui:ui",
-        // Common libraries
-        "androidx.lifecycle:lifecycle-runtime-compose",
-        "androidx.lifecycle:lifecycle-runtime",
-        "org.jetbrains.kotlinx:kotlinx-collections-immutable",
-        "org.jetbrains.kotlinx:kotlinx-coroutines-core",
-        "dev.icerock.moko:resources",
-        "dev.icerock.moko:resources-compose",
-        "androidx.compose.material:material-icons-extended",
-        // Common Android libraries
-        "androidx.activity:activity",
-        "androidx.paging:paging-common",
-        "androidx.sqlite:sqlite",
-        "androidx.datastore:datastore-core",
-        // Additional dependencies from the report
-        "com.squareup.okhttp3:okhttp",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json",
-        "app.cash.sqldelight:android-driver",
-        "app.cash.sqldelight:runtime",
-        "app.cash.sqldelight:sqlite-driver",
-        "com.arkivanov.decompose:decompose",
-        "androidx.paging:paging-common",
-        // Common test dependencies
-        "junit:junit",
-        "androidx.test.ext:junit",
-        "io.kotest:kotest-assertions-shared",
-    )
-}
 
 /**
  * `RootPlugin` is a base Gradle plugin that configures common settings for all subprojects.
@@ -78,6 +20,7 @@ public abstract class RootPlugin : Plugin<Project> {
 
         plugins.apply("com.autonomousapps.dependency-analysis")
 
+        scaffoldProperties()
         configureAggregateTestTasks()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
@@ -135,7 +78,7 @@ public abstract class RootPlugin : Plugin<Project> {
                             /**
                              * Fail on any `JAVA_HOME` issues.
                              */
-                            failOnError.set(booleanProperty("java.toolchains.strict", false))
+                            failOnError.set(scaffoldProperties().javaToolchainsStrict)
                         }
                     }
                 }
@@ -154,7 +97,7 @@ public abstract class RootPlugin : Plugin<Project> {
                     }
 
                     project.onIncorrectConfiguration {
-                        it.exclude(*incorrectConfiguration.toTypedArray())
+                        it.exclude(*AnalysisExclusions.incorrectConfiguration.toTypedArray())
                     }
 
                     project.onRedundantPlugins {
@@ -162,12 +105,12 @@ public abstract class RootPlugin : Plugin<Project> {
                     }
 
                     project.onUnusedDependencies {
-                        it.exclude(*unusedDependencies.toTypedArray())
+                        it.exclude(*AnalysisExclusions.unusedDependencies.toTypedArray())
                     }
 
                     project.onUsedTransitiveDependencies {
                         it.severity("warn")
-                        it.exclude(*usedTransitive.toTypedArray())
+                        it.exclude(*AnalysisExclusions.usedTransitive.toTypedArray())
                     }
                 }
             }

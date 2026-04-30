@@ -2,11 +2,12 @@ package io.github.thomaskioko.gradle.plugins
 
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.CompileOptions
-import com.android.build.api.dsl.TestExtension
-import com.android.build.api.dsl.TestOptions
 import com.android.build.api.variant.HasAndroidTestBuilder
 import com.android.build.api.variant.HasUnitTestBuilder
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
+import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
+import io.github.thomaskioko.gradle.plugins.setup.configureTestOptions
+import io.github.thomaskioko.gradle.plugins.setup.setupTests
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.android
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
@@ -14,8 +15,6 @@ import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.androidLibrary
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.capitalizeFirst
-import io.github.thomaskioko.gradle.plugins.utils.configureCommonAndroid
-import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidLibraryTasks
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
@@ -31,8 +30,6 @@ public abstract class AndroidPlugin : Plugin<Project> {
             target.plugins.apply("com.android.library")
         }
         target.plugins.apply(BasePlugin::class.java)
-        //TODO:: Move back to base plugin
-        target.plugins.apply("com.autonomousapps.dependency-analysis")
 
         target.baseExtension.extensions.create("android", AndroidExtension::class.java)
 
@@ -45,28 +42,16 @@ public abstract class AndroidPlugin : Plugin<Project> {
     }
 
     private fun Project.configureUnitTests() {
-        val configureTestResources: TestOptions.() -> Unit = {
+        configureTestOptions {
             unitTests.isIncludeAndroidResources = true
         }
 
-        when {
-            project.plugins.hasPlugin("com.android.application") ->
-                project.androidApp { testOptions(configureTestResources) }
-
-            project.plugins.hasPlugin("com.android.library") ->
-                project.androidLibrary {
-                    testOptions {
-                        configureTestResources()
-                        unitTests.all(Test::defaultTestSetup)
-                    }
+        if (plugins.hasPlugin("com.android.library")) {
+            androidLibrary {
+                testOptions {
+                    unitTests.all(Test::setupTests)
                 }
-
-            project.plugins.hasPlugin("com.android.test") ->
-                project.extensions.configure(TestExtension::class.java) {
-                    it.testOptions(
-                        configureTestResources,
-                    )
-                }
+            }
         }
 
         androidComponents {
@@ -78,8 +63,8 @@ public abstract class AndroidPlugin : Plugin<Project> {
 
             onVariants { variant ->
                 if (variant.buildType == "debug") {
-                    tasks.named(BasePlugin.LINUX_TEST).configure { task ->
-                        task.dependsOn("test${variant.name.capitalizeFirst()}UnitTest")
+                    rootProject.tasks.named(BasePlugin.LINUX_TEST).configure { task ->
+                        task.dependsOn("${path}:test${variant.name.capitalizeFirst()}UnitTest")
                     }
                 }
             }
