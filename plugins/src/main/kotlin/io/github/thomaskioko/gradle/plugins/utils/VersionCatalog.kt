@@ -44,6 +44,11 @@ internal fun Project.getDependency(name: String): Provider<MinimalExternalModule
 internal fun Project.getBundleDependencies(name: String): Provider<ExternalModuleDependencyBundle> = libs.findBundle(name).orElseThrow { NoSuchElementException("Could not find library $name") }
 
 /**
+ * Retrieves a library bundle from the version catalog by its alias, or `null` if the bundle is not declared.
+ */
+internal fun Project.getBundleDependenciesOrNull(name: String): Provider<ExternalModuleDependencyBundle>? = libs.findBundle(name).orElseGet { null }
+
+/**
  * Retrieves a dependency bundle from the `libs` catalog by its name, or `null` if the bundle is not found.
  */
 internal fun Project.getDependencyOrNull(name: String): Provider<MinimalExternalModuleDependency>? = libs.findLibrary(name).orElseGet { null }
