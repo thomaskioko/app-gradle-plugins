@@ -1,8 +1,8 @@
-package io.github.thomaskioko.gradle.plugins.utils
+package io.github.thomaskioko.gradle.plugins.setup
 
 import org.gradle.api.tasks.testing.Test
 
-internal fun Test.defaultTestSetup() {
+internal fun Test.setupTests() {
     val projectNameProvider = project.provider {
         project.path
             .replace("projects", "")
