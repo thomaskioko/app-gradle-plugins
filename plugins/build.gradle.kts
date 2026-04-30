@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.Test
+import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -9,6 +11,41 @@ plugins {
 
 group = property("GROUP").toString()
 version = property("VERSION_NAME").toString()
+
+val functionalTest = sourceSets.create("functionalTest")
+
+configurations[functionalTest.implementationConfigurationName]
+    .extendsFrom(configurations.testImplementation.get())
+configurations[functionalTest.runtimeOnlyConfigurationName]
+    .extendsFrom(configurations.testRuntimeOnly.get())
+
+val functionalTestTask = tasks.register<Test>("functionalTest") {
+    description = "Runs functional tests via Gradle TestKit against the built plugin classpath."
+    group = "verification"
+    testClassesDirs = functionalTest.output.classesDirs
+    classpath = functionalTest.runtimeClasspath
+    useJUnit()
+    shouldRunAfter(tasks.named("test"))
+    systemProperty(
+        "io.github.thomaskioko.gradle.plugins.fixtures.dir",
+        file("src/functionalTest/resources/fixtures").absolutePath,
+    )
+}
+
+val testPluginExtras: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+dependencies {
+    testPluginExtras(libs.spotless.gradle.plugin)
+    testPluginExtras(libs.metro.gradle.plugin)
+    testPluginExtras(libs.baselineprofile.gradlePlugin)
+}
+
+tasks.withType<PluginUnderTestMetadata>().configureEach {
+    pluginClasspath.from(testPluginExtras)
+}
 
 tasks {
     validatePlugins {
@@ -51,9 +88,13 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(gradleTestKit())
+
+    "functionalTestImplementation"(libs.junit)
 }
 
 gradlePlugin {
+    testSourceSets(functionalTest)
+
     plugins.create("appPlugin") {
         id = "io.github.thomaskioko.gradle.plugins.app"
         implementationClass = "io.github.thomaskioko.gradle.plugins.AppPlugin"
