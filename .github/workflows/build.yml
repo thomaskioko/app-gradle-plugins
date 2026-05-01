@@ -75,7 +75,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Run functional tests
         run: ./gradlew :plugins:functionalTest --stacktrace
