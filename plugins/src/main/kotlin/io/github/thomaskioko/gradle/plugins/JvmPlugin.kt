@@ -1,8 +1,8 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.JvmExtension
+import io.github.thomaskioko.gradle.plugins.setup.setupTests
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
-import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
 import io.github.thomaskioko.gradle.plugins.utils.disableKotlinLibraryTasks
 import io.github.thomaskioko.gradle.plugins.utils.java
 import io.github.thomaskioko.gradle.plugins.utils.javaTargetVersion
@@ -27,10 +27,10 @@ public abstract class JvmPlugin : Plugin<Project> {
             it.options.release.set(target.javaTargetVersion.get().majorVersion.toInt())
         }
 
-        target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
+        target.tasks.withType(Test::class.java).configureEach(Test::setupTests)
 
-        target.tasks.named(BasePlugin.LINUX_TEST).configure {
-            it.dependsOn(target.tasks.named("test"))
+        target.rootProject.tasks.named(BasePlugin.LINUX_TEST).configure {
+            it.dependsOn("${target.path}:test")
         }
 
         target.disableKotlinLibraryTasks()

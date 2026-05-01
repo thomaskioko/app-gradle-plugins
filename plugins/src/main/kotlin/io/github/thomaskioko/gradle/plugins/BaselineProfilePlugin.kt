@@ -4,8 +4,8 @@ import androidx.baselineprofile.gradle.producer.BaselineProfileProducerExtension
 import com.android.build.api.dsl.TestExtension
 import com.android.build.api.variant.TestAndroidComponentsExtension
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
+import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
-import io.github.thomaskioko.gradle.plugins.utils.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import org.gradle.api.Plugin
 import org.gradle.api.Project

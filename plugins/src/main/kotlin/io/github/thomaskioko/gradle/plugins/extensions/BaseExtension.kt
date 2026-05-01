@@ -2,15 +2,11 @@ package io.github.thomaskioko.gradle.plugins.extensions
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
-import dev.zacsweers.metro.gradle.ExperimentalMetroGradleApi
-import dev.zacsweers.metro.gradle.MetroPluginExtension
-import io.github.thomaskioko.gradle.plugins.utils.addBundleImplementationDependency
-import io.github.thomaskioko.gradle.plugins.utils.addImplementationDependency
-import io.github.thomaskioko.gradle.plugins.utils.addKspDependencyForAllTargets
+import io.github.thomaskioko.gradle.plugins.setup.setupCodegen
+import io.github.thomaskioko.gradle.plugins.setup.setupKotlinInject
+import io.github.thomaskioko.gradle.plugins.setup.setupMetro
+import io.github.thomaskioko.gradle.plugins.setup.setupSerialization
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
-import io.github.thomaskioko.gradle.plugins.utils.configureProcessing
-import io.github.thomaskioko.gradle.plugins.utils.getBundleDependencies
-import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
 import io.github.thomaskioko.gradle.plugins.utils.jvmCompilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
@@ -23,6 +19,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 import java.net.URI
 
+@ScaffoldDsl
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
     public fun optIn(vararg classes: String) {
         project.kotlin {
@@ -32,40 +29,20 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
-    @OptIn(ExperimentalMetroGradleApi::class)
     public fun useMetro() {
-        project.plugins.apply("dev.zacsweers.metro")
-
-        project.addImplementationDependency(project.getDependency("metro-runtime"))
-
-        project.extensions.configure(MetroPluginExtension::class.java) {
-            it.generateContributionProviders.set(false) //Temporarily disable
-        }
+        project.setupMetro()
     }
 
     public fun useSerialization() {
-        project.plugins.apply("org.jetbrains.kotlin.plugin.serialization")
-
-        project.addImplementationDependency(project.getDependency("kotlin-serialization-core"))
+        project.setupSerialization()
     }
 
     public fun useKotlinInject() {
-        project.configureProcessing()
-
-        project.addBundleImplementationDependency(project.getBundleDependencies("kotlinInject"))
-        project.addKspDependencyForAllTargets(project.getDependency("kotlinInject-compiler"))
-        project.addKspDependencyForAllTargets(project.getDependency("kotlinInject-anvil-compiler"))
+        project.setupKotlinInject()
     }
 
     public fun useCodegen() {
-        // Codegen relies on Metro's annotation processing, so we can apply the Metro plugin and configure it first
-        if(!project.plugins.hasPlugin("dev.zacsweers.metro")) {
-            useMetro()
-        }
-
-        project.configureProcessing()
-        project.addImplementationDependency(project.getDependency("codegen-annotations"))
-        project.addKspDependencyForAllTargets(project.getDependency("codegen-processor"))
+        project.setupCodegen()
     }
 
     public fun android(configure: AndroidExtension.() -> Unit) {

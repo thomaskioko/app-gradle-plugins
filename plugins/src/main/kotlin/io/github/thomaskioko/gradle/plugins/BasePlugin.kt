@@ -1,6 +1,7 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.getVersionOrNull
 import io.github.thomaskioko.gradle.plugins.utils.java
@@ -8,6 +9,7 @@ import io.github.thomaskioko.gradle.plugins.utils.javaTarget
 import io.github.thomaskioko.gradle.plugins.utils.javaToolchainVersion
 import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
@@ -22,11 +24,15 @@ public abstract class BasePlugin : Plugin<Project> {
         public const val LINUX_TEST: String = "linuxTest"
         public const val IOS_TEST: String = "iosTest"
         public const val ALL_TEST: String = "ciTest"
+        internal const val ROOT_PLUGIN_ID: String = "io.github.thomaskioko.gradle.plugins.root"
     }
 
     override fun apply(target: Project) {
+        requireRootPluginApplied(target)
+
         target.plugins.apply("io.github.thomaskioko.gradle.plugins.spotless")
 
+        target.scaffoldProperties()
         target.extensions.create("scaffold", BaseExtension::class.java)
 
         target.makeJarsReproducible()
@@ -35,17 +41,18 @@ public abstract class BasePlugin : Plugin<Project> {
         target.configureTests()
     }
 
+    private fun requireRootPluginApplied(target: Project) {
+        if (!target.rootProject.plugins.hasPlugin(ROOT_PLUGIN_ID)) {
+            throw GradleException(
+                "$ROOT_PLUGIN_ID must be applied to the root project. " +
+                    "Add `id(\"$ROOT_PLUGIN_ID\")` to the root build.gradle.kts plugins block.",
+            )
+        }
+    }
+
     private fun Project.configureTests() {
         tasks.withType(Test::class.java).configureEach {
             it.failOnNoDiscoveredTests.set(false)
-        }
-
-        val linuxTest = tasks.register(LINUX_TEST)
-        val macTest = tasks.register(IOS_TEST)
-
-        tasks.register(ALL_TEST) {
-            it.dependsOn(linuxTest)
-            it.dependsOn(macTest)
         }
     }
 

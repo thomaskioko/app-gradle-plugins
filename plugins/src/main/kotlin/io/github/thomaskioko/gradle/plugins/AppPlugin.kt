@@ -1,13 +1,14 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
+import io.github.thomaskioko.gradle.plugins.properties.PropertyKeys
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
 import io.github.thomaskioko.gradle.plugins.utils.disableAndroidApplicationTasks
 import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import io.github.thomaskioko.gradle.plugins.utils.parseKeyValueFile
-import io.github.thomaskioko.gradle.plugins.utils.stringProperty
 import io.github.thomaskioko.gradle.tasks.release.BumpVersionTask
 import io.github.thomaskioko.gradle.tasks.release.ReleaseTask
 import org.gradle.api.Plugin
@@ -20,12 +21,12 @@ public abstract class AppPlugin : Plugin<Project> {
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
 
+        val properties = target.scaffoldProperties()
+
         val versionFile = target.rootProject.file("version.txt")
         target.tasks.register("bumpVersion", BumpVersionTask::class.java) {
             it.versionFile.set(versionFile)
-            it.bumpType.convention(
-                target.stringProperty("type").orElse("minor"),
-            )
+            it.bumpType.convention(properties.releaseType)
         }
 
         val changelogFile = target.rootProject.file("CHANGELOG.md")
@@ -35,18 +36,10 @@ public abstract class AppPlugin : Plugin<Project> {
             it.changelogFile.set(changelogFile)
             it.cliffConfigFile.set(cliffConfig)
             it.projectDir.set(target.rootProject.layout.projectDirectory)
-            it.bumpType.convention(
-                target.stringProperty("type").orElse("minor"),
-            )
-            it.beta.convention(
-                target.stringProperty("beta").map { true }.orElse(false),
-            )
-            it.interactive.convention(
-                target.stringProperty("i").map { true }.orElse(false),
-            )
-            it.dryRun.convention(
-                target.stringProperty("dryRun").map { true }.orElse(false),
-            )
+            it.bumpType.convention(properties.releaseType)
+            it.beta.convention(properties.releaseBeta)
+            it.interactive.convention(properties.releaseInteractive)
+            it.dryRun.convention(properties.releaseDryRun)
         }
 
         target.androidApp {
@@ -62,7 +55,7 @@ public abstract class AppPlugin : Plugin<Project> {
                 "BUILD_NUMBER not found or not a valid integer in version.txt."
             }
 
-            val versionSuffix = target.stringProperty("app.versionSuffix").orElse("-beta").get()
+            val versionSuffix = properties.appVersionSuffix.get()
 
             defaultConfig {
                 versionCode = resolvedBuildNumber
@@ -81,15 +74,12 @@ public abstract class AppPlugin : Plugin<Project> {
                     it.enableV4Signing = true
                 }
 
-                val keyStoreFile = target.stringProperty("releaseStoreFile")
+                val keyStoreFile = properties.releaseStoreFile
                 if (keyStoreFile.isPresent) {
-                    val requiredProps = listOf(
-                        "releaseStorePassword",
-                        "releaseKeyAlias",
-                        "releaseKeyPassword",
-                    )
-                    val missingProps = requiredProps.filter {
-                        !target.stringProperty(it).isPresent
+                    val missingProps = buildList {
+                        if (!properties.releaseStorePassword.isPresent) add(PropertyKeys.RELEASE_STORE_PASSWORD)
+                        if (!properties.releaseKeyAlias.isPresent) add(PropertyKeys.RELEASE_KEY_ALIAS)
+                        if (!properties.releaseKeyPassword.isPresent) add(PropertyKeys.RELEASE_KEY_PASSWORD)
                     }
 
                     require(missingProps.isEmpty()) {
@@ -98,9 +88,9 @@ public abstract class AppPlugin : Plugin<Project> {
 
                     register("release") {
                         it.storeFile = target.rootProject.file(keyStoreFile.get())
-                        it.storePassword = target.stringProperty("releaseStorePassword").get()
-                        it.keyAlias = target.stringProperty("releaseKeyAlias").get()
-                        it.keyPassword = target.stringProperty("releaseKeyPassword").get()
+                        it.storePassword = properties.releaseStorePassword.get()
+                        it.keyAlias = properties.releaseKeyAlias.get()
+                        it.keyPassword = properties.releaseKeyPassword.get()
                         it.enableV3Signing = true
                         it.enableV4Signing = true
                     }

@@ -1,13 +1,16 @@
-package io.github.thomaskioko.gradle.plugins.utils
+package io.github.thomaskioko.gradle.plugins.setup
 
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
+import io.github.thomaskioko.gradle.plugins.utils.composeCompiler
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 internal fun Project.setupCompose() {
     plugins.apply("org.jetbrains.kotlin.plugin.compose")
 
-    val enableMetrics = project.booleanProperty("compose.enableCompilerMetrics", false)
-    val enableReports = project.booleanProperty("compose.enableCompilerReports", false)
+    val properties = scaffoldProperties()
+    val enableMetrics = properties.composeMetrics
+    val enableReports = properties.composeReports
 
     composeCompiler {
         // Needed for Layout Inspector to be able to see all of the nodes in the component tree:
@@ -24,7 +27,7 @@ internal fun Project.setupCompose() {
             reportsDestination.set(reportsFolder)
         }
 
-        if (project.providers.gradleProperty("compose.enableComposeCompilerReports").isPresent) {
+        if (properties.composeCompilerReports.isPresent) {
             val composeReports = layout.buildDirectory.map { it.dir("reports").dir("compose") }
 
             if (!enableReports.get()) {

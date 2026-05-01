@@ -1,0 +1,6 @@
+[versions]
+java-target = "21"
+java-toolchain = "25"
+ktlint = "1.4.0"
+android-compile = "35"
+android-min = "24"

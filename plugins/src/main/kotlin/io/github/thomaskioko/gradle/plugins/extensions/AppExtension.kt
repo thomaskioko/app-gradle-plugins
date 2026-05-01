@@ -4,6 +4,7 @@ import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import org.gradle.api.Project
 import java.io.File
 
+@ScaffoldDsl
 public abstract class AppExtension(private val project: Project) {
     public fun applicationId(applicationId: String) {
         project.androidApp {

@@ -1,10 +1,10 @@
 package io.github.thomaskioko.gradle.plugins
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
+import io.github.thomaskioko.gradle.plugins.setup.setupTests
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
-import io.github.thomaskioko.gradle.plugins.utils.configureCommonAndroid
-import io.github.thomaskioko.gradle.plugins.utils.defaultTestSetup
 import io.github.thomaskioko.gradle.plugins.utils.disableMultiplatformTasks
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getPackageNameProvider
@@ -76,7 +76,7 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
             }
         }
 
-        target.tasks.withType(Test::class.java).configureEach(Test::defaultTestSetup)
+        target.tasks.withType(Test::class.java).configureEach(Test::setupTests)
         target.configureMultiplatformTests()
         target.disableMultiplatformTasks()
 
@@ -93,8 +93,8 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
                             else -> BasePlugin.LINUX_TEST
                         }
                         val testTaskName = "${target.name}${compilation.name.capitalizeFirst()}"
-                        tasks.named(aggregateTaskName).configure {
-                            it.dependsOn(tasks.named(testTaskName))
+                        rootProject.tasks.named(aggregateTaskName).configure {
+                            it.dependsOn("${path}:$testTaskName")
                         }
                     }
                 }

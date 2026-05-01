@@ -1,14 +1,37 @@
-package io.github.thomaskioko.gradle.plugins.utils
+package io.github.thomaskioko.gradle.plugins.setup
 
 import com.android.build.api.dsl.Lint
+import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
+import io.github.thomaskioko.gradle.plugins.utils.android
+import io.github.thomaskioko.gradle.plugins.utils.getBundleDependenciesOrNull
+import io.github.thomaskioko.gradle.plugins.utils.getVersion
+import io.github.thomaskioko.gradle.plugins.utils.pathBasedAndroidNamespace
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 
-internal fun Project.configureStandaloneLint() {
+internal fun Project.setupStandaloneLint() {
     extensions.configure(Lint::class.java) {
         it.configure(project)
     }
+}
+
+internal fun Project.configureCommonAndroid() {
+    android {
+        namespace = pathBasedAndroidNamespace()
+        compileSdk = getVersion("android-compile").toInt()
+        defaultConfig.minSdk = getVersion("android-min").toInt()
+        lint.configure(project)
+    }
+}
+
+@Suppress("UnstableApiUsage")
+internal fun KotlinMultiplatformAndroidLibraryTarget.configureCommonAndroid(project: Project) {
+    namespace = project.pathBasedAndroidNamespace()
+    compileSdk = project.getVersion("android-compile").toInt()
+    minSdk = project.getVersion("android-min").toInt()
+    lint.configure(project)
 }
 
 internal fun Lint.configure(project: Project) {
@@ -37,7 +60,7 @@ internal fun Lint.configure(project: Project) {
     textReport = true
     textOutput = project.reportsFile("lint-result.txt").get().asFile
 
-    project.dependencies.addIfNotNull("lintChecks", project.getBundleDependencies("lint"))
+    project.dependencies.addIfNotNull("lintChecks", project.getBundleDependenciesOrNull("lint"))
 }
 
 private fun Project.reportsFile(name: String): Provider<RegularFile> {

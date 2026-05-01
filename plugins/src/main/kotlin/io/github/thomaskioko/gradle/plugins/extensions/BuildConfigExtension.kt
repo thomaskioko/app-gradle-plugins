@@ -5,6 +5,7 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import java.util.Properties
 
+@ScaffoldDsl
 public abstract class BuildConfigExtension(private val project: Project) {
 
     /**

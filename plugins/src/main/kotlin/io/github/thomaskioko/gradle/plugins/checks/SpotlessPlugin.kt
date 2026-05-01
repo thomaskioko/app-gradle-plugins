@@ -50,16 +50,4 @@ public class SpotlessPlugin : Plugin<Project> {
             else -> false
         }
     }
-
-    private fun shouldConfigureXmlFormatting(project: Project): Boolean {
-        return when {
-            // Skip XML formatting for modules that typically don't have source XML files
-            project.name == "benchmark" -> false
-            project.path.contains(":benchmark") -> false
-            // Only include XML formatting for Android modules that might have layouts/resources
-            project.pluginManager.hasPlugin("com.android.application") -> true
-            project.pluginManager.hasPlugin("com.android.library") -> true
-            else -> false
-        }
-    }
 }
