@@ -36,7 +36,14 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Build plugins
-        run: ./gradlew build --stacktrace
+        run: |
+          ./gradlew build \
+            :plugins:build \
+            :codegen:annotations:build \
+            :codegen:processor:build \
+            :codegen:processor-test:build \
+            :lint-rules:build \
+            --stacktrace
 
       - name: Upload build reports
         if: failure()
