@@ -69,7 +69,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    needs: build
+    needs: static-analysis
 
     steps:
       - name: Checkout
