@@ -1,35 +1,66 @@
 # Get started
 
-Codegen is a KSP processor that eliminates the per-destination DI boilerplate for screens, tabs, modal sheets (bottom sheets, dialogs, or overlays presented via Decompose's `childSlot`), and the Android platform-side renderer bindings that wire composables into the root Compose stack. A single annotation replaces a manually authored Metro `@GraphExtension` plus binding, or a manually authored `ScreenContent` / `SheetContent` multibinding contribution.
+The navigation codegen is a KSP processor that eliminates the Metro dependency injection
+boilerplate associated with Decompose-based navigation. It covers screen destinations, modal
+overlays presented through Decompose's slot mechanism, tab roots, and the Android renderer
+bindings that join composables to the navigation host.
+
+A single annotation on the consumer's presenter or composable replaces a manually written Metro
+`@GraphExtension`, navigation binding, or `ScreenContent` / `SheetContent` multibinding
+contribution.
 
 ## Why it exists
 
-Each root destination in a Metro + Decompose KMP app needs three artifacts written manually:
+### Why the presenter needs an annotation
 
-1. `FooRoute` in `nav/api` — the feature's public API, stays manual.
-2. `FooScreenGraph` in `presenter/di` — Metro `@GraphExtension`.
-3. `FooNavDestinationBinding` in `presenter/di` — contributes `NavDestination` + `NavRouteBinding` to the Metro multibinding.
+Each destination in a Metro plus Decompose Kotlin Multiplatform app needs three presenter side artifacts that you would otherwise write by hand:
 
-The graph and binding are mechanical and derive entirely from the presenter + route. Separately, each Android Compose screen needs a small renderer binding that contributes a `ScreenContent` (or `SheetContent`) into the activity-scope multibinding consumed by the root Compose stack. That binding is also mechanical and derives entirely from the composable + presenter type. The codegen generates all of the above from a single annotation per artifact. The route and the composable stay manual because they are the feature's public API; the route doubles as the `@GraphExtension` scope marker, and the composable is the entry point the annotation is placed on.
+1. `FooRoute` (or `FooRoot`) in `nav/api`. The feature's public API. Stays manual.
+2. `FooScreenGraph` (or `FooTabGraph`) in `presenter/di`. A Metro `@GraphExtension` scoped to the route, that exposes the presenter (or its assisted factory) to the activity graph.
+3. `FooNavDestinationBinding` in `presenter/di`. Contributes a `NavDestination<*>` factory plus a `NavRouteBinding` or `NavRootBinding` serializer entry to the activity
+   scope multibindings, so the navigator can find the destination by route type and Decompose can save and restore the back stack across process death.
 
-## Supported annotation shapes
+The graph and binding are mechanical and derive entirely from the presenter class and the route class. `@NavDestination` generates them from one annotation. The route
+stays manual because it is the feature's public API; it also doubles as the `@GraphExtension` scope marker.
 
-Five annotations cover the shapes the processor knows how to generate. See [annotations.md](annotations.md) for the full reference and [examples.md](examples.md) for concrete inputs and outputs.
+### Why the composable needs an annotation
 
-Shared-code presenter annotations (target `CLASS`, live in the KMP `presenter` module):
+The navigation host renders whatever the navigator pushes. At runtime it holds an active `RootChild` (or `SheetChild` for overlays) whose concrete presenter type is
+opaque to the host: the host is a single Compose tree at the activity root, but the active child can be any feature's presenter. To render the matching Android
+composable, the host needs a registry that maps a presenter type to a composable.
 
-1. `@NavScreen` marks a root destination (simple or parameterized). It generates a graph scoped to the route plus a binding that contributes `NavDestination` and `NavRouteBinding` into the Metro multibindings. The processor auto-detects `@AssistedInject` and a nested `@AssistedFactory` to switch between the simple and parameterized generation paths.
-2. `@TabScreen` marks a home tab destination. It generates a graph scoped to the config plus a binding that contributes `TabDestination`. No `NavRouteBinding` is emitted because the host feature owns its own config serialization.
-3. `@NavSheet` marks a modal sheet destination, a bottom sheet, dialog, or overlay presented on top of the current destination through Decompose's `childSlot`. It generates a graph scoped to the config plus a binding that contributes `SheetChildFactory` and `SheetConfigBinding`.
+That registry is the `Set<ScreenContent>` (and `Set<SheetContent>`) multibinding. Each entry pairs a `matches` predicate (does this entry handle the active child?) with a
+`content` lambda (here is how to render it). The host iterates the set, picks the entry whose predicate returns `true`, and invokes its `content` lambda.
 
-Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` module):
+Without `@ScreenUi` or `@SheetUi`, every feature has to write a `ScreenContent` (or `SheetContent`) binding by hand: a `@Provides @IntoSet` function that constructs the
+right predicate (`(it as? ScreenDestination<*>)?.presenter is FooPresenter`) and the right content lambda (cast the child, cast its presenter, invoke the composable).
+That binding is mechanical and derives entirely from the composable function reference and the presenter type, so `@ScreenUi` and `@SheetUi` generate it instead. The
+composable itself stays manual because it is the feature's UI; the annotation marks the entry point the codegen reads to produce the registry entry.
 
-4. `@ScreenUi` marks a `@Composable` screen function as the Android-side renderer for a root-stack presenter. It generates a `@BindingContainer` object contributing a `ScreenContent` into `Set<ScreenContent>` so the root Compose stack can iterate the set and dispatch to the right screen.
-5. `@SheetUi` marks a `@Composable` sheet function as the Android-side renderer for a modal sheet presenter. Parallel to `@ScreenUi` but contributes a `SheetContent` into `Set<SheetContent>`.
+For how the processor turns each annotation into Metro plus Decompose code, see [architecture/index.md](architecture/index.md).
+
+## Supported annotations
+
+Three annotations cover every variant the processor knows how to generate. See [annotations.md](annotations.md) for the full reference and [examples.md](examples.md) for
+concrete inputs and outputs.
+
+The shared code presenter annotation (target `CLASS`, lives in the Kotlin Multiplatform `presenter` module):
+
+1. `@NavDestination(route, parentScope, kind)` is one annotation for every navigation destination. `kind` is one of `DestinationKind.SCREEN`, `OVERLAY`, or `TAB_ROOT`.
+   - `SCREEN` and `OVERLAY` generate a graph scoped to the route plus a binding that contributes `NavDestination.Screen` (or `Overlay`) and `NavRouteBinding`. The
+     processor auto-detects `@AssistedInject` with a nested `@AssistedFactory` to switch between the two presenter forms (one with no runtime parameters, one
+     parameterized).
+   - `TAB_ROOT` generates a graph scoped to the root plus a binding that contributes `NavDestination.TabRoot` and `NavRootBinding`. Plain `@Inject` only.
+
+The Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` module):
+
+2. `@ScreenUi` marks a `@Composable` function as the Android renderer for a screen presenter defined in the shared Kotlin Multiplatform layer. It generates a
+   `@BindingContainer` object that contributes a `ScreenContent` into `Set<ScreenContent>` so the navigation host can iterate the set and render the right screen.
+3. `@SheetUi` marks a `@Composable` function as the Android renderer for a modal overlay presenter. It contributes a `SheetContent` into `Set<SheetContent>`.
 
 ## Dependency
 
-1. Apply the plugin DSL. In a KMP presenter module's `build.gradle.kts`:
+1. Apply the plugin DSL. In a Kotlin Multiplatform presenter module's `build.gradle.kts`:
 
    ```kotlin
    plugins {
@@ -41,7 +72,10 @@ Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` mod
    }
    ```
 
-   Same call in an Android `ui` module when using `@ScreenUi` / `@SheetUi`:
+
+   `useCodegen()` is also the entry point in an Android `ui` module that uses `@ScreenUi` or `@SheetUi`. The Android module typically pairs it with `useCompose()` inside
+   the `android` block:
+
 
    ```kotlin
    plugins {
@@ -57,9 +91,10 @@ Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` mod
    }
    ```
 
-   `useCodegen()` is defined on `BaseExtension` in `plugins/src/main/kotlin/io/github/thomaskioko/gradle/plugins/extensions/BaseExtension.kt`. It applies `com.google.devtools.ksp`, adds `codegen-annotations` to the appropriate implementation configuration, and registers `codegen-processor` as a KSP processor for every target in the module.
+   `useCodegen()` applies the KSP plugin, adds `codegen-annotations` to the appropriate implementation configuration, and registers `codegen-processor` as a KSP processor
+   for every target in the module.
 
-2. Declare the two library entries in the consumer's `libs.versions.toml` so the DSL can resolve them via the version catalog:
+2. Declare the two library entries in the consumer's `libs.versions.toml` so the DSL can resolve them through the version catalog:
 
    ```toml
    [libraries]
@@ -69,18 +104,25 @@ Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` mod
 
 ## Basic usage
 
-Annotate the presenter (shared KMP layer):
+Annotate the presenter (shared Kotlin Multiplatform layer):
 
 ```kotlin
 @Inject
-@NavScreen(route = DebugRoute::class, parentScope = ActivityScope::class)
+@NavDestination(
+    route = DebugRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.SCREEN,
+)
 public class DebugPresenter(...) : ComponentContext by componentContext
 ```
 
-Annotate the matching composable (Android ui layer):
+Annotate the matching composable (Android `ui` layer):
 
 ```kotlin
-@ScreenUi(presenter = DebugPresenter::class, parentScope = ActivityScope::class)
+@ScreenUi(
+    presenter = DebugPresenter::class,
+    parentScope = ActivityScope::class
+)
 @Composable
 public fun DebugMenuScreen(
     presenter: DebugPresenter,
@@ -88,9 +130,75 @@ public fun DebugMenuScreen(
 ) { ... }
 ```
 
-Build the modules. KSP generates the graph + nav binding into the presenter module's `di/` package, and the `ScreenContent` binding into the ui module's `di/` package. No further wiring is required inside each module.
+Build the modules. KSP generates the graph and navigation binding into the presenter module's `di/` package, and the `ScreenContent` binding into the `ui` module's `di/`
+package. No further wiring is required inside each module.
 
-For the `@ScreenUi` / `@SheetUi` contributions to be picked up by the app's Metro graph, the app module must declare a direct `implementation` dependency on each feature `ui` module. Transitive `implementation` dependencies through a root ui module do not expose the generated `metro/hints/` classes on the app's compile classpath, and Metro will report the multibinding as unexpectedly empty at build time.
+The app module must declare a direct `implementation` dependency on each feature `ui` module, not a transitive one. A transitive `implementation` dependency through a
+root `ui` module does not put the generated bindings on the app's compile classpath. Metro then reports a build error because the `Set<ScreenContent>` (or
+`Set<SheetContent>`) multibinding is empty.
+
+## Common questions
+
+**Can I reuse one route across multiple presenters?**
+No. Each presenter has its own unique route class. The route class doubles as the graph extension's scope marker, so reusing it across presenters would mean two graphs
+sharing one scope, which Metro rejects. If you want two presenters to share a value, model it as a parameter on the route and let each route be its own type.
+
+**Can my parameterized presenter take more than one runtime parameter?**
+Not today. The processor expects exactly one `@Assisted` constructor parameter on a parameterized presenter and one matching property on the route class. If you need
+more, fold the inputs into a single value type and pass that as the assisted parameter.
+
+For example, an episode details screen that needs both a show ID and a season number does not declare two assisted parameters:
+
+```kotlin
+// Won't work. The processor reports a compile error because the presenter
+// has two @Assisted parameters.
+@AssistedInject
+@NavDestination(route = EpisodeRoute::class, parentScope = ActivityScope::class, kind = SCREEN)
+public class EpisodePresenter(
+    @Assisted private val showId: Long,
+    @Assisted private val seasonNumber: Int,
+    componentContext: ComponentContext,
+)
+
+@Serializable
+public data class EpisodeRoute(
+    public val showId: Long,
+    public val seasonNumber: Int,
+) : NavRoute
+```
+
+Wrap the two values in a single param type and assist on the wrapper:
+
+```kotlin
+@Serializable
+public data class EpisodeParam(
+    public val showId: Long,
+    public val seasonNumber: Int,
+)
+
+@AssistedInject
+@NavDestination(route = EpisodeRoute::class, parentScope = ActivityScope::class, kind = SCREEN)
+public class EpisodePresenter(
+    @Assisted private val param: EpisodeParam,
+    componentContext: ComponentContext,
+) {
+    @AssistedFactory
+    public fun interface Factory {
+        public fun create(param: EpisodeParam): EpisodePresenter
+    }
+}
+
+@Serializable
+public data class EpisodeRoute(public val param: EpisodeParam) : NavRoute
+```
+
+The route now has one property (`param`) whose type matches the presenter's one `@Assisted` parameter. Adding a multi parameter form to the codegen itself would be a
+generator change in `NavDestinationBindingGenerator.destinationBody`.
+
+**Where does state save and restore happen?**
+Each generated binding contributes a `NavRouteBinding` or `NavRootBinding` entry that pairs the route class with its `KSerializer`. The consumer's serialization layer
+iterates that multibinding to build a `SerializersModule` that Decompose uses to encode the back stack on process death and decode it on relaunch. The codegen never
+serialises anything itself; it only contributes the entries. See [architecture/consumer-contract.md](architecture/consumer-contract.md#state-save-and-restore).
 
 ## References
 
