@@ -9,7 +9,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "codegen-plugins"
+rootProject.name = "codegen"
 
 include(
     ":annotations",
