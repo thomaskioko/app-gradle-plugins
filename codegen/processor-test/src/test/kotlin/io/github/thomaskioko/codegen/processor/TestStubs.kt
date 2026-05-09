@@ -1,8 +1,27 @@
 package io.github.thomaskioko.codegen.processor
 
 /**
- * Minimal hand-rolled fakes of the consumer-project types the generator references. Bundling
- * them as test sources lets the compiler type-check the generated code in isolation.
+ * Minimal source level fakes of the consumer project types the generator references.
+ *
+ * The processor resolves type names against whatever is on the test compilation's classpath, so
+ * each test must compile alongside source files that declare the consumer's navigation
+ * primitives, the Decompose `ComponentContext`, the Metro annotations, and so on. Bundling these
+ * as test sources rather than depending on a real artifact keeps the test module hermetic and
+ * lets the compiler type check the generated output in isolation.
+ *
+ * The stubs are grouped into three lists. Tests pull the list that matches the annotations they
+ * exercise:
+ *
+ * - [baseStubs] covers every test (Decompose `ComponentContext`, `ActivityScope`, the navigation
+ *   primitives, Metro annotations, `kotlinx.serialization`).
+ * - [tabStubs] adds the `TabChild` type from the home navigation package, used by tab root tests.
+ * - [uiStubs] adds Compose and the navigation UI primitives, used by `@ScreenUi` and `@SheetUi`
+ *   tests.
+ *
+ * The type signatures here must match the constants in
+ * `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/util/External.kt`
+ * exactly. If the consumer's primitives change, both files must be updated together. End to end
+ * compilation in the test suite is what catches drift.
  */
 internal object TestStubs {
 
@@ -34,7 +53,11 @@ internal object TestStubs {
         import kotlinx.serialization.KSerializer
         import kotlin.reflect.KClass
 
-        public interface NavRoute
+        public sealed interface BaseRoute
+
+        public interface NavRoute : BaseRoute
+
+        public interface NavRoot : BaseRoute
 
         public interface RootChild
 
@@ -44,9 +67,34 @@ internal object TestStubs {
 
         public class SheetDestination<out T : Any>(public val presenter: T) : SheetChild
 
-        public interface NavDestination {
-            public fun matches(route: NavRoute): Boolean
-            public fun createChild(route: NavRoute, componentContext: ComponentContext): RootChild
+        public sealed class NavDestination<out R : BaseRoute>(
+            public val routeClass: KClass<out R>,
+        ) {
+            public fun matches(route: BaseRoute): Boolean = routeClass.isInstance(route)
+
+            public class Screen<R : NavRoute>(
+                routeClass: KClass<R>,
+                private val factory: (R, ComponentContext) -> RootChild,
+            ) : NavDestination<R>(routeClass) {
+                public fun createChild(route: BaseRoute, componentContext: ComponentContext): RootChild =
+                    @Suppress("UNCHECKED_CAST") factory(route as R, componentContext)
+            }
+
+            public class Overlay<R : NavRoute>(
+                routeClass: KClass<R>,
+                private val factory: (R, ComponentContext) -> RootChild,
+            ) : NavDestination<R>(routeClass) {
+                public fun createChild(route: BaseRoute, componentContext: ComponentContext): RootChild =
+                    @Suppress("UNCHECKED_CAST") factory(route as R, componentContext)
+            }
+
+            public class TabRoot<R : NavRoot>(
+                routeClass: KClass<R>,
+                private val factory: (R, ComponentContext) -> RootChild,
+            ) : NavDestination<R>(routeClass) {
+                public fun createChild(route: BaseRoute, componentContext: ComponentContext): RootChild =
+                    @Suppress("UNCHECKED_CAST") factory(route as R, componentContext)
+            }
         }
 
         public data class NavRouteBinding<T : NavRoute>(
@@ -54,14 +102,7 @@ internal object TestStubs {
             public val serializer: KSerializer<T>,
         )
 
-        public interface SheetConfig
-
-        public interface SheetChildFactory {
-            public fun matches(config: SheetConfig): Boolean
-            public fun createChild(config: SheetConfig, componentContext: ComponentContext): SheetChild
-        }
-
-        public data class SheetConfigBinding<T : SheetConfig>(
+        public data class NavRootBinding<T : NavRoot>(
             public val kClass: KClass<T>,
             public val serializer: KSerializer<T>,
         )
@@ -70,29 +111,26 @@ internal object TestStubs {
     val homeNav = "HomeNav.kt" to """
         package com.thomaskioko.tvmaniac.home.nav
 
-        import com.arkivanov.decompose.ComponentContext
-        import com.thomaskioko.tvmaniac.home.nav.di.model.HomeConfig
+        import com.thomaskioko.tvmaniac.navigation.RootChild
 
-        public class TabChild<out T : Any>(public val presenter: T)
-
-        public interface TabDestination {
-            public fun matches(config: HomeConfig): Boolean
-            public fun createChild(config: HomeConfig, componentContext: ComponentContext): TabChild<*>
-        }
+        public class TabChild<out T : Any>(public val presenter: T) : RootChild
     """.trimIndent()
 
-    val homeConfig = "HomeConfig.kt" to """
-        package com.thomaskioko.tvmaniac.home.nav.di.model
+    val homeConfig = "HomeRoots.kt" to """
+        package com.thomaskioko.tvmaniac.home.nav.roots
 
+        import com.thomaskioko.tvmaniac.navigation.NavRoot
+        import kotlinx.serialization.KSerializer
         import kotlinx.serialization.Serializable
 
         @Serializable
-        public sealed interface HomeConfig {
-            @Serializable
-            public data object Discover : HomeConfig
+        public data object DiscoverRoot : NavRoot {
+            public fun serializer(): KSerializer<DiscoverRoot> = error("stub")
+        }
 
-            @Serializable
-            public data object Library : HomeConfig
+        @Serializable
+        public data object LibraryRoot : NavRoot {
+            public fun serializer(): KSerializer<LibraryRoot> = error("stub")
         }
     """.trimIndent()
 
