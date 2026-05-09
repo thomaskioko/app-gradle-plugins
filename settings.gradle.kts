@@ -9,7 +9,6 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+includeBuild("codegen")
 includeBuild("plugins")
-includeBuild("codegen") {
-    name = "codegen-plugins"
-}
+includeBuild("lint-rules")
