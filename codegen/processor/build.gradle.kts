@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.publish)
 }
 
+group = property("GROUP").toString()
+version = property("VERSION_NAME").toString()
+
 kotlin {
     explicitApi()
     jvmToolchain(libs.versions.java.toolchain.get().toInt())
@@ -25,11 +28,7 @@ dependencies {
 }
 
 mavenPublishing {
-    coordinates(
-        groupId = property("GROUP").toString(),
-        artifactId = "codegen-processor",
-        version = property("VERSION_NAME").toString(),
-    )
+    coordinates(artifactId = "codegen-processor")
     publishToMavenCentral(automaticRelease = true)
     if (findProperty("maven.central.publish")?.toString() == "true") {
         signAllPublications()

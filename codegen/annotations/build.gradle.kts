@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.publish)
 }
 
+group = property("GROUP").toString()
+version = property("VERSION_NAME").toString()
+
 kotlin {
     jvm()
     iosArm64()
@@ -12,11 +15,7 @@ kotlin {
 }
 
 mavenPublishing {
-    coordinates(
-        groupId = property("GROUP").toString(),
-        artifactId = "codegen-annotations",
-        version = property("VERSION_NAME").toString(),
-    )
+    coordinates(artifactId = "codegen-annotations")
     publishToMavenCentral(automaticRelease = true)
     if (findProperty("maven.central.publish")?.toString() == "true") {
         signAllPublications()
