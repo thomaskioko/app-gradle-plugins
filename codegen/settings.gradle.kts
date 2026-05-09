@@ -16,7 +16,3 @@ include(
     ":processor",
     ":processor-test",
 )
-
-project(":annotations").name = "codegen-annotations"
-project(":processor").name = "codegen-processor"
-project(":processor-test").name = "codegen-processor-test"
