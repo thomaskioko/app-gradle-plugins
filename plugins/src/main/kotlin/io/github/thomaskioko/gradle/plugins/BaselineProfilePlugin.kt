@@ -10,6 +10,27 @@ import io.github.thomaskioko.gradle.plugins.utils.isDebugOnlyBuild
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * Configures a benchmark module that produces an Android baseline profile for an app.
+ *
+ * Apply this plugin on a `com.android.test` benchmark module paired with the consumer app
+ * module. The plugin applies `com.android.test`, chains [BasePlugin], and registers the
+ * `benchmark` sub-DSL ([io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension]) on
+ * `scaffold {}`. It points the test module at the app module via `targetProjectPath = ":app"`,
+ * sets `androidx.test.runner.AndroidJUnitRunner` as the instrumentation runner, and applies the
+ * project's common Android settings.
+ *
+ * On non-debug builds the plugin also applies `androidx.baselineprofile`, configures the producer
+ * extension to run on the registered Pixel 6 managed device, disables connected devices, and
+ * forwards the target app ID into the instrumentation runner arguments so the produced profile
+ * targets the right package. Skipped entirely when the project is in debug-only mode.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.baseline.profile")
+ * }
+ * ```
+ */
 public class BaselineProfilePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("com.android.test")

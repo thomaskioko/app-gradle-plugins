@@ -23,6 +23,34 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 
+/**
+ * Configures an Android library or application module with the project's defaults.
+ *
+ * Apply this plugin on a module that ships Android code. When the module already has
+ * `com.android.application` applied, the plugin treats it as an application module and skips
+ * applying the library plugin. Otherwise it applies `com.android.library`. Either way the plugin
+ * also applies [BasePlugin] and registers the [io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension] sub-DSL on
+ * `scaffold {}`.
+ *
+ * Defaults applied: shared Android settings from the project's version catalog, unit tests
+ * configured to include Android resources and run through the project test setup, the legacy
+ * `viewBinding`, `resValues`, and `shaders` build features turned off, core library desugaring
+ * wired in when the consumer's catalog declares the desugar artifact, and Android instrumentation
+ * tests disabled by default until [io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension.enableAndroidTests] is called.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.android")
+ * }
+ *
+ * scaffold {
+ *   android {
+ *     useCompose()
+ *     enableAndroidResources()
+ *   }
+ * }
+ * ```
+ */
 public abstract class AndroidPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val isApplication = target.plugins.hasPlugin("com.android.application")

@@ -1,6 +1,40 @@
 Change Log
 ==========
 
+## 0.7.6 *(2026-05-09)*
+
+### Navigation
+
+A single annotation now covers every navigation destination. The three older annotations (`@NavScreen`, `@TabScreen`, `@NavSheet`)
+have been replaced by `@NavDestination(kind = ...)`, and the processor auto-detects whether a presenter
+accepts a runtime parameter from the route.
+
+- Replace `@NavScreen`, `@TabScreen`, and `@NavSheet` with a single `@NavDestination(kind = ...)` annotation. The
+processor reads one annotation on the presenter and picks the destination role from the `kind` parameter: `SCREEN`
+for stack screens, `OVERLAY` for modal sheets and dialogs, `TAB_ROOT` for top level tab anchors.
+- Auto-detect parameterized presenters from a nested Metro's `@AssistedFactory`. A presenter with a
+nested factory generates a binding that reads the route property and threads it through `factory.create(...)`.
+A plain `@Inject` presenter generates a binding that exposes the presenter directly. Annotating a tab presenter with `@AssistedInject` produces a compile error because a tab's route is a singleton `data object` and carries no payload.
+
+
+### Lint rules
+
+A new published `lint-rules` artifact ships six ktlint rules that enforce the project's navigation, preview, dependency injection, and test naming conventions. Two of the rules read `.editorconfig` so consumer projects can adapt the navigation layer location and the set of forbidden preview wrappers without forking.
+
+- New `lint-rules` artifact (`io.github.thomaskioko.gradle.plugins:lint-rules`) shipping six custom ktlint rules:
+    - `tvmaniac:no-mutating-router-import` prevents Decompose router mutation imports outside the navigation layer. The two read only types (`ChildStack`, `ChildSlot`) remain allowed everywhere.
+    - `tvmaniac:no-navigation-construct-outside-nav` prevents `StackNavigation()` and `SlotNavigation()` construction outside the navigation layer. Type references in parameter and return positions are unaffected.
+    - `tvmaniac:no-custom-navigator-interface` prevents feature specific `*Navigator` interfaces. Presenters must inject the canonical `Navigator` or `SheetNavigator` from `navigation/api`.
+    - `tvmaniac:no-style-wrapper-in-preview` prevents redundant styling wrappers (`TvManiacTheme`, `TvManiacBackground`, `Surface`, `MaterialTheme` by default) inside `@Preview` composables. The wrapper provider applies the project styling once.
+    - `tvmaniac:metro-redundant-inject` removes redundant `@Inject` from classes that already declare a Metro `@Contributes...` annotation. Autocorrect-able.
+    - `tvmaniac:test-name-format` enforces the `should X given Y` test naming convention. Backticked and camelCase forms are both accepted.
+- The navigation and preview rules read `.editorconfig` properties (`ktlint_tvmaniac_navigation_module_paths`, `ktlint_tvmaniac_preview_wrappers`, `ktlint_tvmaniac_preview_wrapper_packages`) so consumer projects can adjust the navigation layer location and the set of forbidden wrappers without forking. See [lint-rules/README.md](lint-rules/README.md).
+
+### Misc
+
+- Bumped ktlint dependency 1.4.0 → 1.8.0.
+- Dependency updates.
+
 ## 0.7.5 *(2026-04-26)*
 - Apply [KT-42254](https://youtrack.jetbrains.com/issue/KT-42254) Kotlin/Native cache-disable workaround automatically in `addIosTargetsWithXcFramework`
 - `io.github.thomaskioko.gradle.plugins.root` is now **required** on the root project. Any subproject plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) throws `GradleException` at apply-time when `root` is missing on the root project.

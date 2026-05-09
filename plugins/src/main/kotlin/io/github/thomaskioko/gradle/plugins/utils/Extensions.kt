@@ -125,11 +125,14 @@ internal fun Project.java(block: JavaPluginExtension.() -> Unit) {
 }
 
 /**
- * Configures the compiler options for a Kotlin project extension.
- * This method handles different types of Kotlin project extensions, such as JVM, Android, or Multiplatform,
- * and applies the specified configurations to their respective compiler options.
+ * Applies a Kotlin compiler options configuration block to whichever Kotlin project extension is
+ * registered: `KotlinJvmProjectExtension`, `KotlinAndroidProjectExtension`, or
+ * `KotlinMultiplatformExtension`. For multiplatform, the block runs both on the top-level
+ * compiler options and on every per-target options object that exposes them.
  *
- * @param configure A lambda expression used to configure the Kotlin compiler options.
+ * @param configure Lambda applied to each [KotlinCommonCompilerOptions] instance.
+ * @throws IllegalStateException if the project's Kotlin extension is none of the three expected
+ *   types.
  */
 internal fun KotlinProjectExtension.compilerOptions(configure: KotlinCommonCompilerOptions.() -> Unit) {
     when (this) {

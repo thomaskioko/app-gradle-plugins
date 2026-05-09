@@ -6,6 +6,23 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
+/**
+ * Generates Kotlin sources from Moko Resources strings and wires them into `commonMain`.
+ *
+ * Apply this plugin on a Kotlin Multiplatform module that uses Moko Resources for localization.
+ * The plugin registers the `generateMokoStrings` task, which produces a sealed class enumerating
+ * every string key. When `dev.icerock.mobile.multiplatform-resources` is also applied, the task
+ * runs after `generateMRcommonMain` so the keys it scans are up to date. Generated sources are
+ * added to the `commonMain` source set, and every Kotlin compile task that includes `commonMain`
+ * depends on the generation task.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("dev.icerock.mobile.multiplatform-resources")
+ *   id("io.github.thomaskioko.gradle.plugins.resource.generator")
+ * }
+ * ```
+ */
 public class ResourceGeneratorPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val generateStringsTask = target.tasks.register("generateMokoStrings", MokoResourceGeneratorTask::class.java) { task ->

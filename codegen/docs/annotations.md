@@ -1,110 +1,116 @@
-# Annotation Reference
+# Annotation reference
 
-The annotations live in the `codegen-annotations` artifact under the package `io.github.thomaskioko.codegen.annotations`. All five have `SOURCE` retention. Three (`@NavScreen`, `@TabScreen`, `@NavSheet`) target presenter classes in the shared KMP layer and generate Metro `@GraphExtension`s plus navigation bindings. Two (`@ScreenUi`, `@SheetUi`) target `@Composable` functions in Android `ui` modules and generate the platform-side renderer bindings consumed by the `Set<ScreenContent>` / `Set<SheetContent>` multibindings. This reference walks through each annotation, what it marks, what the processor emits, and the invariants the processor checks.
+The annotations live in the `codegen-annotations` artifact under the package `io.github.thomaskioko.codegen.annotations`. All have `SOURCE` retention.
+
+Three annotations:
+
+- `@NavDestination` targets presenter classes in the shared Kotlin Multiplatform layer. The processor generates a Metro `@GraphExtension` plus a navigation binding for
+  each annotated presenter.
+- `@ScreenUi` and `@SheetUi` target `@Composable` functions in Android `ui` modules. The processor generates the Metro binding that contributes the composable to the
+  consumer's `Set<ScreenContent>` or `Set<SheetContent>` multibinding.
+
+This reference walks through each annotation: what it marks, what the processor emits, the validation rules, and the common pitfalls. For the vocabulary used throughout
+(graph extension, multibinding, binding, slot, scope), see the glossary in [architecture/index.md](architecture/index.md#glossary).
 
 
-## `@NavScreen`
+## `@NavDestination`
 
-Marks a presenter class as a root level navigation destination. A destination is something that sits on the back stack. It is reached with `navigator.navigateTo(route)` and popped with `navigator.navigateBack()`.
+Marks a presenter class as a navigation destination. One annotation, three kinds.
 
 ```kotlin
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-public annotation class NavScreen(
+public annotation class NavDestination(
     val route: KClass<*>,
     val parentScope: KClass<*>,
+    val kind: DestinationKind,
 )
+
+public enum class DestinationKind {
+    SCREEN,
+    OVERLAY,
+    TAB_ROOT,
+}
 ```
 
-The `route` parameter points at the feature's route class. This is the `@Serializable` type that implements the consumer project's `NavRoute` interface. The processor verifies the reference at generation time.
+### When to use `@NavDestination`
 
-The `parentScope` parameter names the parent DI scope whose factory provides a `ComponentContext`. In Tv Maniac this is almost always `ActivityScope::class`.
+Annotate a presenter class with `@NavDestination` whenever the consumer's navigator needs to push it onto the back stack (`SCREEN`), present it as a modal overlay
+(`OVERLAY`), or render it as a top-level tab anchor (`TAB_ROOT`). Without the annotation the consumer has to manually write the Metro graph extension, the
+`NavDestination` factory, and the route binding for each presenter.
 
-### Processor behavior
+### Parameters
 
-The processor picks between two output shapes based on how the presenter is injected.
+The `route` parameter points at the feature's route class.
 
-1. If the class is annotated with `@Inject` (plain constructor injection), the processor emits the simple shape. The generated graph exposes the presenter instance directly.
-2. If the class is annotated with `@AssistedInject` and has a nested `@AssistedFactory`, the processor emits the parameterized shape. The generated graph exposes the factory type. The generated `NavDestination.createChild` casts the incoming route, extracts the single property whose type matches the presenter's single `@Assisted` constructor parameter, and calls `factory.create(param)`.
+- For `SCREEN` and `OVERLAY` it implements the consumer project's `NavRoute` interface. `OVERLAY` additionally implements the consumer's overlay marker interface (for
+  example `OverlayRoute` in Tv Maniac), which is what the consumer's navigator inspects at runtime to decide between stack and overlay routing.
+- For `TAB_ROOT` it implements the consumer's `NavRoot` interface and is typically a `data object`.
 
-### Generated files
+The `parentScope` parameter names the parent dependency injection scope whose factory provides a `ComponentContext`. Typically `ActivityScope::class`.
 
-For a presenter `com.example.feature.presenter.FooPresenter`, the processor emits two files into `com.example.feature.presenter.di`.
+The `kind` parameter chooses one of three destination roles. See [DestinationKind](#destinationkind).
 
-`FooScreenGraph.kt` is a Metro `@GraphExtension(FooRoute::class)` interface. The route class itself is used as the graph's scope marker, so no separate scope class is generated.
-
-`FooNavDestinationBinding.kt` is a Metro `@ContributesTo(parentScope)` interface with a companion that contributes `@IntoSet NavDestination` and `@IntoSet NavRouteBinding<*>`.
-
-Using the route as the scope keeps it visible from every consumer (including `commonMain` and sibling modules) without the cross module visibility problems that a KSP generated scope class would introduce. KSP output lands in per target source sets, so a separately generated `FooScreenScope` would be invisible from `commonMain`.
-
-See [examples.md](examples.md) for concrete output shapes.
-
-
-## `@TabScreen`
-
-Marks a presenter class as a tab inside a host screen, for example a bottom navigation tab hanging off a home screen. Tabs don't participate in the root back stack; they contribute into a host's tab multibinding instead.
+### Minimal example
 
 ```kotlin
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
-public annotation class TabScreen(
-    val config: KClass<*>,
-    val parentScope: KClass<*>,
+@Inject
+@NavDestination(
+    route = ShowsRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.SCREEN,
 )
+public class ShowsPresenter(
+    componentContext: ComponentContext,
+) : ComponentContext by componentContext
 ```
 
-The `config` parameter names the config subtype (usually a data object) this tab matches. In Tv Maniac this is a subtype of `HomeConfig`. The config class itself doubles as the generated tab graph's scope marker.
+### Generated artifacts
 
-The `parentScope` parameter is typically the host route class (e.g. `HomeRoute::class`) rather than `ActivityScope::class`, because tabs contribute into the host graph whose scope is the host route.
+For a presenter `com.example.feature.presenter.FooPresenter` annotated `@NavDestination(route = FooRoute::class, parentScope = ActivityScope::class, kind = SCREEN)`:
 
-### Processor behavior
+- `FooScreenGraph.kt` is a Metro `@GraphExtension(FooRoute::class)` interface scoped to the route. The route class itself is the scope marker, so no separate scope class
+  is generated. The reasoning lives in [architecture/generators.md](architecture/generators.md#route-class-as-graph-scope).
+- `FooNavDestinationBinding.kt` is a Metro `@ContributesTo(parentScope)` interface with a companion that contributes:
+    - `@IntoSet NavDestination<*>`: the matching `NavDestination.Screen` (or `Overlay`, or `TabRoot`) instance.
+    - `@IntoSet NavRouteBinding<*>` for `SCREEN` or `OVERLAY`, or `@IntoSet NavRootBinding<*>` for `TAB_ROOT`.
 
-`@TabScreen` is incompatible with `@AssistedInject`. Tabs must use plain `@Inject`. The processor reports a compile error if a tab presenter declares a nested `@AssistedFactory`.
+See [examples.md](examples.md) for concrete output for each kind.
 
-### Generated files
+### Behavior by kind
 
-For `FooPresenter` matching `HomeConfig.Foo`, the processor emits two files.
+| Kind | Injection | Contributes |
+|---|---|---|
+| `SCREEN` | `@Inject` (no runtime parameters) or `@AssistedInject` (parameterized) | `NavDestination.Screen` plus `NavRouteBinding<*>` |
+| `OVERLAY` | Same as `SCREEN` | `NavDestination.Overlay` plus `NavRouteBinding<*>` |
+| `TAB_ROOT` | `@Inject` only (no `@AssistedInject`) | `NavDestination.TabRoot` plus `NavRootBinding<*>` |
 
-`FooTabGraph.kt` is a `@GraphExtension(HomeConfig.Foo::class)` exposing the presenter. The config class itself is the scope marker, so no separate tab scope class is generated.
+For `SCREEN` and `OVERLAY` the processor auto-detects whether your presenter accepts a runtime parameter from the route. A plain `@Inject` constructor produces a graph
+that exposes the presenter directly. An `@AssistedInject` constructor with a nested `@AssistedFactory` produces a graph that exposes the factory; the generated binding
+casts the route, reads the property whose type matches the presenter's single `@Assisted` parameter, and calls `factory.create(param)`.
 
-`FooTabDestinationBinding.kt` contributes `@IntoSet TabDestination`. No `NavRouteBinding` is generated because the host feature owns its own config serialization.
+### Validation
 
+The processor reports a compile error if any of the following hold:
 
-## `@NavSheet`
+- The annotated symbol is not a class.
+- `kind` is not `SCREEN`, `OVERLAY`, or `TAB_ROOT`.
+- The presenter is parameterized but does not have exactly one `@Assisted` constructor parameter.
+- `kind` is `TAB_ROOT` and the presenter declares a nested `@AssistedFactory`. Tab roots must use plain `@Inject` because the route is a `data object` and carries no payload.
 
-Marks a presenter class as a modal sheet destination. This is a bottom sheet, dialog, or other overlay presented on top of the current destination through Decompose's `childSlot`.
+### Common pitfalls
 
-```kotlin
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
-public annotation class NavSheet(
-    val route: KClass<*>,
-    val parentScope: KClass<*>,
-)
-```
-
-The `route` parameter names the sheet's config class. The config must implement the consumer project's `SheetConfig` marker. Like the other annotations, this class also serves as the generated graph's scope marker.
-
-The `parentScope` parameter names the DI scope the generated binding is contributed to. This is typically `ActivityScope::class`.
-
-### Processor behavior
-
-`@NavSheet` requires `@AssistedInject`. The presenter must declare a nested `@AssistedFactory`. The processor maps each `@Assisted` constructor parameter to a property of the route class by type, in order, and emits an error if the shapes do not match.
-
-### Generated files
-
-For `FooSheetPresenter` annotated with `route = FooSheetConfig::class`, the processor emits two files.
-
-`FooSheetScreenGraph.kt` is a `@GraphExtension(FooSheetConfig::class)` exposing the presenter's nested `@AssistedFactory`.
-
-`FooSheetDestinationBinding.kt` is a `@ContributesTo(parentScope)` interface whose companion contributes both `@IntoSet SheetChildFactory` and `@IntoSet SheetConfigBinding<*>`.
-
-The sheet binding mirrors the `@NavScreen` pair. The child factory matches on the generic `SheetConfig` marker, casts to the feature's config type, and dispatches through the graph's assisted factory. The config binding feeds the polymorphic `KSerializer<SheetConfig>` used by Decompose's `childSlot`, so the sheet slot survives process death without a central registry.
+- **Forgetting `@Inject` or `@AssistedInject`.** `@NavDestination` only tells the processor which graph and binding to generate. The presenter still needs Metro's
+  injection annotation so Metro creates instances of it.
+- **Routing a tab through a `data class`.** `TAB_ROOT` requires a `data object`. A `data class` route would imply a payload, but the tab multibinding is keyed by route
+  type, not by an instance.
+- **Mismatched route property type for parameterized presenters.** The `@Assisted` parameter type must match a property on the route class. The processor reads that
+  property at navigation time and passes it through the assisted factory.
 
 
 ## `@ScreenUi`
 
-Marks a `@Composable` screen function as the Android-side renderer for a root-stack presenter. Unlike the three annotations above, this one targets the composable function directly so the generated binding lives in the same module as the composable it calls. No cross-module KSP emission is needed.
+Marks a `@Composable` function as the Android renderer for a screen presenter.
 
 ```kotlin
 @Target(AnnotationTarget.FUNCTION)
@@ -115,26 +121,64 @@ public annotation class ScreenUi(
 )
 ```
 
-The `presenter` parameter names the presenter type this screen renders. The processor uses it to build the `matches` predicate that tests whether the active `RootChild` is a `ScreenDestination<*>` wrapping an instance of that type, and to cast the presenter before forwarding it to the composable.
+### When to use `@ScreenUi`
 
-The `parentScope` parameter names the DI scope the generated binding is contributed to. In Tv Maniac this is `ActivityScope::class`.
+Pair `@ScreenUi` with `@NavDestination(kind = SCREEN)` on the matching presenter. The presenter lives in the shared Kotlin Multiplatform layer; the composable lives in an
+Android only `ui` module.
 
-### Processor behavior
+The annotation exists because the navigation host cannot call the composable directly. At runtime the host holds an active `RootChild` whose concrete presenter type is
+opaque to it, so it iterates a `Set<ScreenContent>` multibinding to find the entry whose predicate matches the active child and renders that entry's `content` lambda.
+`@ScreenUi` generates the entry that pairs the `(it as? ScreenDestination<*>)?.presenter is FooPresenter` predicate with a content lambda that casts the child and invokes
+the annotated composable.
 
-The annotated function must match the signature `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The processor does not enforce the `Modifier` parameter name or default, but the generated code calls the composable with `presenter = ..., modifier = modifier`, so the function must accept both in that order with those names.
+### Parameters
 
-### Generated files
+The `presenter` parameter names the presenter type this screen renders. The processor uses it to build the `matches` predicate that tests whether the active `RootChild`
+is a `ScreenDestination<*>` wrapping an instance of that type, and to cast the presenter before forwarding it to the composable.
 
-For a composable `com.example.feature.ui.FooScreen` with `@ScreenUi(presenter = FooPresenter::class, parentScope = ActivityScope::class)`, the processor emits one file into `com.example.feature.ui.di`.
+The `parentScope` parameter names the dependency injection scope the generated binding is contributed to. Typically `ActivityScope::class`.
 
-`FooScreenUiBinding.kt` is a `@BindingContainer @ContributesTo(ActivityScope::class) object` that `@Provides @IntoSet` a single `ScreenContent`. The `matches` lambda tests `(it as? ScreenDestination<*>)?.presenter is FooPresenter`. The `content` lambda casts the child and invokes `FooScreen(presenter = ..., modifier = modifier)`.
+### Minimal example
 
-The `@BindingContainer + object` shape is deliberate. Hand-authored `@Provides @IntoSet` inside an `interface + companion object` requires Metro's `generateContributionProviders` flag to be enabled, which is disabled in the shared scaffold. Codegen-emitted bindings for the KMP presenter layer get away with the interface form because they are picked up by a separate code path. Bindings emitted into Android-only `ui` modules would silently produce an empty multibinding if the interface form were used, so the generator targets the object form instead.
+```kotlin
+@Composable
+@ScreenUi(presenter = ShowsPresenter::class, parentScope = ActivityScope::class)
+public fun ShowsScreen(
+    presenter: ShowsPresenter,
+    modifier: Modifier = Modifier,
+) {
+    // ... compose UI here
+}
+```
+
+### Generated artifacts
+
+For a composable `com.example.feature.ui.FooScreen` annotated `@ScreenUi(presenter = FooPresenter::class, parentScope = ActivityScope::class)`, the processor emits one
+file into `com.example.feature.ui.di`:
+
+- `FooScreenUiBinding.kt`: a `@BindingContainer @ContributesTo(ActivityScope::class) object` that `@Provides @IntoSet` a single `ScreenContent`. The `matches` lambda
+  tests `(it as? ScreenDestination<*>)?.presenter is FooPresenter`. The `content` lambda casts the child and invokes `FooScreen(presenter = ..., modifier = modifier)`.
+
+The `@BindingContainer object` structure is deliberate. The detailed reasoning lives in
+[architecture/generators.md](architecture/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings); the short version is that
+an `interface + companion object` form would silently produce an empty multibinding inside an Android only `ui` module without the right Metro flag.
+
+### Composable signature requirement
+
+The annotated function must match the signature `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The processor does not enforce the
+parameter names or the `Modifier` default at parse time, but the generated code calls the composable with `presenter = ..., modifier = modifier`. A function whose
+parameters are out of order or named differently will fail to compile after generation, not during processing.
+
+### Common pitfalls
+
+- **Annotating a composable in a transitive `implementation` dependency.** The generated binding lives in the same module as the composable. If the consumer pulls in that
+  module only as a transitive dependency, the binding never makes it onto the app's compile classpath. Add the module as a direct `implementation` dependency.
+- **Returning a value from the composable.** `ScreenContent.content` is `(RootChild, Modifier) -> Unit`. The generated wrapper expects the composable to return `Unit`.
 
 
 ## `@SheetUi`
 
-Marks a `@Composable` sheet function as the Android-side renderer for a modal sheet presenter. Parallel to `@ScreenUi`, but targets the sheet-side multibinding `Set<SheetContent>` instead of the screen-side `Set<ScreenContent>`.
+Marks a `@Composable` function as the Android renderer for a modal overlay presenter. Parallel to `@ScreenUi`, but contributes a `SheetContent` instead of a `ScreenContent`.
 
 ```kotlin
 @Target(AnnotationTarget.FUNCTION)
@@ -145,23 +189,98 @@ public annotation class SheetUi(
 )
 ```
 
-The parameters have the same meaning as on `@ScreenUi`. The generated `matches` predicate tests for a `SheetDestination<*>` (not `ScreenDestination<*>`), and the `content` lambda invokes the composable with `presenter` only. The sheet renderer does not receive a `Modifier` because `SheetContent.content` is `@Composable (SheetChild) -> Unit`; the sheet lays itself out via its own `ModalBottomSheet` (or equivalent) in the composable body.
+### When to use `@SheetUi`
 
-### Generated files
+Pair `@SheetUi` with `@NavDestination(kind = OVERLAY)` on the matching presenter. The presenter lives in the shared Kotlin Multiplatform layer; the composable lives in an
+Android only `ui` module.
 
-For `EpisodeSheet` annotated with `@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)`, the processor emits `EpisodeSheetUiBinding.kt`. Shape mirrors `@ScreenUi` output, differing only in return type (`SheetContent` vs `ScreenContent`) and the absence of the `modifier` forwarding.
+The annotation exists for the same reason as `@ScreenUi`: the consumer's overlay slot cannot call the composable directly. The slot host iterates a `Set<SheetContent>`
+multibinding to find the entry whose predicate matches the active overlay child, then renders that entry's `content` lambda. `@SheetUi` generates the entry that pairs the
+`(it as? SheetDestination<*>)?.presenter is FooPresenter` predicate with a content lambda that casts the child and invokes the annotated composable. The set is separate
+from `Set<ScreenContent>` because the overlay slot and the navigation stack are independent registries.
+
+### Parameters
+
+The parameters have the same meaning as on [`@ScreenUi`](#screenui).
+
+### Minimal example
+
+```kotlin
+@Composable
+@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)
+public fun EpisodeSheet(
+    presenter: EpisodeSheetPresenter,
+    modifier: Modifier = Modifier,
+) {
+    // ... compose your ModalBottomSheet here
+}
+```
+
+### Generated artifacts
+
+For `EpisodeSheet` annotated `@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)`, the processor emits `EpisodeSheetUiBinding.kt`. The
+file is structurally identical to a `@ScreenUi` binding. The two differences are the return type (`SheetContent` instead of `ScreenContent`) and the absence of `modifier`
+forwarding in the `content` lambda.
+
+### Composable signature requirement
+
+The signature requirement matches `@ScreenUi`: `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. Only `presenter` is forwarded by the
+generated code. The `modifier` parameter exists so the composable can still be called from preview code.
+
+The generated wrapper does not pass a modifier because `SheetContent.content` is typed as `(SheetChild) -> Unit`. A modal overlay decides its own layout (typically inside
+a `ModalBottomSheet`) in the composable body, not at the call site.
+
+
+## `DestinationKind`
+
+`DestinationKind` is the enum passed to `@NavDestination(kind = ...)`. It picks the role the destination plays at runtime.
+
+- `SCREEN`: a screen pushed onto the navigation stack. Tapping the system back button pops it off and returns to the previous destination.
+- `OVERLAY`: a modal overlay (sheet, dialog, or menu) that appears on top of the current screen without affecting the back stack. Dismissing the overlay returns to the
+  screen that was visible underneath.
+- `TAB_ROOT`: the destination shown when the user selects a top level tab. Each tab anchors its own back stack and persists across tab switches.
+
+The `SCREEN` and `OVERLAY` outputs are structurally identical; they differ only in the `NavDestination` subclass the binding contributes. The consumer's navigator
+inspects that subclass at runtime to choose between stack and overlay routing.
 
 
 ## Required consumer primitives
 
-The generated code references fully qualified names that the consumer project must provide. These are hardcoded in the processor's `util/External.kt`, grouped below by the role they play.
+The generated code references fully qualified names that the consumer project must provide. These are hardcoded in the processor's `util/External.kt`, grouped below by
+the role each plays.
 
-The root destination shape pulls from `com.thomaskioko.tvmaniac.navigation`: `NavRoute` is the route supertype, `NavRouteBinding` is the Metro multibinding entry for routes, `NavDestination` is the root destination factory interface, `RootChild` is the Decompose child marker, and `ScreenDestination` is the generic root wrapper.
+The destination types pull from `com.thomaskioko.tvmaniac.navigation`:
 
-The sheet shape reuses that package for `SheetConfig` (the sheet config supertype), `SheetChild` (Decompose sheet child marker), `SheetDestination` (generic sheet wrapper), `SheetChildFactory` (sheet destination factory interface), and `SheetConfigBinding` (Metro multibinding entry for sheet configs).
+- `BaseRoute`: sealed parent of every routable target.
+- `NavRoute`: supertype for routes that map to navigation stack screens or overlays.
+- `NavRoot`: supertype for routes that map to top level tab anchors.
+- `NavDestination`: sealed factory family with nested `Screen`, `Overlay`, `TabRoot` subclasses. Codegen emits one of these for each annotated presenter.
+- `NavRouteBinding`: Metro multibinding entry for `NavRoute` polymorphic serialization.
+- `NavRootBinding`: Metro multibinding entry for `NavRoot` polymorphic serialization.
+- `RootChild`: Decompose child marker; the return type of every `NavDestination` factory lambda.
+- `ScreenDestination`: generic root wrapper used by `Screen` and `Overlay` factories.
+- `SheetChild`, `SheetDestination`: used by overlay rendering at the slot host. The consumer typically rewraps a `RootChild` from an `Overlay` factory into a
+  `SheetDestination` at the slot host.
 
-Tabs live under `com.thomaskioko.tvmaniac.home.nav`: `TabDestination` is the tab factory interface and `TabChild` is the generic tab wrapper. Finally, `com.thomaskioko.tvmaniac.core.base.ActivityScope` is the default parent scope referenced by the generated binding contributions.
+Tabs additionally pull `TabChild` from `com.thomaskioko.tvmaniac.home.nav`. `TabChild` is the generic tab wrapper used by `TabRoot` factory lambdas.
 
-The platform-side UI renderer types live under `com.thomaskioko.tvmaniac.navigation.ui`: `ScreenContent` carries a `matches` predicate and a `@Composable (RootChild, Modifier) -> Unit` content lambda, and `SheetContent` does the same for `SheetChild`. The generated `@ScreenUi` / `@SheetUi` bindings also reference `androidx.compose.ui.Modifier` because the screen variant forwards a modifier into the composable.
+`com.thomaskioko.tvmaniac.core.base.ActivityScope` is the default parent scope referenced by the generated binding contributions.
 
-The processor is opinionated about these names. Consumers other than Tv Maniac would need to adjust `util/External.kt` to match their navigation primitives.
+The Android UI renderer types live under `com.thomaskioko.tvmaniac.navigation.ui`. `ScreenContent` carries a `matches` predicate and a `@Composable (RootChild, Modifier)
+-> Unit` content lambda. `SheetContent` does the same for `SheetChild`. The bindings generated for `@ScreenUi` and `@SheetUi` also reference
+`androidx.compose.ui.Modifier` because the screen variant forwards a modifier into the composable.
+
+The processor is opinionated about these names. Consumers other than Tv Maniac would need to adjust `util/External.kt` to match their navigation primitives. See
+[architecture/consumer-contract.md](architecture/consumer-contract.md) for why these are constants and what a fork would change.
+
+
+## Migration from earlier versions
+
+Earlier releases of this module shipped `@NavScreen`, `@TabScreen`, and `@NavSheet` as separate annotations. They have been replaced by the unified `@NavDestination(kind
+= ...)` API:
+
+- `@NavScreen` becomes `@NavDestination(kind = DestinationKind.SCREEN)`.
+- `@TabScreen` becomes `@NavDestination(kind = DestinationKind.TAB_ROOT)`.
+- `@NavSheet` becomes `@NavDestination(kind = DestinationKind.OVERLAY)`.
+
+See the [CHANGELOG](../../CHANGELOG.md) for the version that introduced the change.

@@ -11,12 +11,30 @@ import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import java.io.File
 
 /**
- * Runs the [NavigationCodegenProcessor] over a set of source strings and exposes the generated
- * Kotlin sources alongside the raw [JvmCompilationResult] for assertion.
+ * Test harness that runs [NavigationCodegenProcessor] over inline Kotlin source strings and
+ * exposes the generated files for golden comparison.
+ *
+ * Each call to [run] builds a fresh `KotlinCompilation` configured with KSP2, registers the
+ * processor as the only symbol processor provider, compiles the supplied sources, and walks the
+ * KSP output directory to collect every generated `.kt` file. The result wraps the raw
+ * [JvmCompilationResult] (so tests can assert on exit code or messages) alongside a
+ * `Map<file name -> contents>` for the generated files.
+ *
+ * `inheritClassPath = true` lets the compilation see the test module's runtime classpath, which
+ * is how it picks up the real `codegen-annotations` jar. The processor reads the actual
+ * `@NavDestination` symbol, not a stub.
  */
 @OptIn(ExperimentalCompilerApi::class)
 internal class ProcessorTestRunner {
 
+    /**
+     * The result of one processor run.
+     *
+     * @property result The raw compilation result. Tests use this to assert on exit code or to
+     *   inspect compiler messages (the error path tests assert on these).
+     * @property generatedFiles The generated Kotlin files, keyed by simple file name. The
+     *   directory layout under KSP's source root is flattened.
+     */
     data class RunResult(
         val result: JvmCompilationResult,
         val generatedFiles: Map<String, String>,
@@ -25,6 +43,13 @@ internal class ProcessorTestRunner {
         val messages: String get() = result.messages
     }
 
+    /**
+     * Compiles [sources] under KSP2 with [NavigationCodegenProcessor] registered, then collects
+     * every generated Kotlin file.
+     *
+     * @param sources The source files to compile, keyed by file name.
+     * @return The compilation result and the generated files.
+     */
     fun run(sources: Map<String, String>): RunResult {
         val compilation = KotlinCompilation().apply {
             this.sources = sources.map { (name, content) -> SourceFile.kotlin(name, content) }

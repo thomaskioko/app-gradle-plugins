@@ -19,8 +19,49 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 import java.net.URI
 
+/**
+ * Top-level receiver for the `scaffold {}` DSL exposed by every plugin in this suite.
+ *
+ * Each method on this class either configures a Kotlin compiler feature (such as opt-in flags),
+ * enables an opinionated tool (Metro, Serialization, kotlin-inject, the navigation codegen), or
+ * adds a Kotlin Multiplatform target. Sub-DSLs for Android and JVM apps are reachable through
+ * [android] once [addAndroidTarget] has registered the Android sub-extension.
+ *
+ * ```kotlin
+ * scaffold {
+ *   useMetro()
+ *   addJvmTarget()
+ *   addAndroidTarget {
+ *     useCompose()
+ *     minSdkVersion(24)
+ *   }
+ *   addIosTargets()
+ * }
+ * ```
+ *
+ * @property project The Gradle [Project] this extension is attached to. Used internally to apply
+ *   plugins, register dependencies, and configure the Kotlin Multiplatform extension.
+ */
 @ScaffoldDsl
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
+    /**
+     * Adds compiler opt-in entries to every Kotlin compilation in the project.
+     *
+     * Use this to opt in to experimental APIs without sprinkling `@OptIn` annotations across the
+     * source set. Each entry is a fully qualified annotation class name.
+     *
+     * ```kotlin
+     * scaffold {
+     *   optIn(
+     *     "kotlinx.coroutines.ExperimentalCoroutinesApi",
+     *     "kotlinx.serialization.ExperimentalSerializationApi",
+     *   )
+     * }
+     * ```
+     *
+     * @param classes Fully qualified annotation class names to add to the Kotlin compiler's
+     *   `optIn` list.
+     */
     public fun optIn(vararg classes: String) {
         project.kotlin {
             compilerOptions {
@@ -29,28 +70,131 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
+    /**
+     * Applies the Metro Gradle plugin and turns on contribution providers.
+     *
+     * Call this in a module that participates in a Metro dependency graph. The plugin registers
+     * the Metro compiler plugin on every Kotlin compilation in the project and is required for
+     * `@DependencyGraph`, `@Inject`, `@Provides`, and contribution annotations to compile.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useMetro()
+     * }
+     * ```
+     */
     public fun useMetro() {
         project.setupMetro()
     }
 
+    /**
+     * Applies the kotlinx.serialization Gradle plugin and adds the runtime dependency.
+     *
+     * Use this in any module that defines `@Serializable` classes. The runtime artifact is
+     * resolved from the consumer's version catalog under the `kotlinx-serialization-json` alias.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useSerialization()
+     * }
+     * ```
+     */
     public fun useSerialization() {
         project.setupSerialization()
     }
 
+    /**
+     * Applies the kotlin-inject and kotlin-inject-anvil compiler plugins.
+     *
+     * Use this in modules that rely on kotlin-inject for dependency injection. Pairs with the
+     * runtime and KSP dependencies that the setup helper wires in. Mutually exclusive with
+     * [useMetro] in the same module.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useKotlinInject()
+     * }
+     * ```
+     */
     public fun useKotlinInject() {
         project.setupKotlinInject()
     }
 
+    /**
+     * Applies KSP and adds the navigation codegen processor and annotations.
+     *
+     * The codegen reads `@NavDestination`, `@ScreenUi`, and `@SheetUi` annotations and produces
+     * Metro `@GraphExtension` graphs plus binding files. See
+     * [codegen/docs/get-started.md](../../../../../../../../codegen/docs/get-started.md) for
+     * the full feature list.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useMetro()
+     *   useCodegen()
+     * }
+     * ```
+     */
     public fun useCodegen() {
         project.setupCodegen()
     }
 
+    /**
+     * Configures the Android sub-DSL after [addAndroidTarget] has registered it.
+     *
+     * Calling this before [addAndroidTarget] throws an `IllegalStateException`. The receiver of
+     * the lambda is an [AndroidExtension] that exposes Android-specific options such as
+     * [AndroidExtension.useCompose], [AndroidExtension.enableAndroidTests], and
+     * [AndroidExtension.manifestPlaceholders].
+     *
+     * ```kotlin
+     * scaffold {
+     *   addAndroidTarget()
+     *   android {
+     *     useCompose()
+     *     enableAndroidResources()
+     *   }
+     * }
+     * ```
+     *
+     * @param configure Configuration block applied to the registered [AndroidExtension].
+     */
     public fun android(configure: AndroidExtension.() -> Unit) {
         val androidExtension = extensions.findByType(AndroidExtension::class.java)
             ?: throw IllegalStateException("Android extension not found. Did you call addAndroidTarget()?")
         androidExtension.configure()
     }
 
+    /**
+     * Adds an Android library target to the Kotlin Multiplatform extension and registers the
+     * Android sub-DSL.
+     *
+     * Configures the Kotlin Multiplatform Android library target with project defaults and
+     * registers an `android` sub-extension on this receiver. After this call, you can configure
+     * Android-specific options inside the [configure] block or through a separate [android] call.
+     *
+     * ```kotlin
+     * scaffold {
+     *   addAndroidTarget(
+     *     enableAndroidResources = true,
+     *     withDeviceTestBuilder = true,
+     *   ) {
+     *     useCompose()
+     *     minSdkVersion(24)
+     *   }
+     * }
+     * ```
+     *
+     * @param enableAndroidResources Enables Android resource processing on the target. Defaults
+     *   to `false` because most shared modules ship code only.
+     * @param withDeviceTestBuilder Registers an Android device test builder wired to
+     *   `androidx.test.runner.AndroidJUnitRunner`. Set to `true` for modules that need
+     *   instrumentation tests.
+     * @param withJava Enables Java sources on the Android target and aligns the JVM compiler
+     *   options to the project's [jvmTarget]. Defaults to `false`.
+     * @param configure Configuration block applied to the registered [AndroidExtension].
+     * @param lintConfiguration Configuration block applied to the target's [Lint] options.
+     */
     @JvmOverloads
     public fun addAndroidTarget(
         enableAndroidResources: Boolean = false,
@@ -88,12 +232,41 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
             .configure()
     }
 
+    /**
+     * Adds the JVM target to the Kotlin Multiplatform extension.
+     *
+     * Use this when a shared module produces a JVM artifact, for example a desktop app, a server,
+     * or a CLI tool. The target inherits the JVM compile options from the project's
+     * [jvmTarget].
+     *
+     * ```kotlin
+     * scaffold {
+     *   addJvmTarget()
+     * }
+     * ```
+     */
     public fun addJvmTarget() {
         project.kotlinMultiplatform {
             jvm()
         }
     }
 
+    /**
+     * Adds the iOS targets used by the project: `iosArm64` and `iosSimulatorArm64`.
+     *
+     * The `iosX64` target is omitted by default because Apple Silicon hosts run the simulator on
+     * `iosSimulatorArm64`. Set [includeX64] to `true` only when an Intel Mac or CI runner needs
+     * to compile or test against the x86_64 simulator.
+     *
+     * ```kotlin
+     * scaffold {
+     *   addIosTargets()
+     * }
+     * ```
+     *
+     * @param includeX64 Adds the `iosX64` target alongside the arm64 targets. Defaults to
+     *   `false`.
+     */
     @JvmOverloads
     public fun addIosTargets(includeX64: Boolean = false) {
         project.kotlinMultiplatform {
@@ -105,6 +278,26 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
+    /**
+     * Applies common compiler and linker options to every Kotlin/Native target in the project.
+     *
+     * Sets the framework `bundleId` binary option, links `sqlite3`, opts in to the Foreign and
+     * Beta interop APIs, picks the custom Kotlin/Native allocator, enables light debug info, and
+     * allows expect/actual classes. Run this after [addIosTargets] or
+     * [addIosTargetsWithXcFramework].
+     *
+     * ```kotlin
+     * scaffold {
+     *   addIosTargets()
+     *   configureNativeTargets(bundleId = "com.example.shared")
+     * }
+     * ```
+     *
+     * @param bundleId Bundle identifier written into every framework binary. When `null`, the
+     *   project's package name from the version catalog is used.
+     * @param configure Per-target configuration block applied after the common options. Receives
+     *   each [KotlinNativeTarget] in turn.
+     */
     @JvmOverloads
     public fun configureNativeTargets(
         bundleId: String? = null,
@@ -137,6 +330,31 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
         }
     }
 
+    /**
+     * Adds the iOS targets and bundles them into a single static XCFramework.
+     *
+     * Calls [addIosTargets] first, then registers each iOS target's framework with an
+     * [XCFrameworkConfig] keyed by [frameworkName]. The framework is static (`isStatic = true`),
+     * which is the configuration the Tv Maniac iOS app expects. Also applies the Kotlin/Native
+     * cache workaround from
+     * [KT-42254](https://youtrack.jetbrains.com/issue/KT-42254) so multiple frameworks can be
+     * linked without double runtime injection.
+     *
+     * ```kotlin
+     * scaffold {
+     *   addIosTargetsWithXcFramework("Shared") {
+     *     export(project(":api"))
+     *   }
+     *   configureNativeTargets()
+     * }
+     * ```
+     *
+     * @param frameworkName Base name for the produced framework and XCFramework directory.
+     * @param includeX64 Adds the `iosX64` target alongside the arm64 targets. Defaults to
+     *   `false`.
+     * @param configure Per-target configuration block. Receives the [KotlinNativeTarget] and the
+     *   target's [Framework] so additional `export(...)` or compiler options can be added.
+     */
     @JvmOverloads
     public fun addIosTargetsWithXcFramework(
         frameworkName: String,

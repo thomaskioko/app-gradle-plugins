@@ -11,6 +11,27 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 
+/**
+ * Configures a JVM-only Kotlin module with the project's defaults.
+ *
+ * Apply this plugin on a pure JVM module such as a server, a CLI, or a JVM library that does
+ * not need an Android target. The plugin applies `org.jetbrains.kotlin.jvm`, chains [BasePlugin]
+ * for the shared Kotlin configuration, registers the `jvm` sub-DSL
+ * ([io.github.thomaskioko.gradle.plugins.extensions.JvmExtension]) on `scaffold {}`, sets the
+ * Java source and target compatibility from the project's catalog, sets the `--release` flag on
+ * every `JavaCompile` task, runs the project's test setup on every `Test` task, and attaches the
+ * module's `test` task to the [BasePlugin.LINUX_TEST] aggregate.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.jvm")
+ * }
+ *
+ * scaffold {
+ *   useAndroidLint()
+ * }
+ * ```
+ */
 public abstract class JvmPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("org.jetbrains.kotlin.jvm")

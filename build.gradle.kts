@@ -11,13 +11,15 @@ tasks.register("publishLocal") {
     group = "publishing"
     description = "Publish plugins + codegen artifacts to mavenLocal."
     dependsOn(gradle.includedBuild("plugins").task(":publishToMavenLocal"))
-    dependsOn(gradle.includedBuild("codegen-plugins").task(":codegen-annotations:publishToMavenLocal"))
-    dependsOn(gradle.includedBuild("codegen-plugins").task(":codegen-processor:publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("codegen").task(":annotations:publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("codegen").task(":processor:publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("lint-rules").task(":publishToMavenLocal"))
 }
 
 tasks.register("buildHealthAll") {
     group = "verification"
-    description = "Run buildHealth across plugins + codegen composite builds."
+    description = "Run buildHealth across plugins + lint-rules + codegen composite builds."
     dependsOn(gradle.includedBuild("plugins").task(":buildHealth"))
-    dependsOn(gradle.includedBuild("codegen-plugins").task(":buildHealth"))
+    dependsOn(gradle.includedBuild("lint-rules").task(":buildHealth"))
+    dependsOn(gradle.includedBuild("codegen").task(":buildHealth"))
 }

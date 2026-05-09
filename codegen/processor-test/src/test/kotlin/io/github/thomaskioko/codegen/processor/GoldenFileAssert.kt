@@ -4,9 +4,22 @@ import org.junit.Assert.assertEquals
 import java.io.File
 
 /**
- * Compares generated Kotlin source against a golden file in `src/test/resources/golden/`.
- * Set `-Dgolden.update=true` (or env var `GOLDEN_UPDATE=true`) to write the actual output back
- * to the golden file instead of failing.
+ * Compares generated Kotlin source against a checked in golden file.
+ *
+ * Each generator output has a corresponding `.kt` file under
+ * `codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt` that records the
+ * expected output. [assertMatches] reads the golden, normalises both expected and actual by
+ * trimming trailing whitespace per line and trimming the file as a whole, then compares them
+ * with `assertEquals`. Trailing newline drift therefore does not cause flakes.
+ *
+ * ## Updating goldens
+ *
+ * Set the system property `golden.update=true` or the environment variable `GOLDEN_UPDATE=true`
+ * and run the suite. [assertMatches] writes the actual output back to the golden file instead of
+ * failing. The repo wraps this in the `/update-golden` skill, which sets the property, runs the
+ * suite, and surfaces the diff so the change is reviewable before commit. Always read the diff.
+ * Goldens are the contract a contributor is committing to; an unreviewed bulk update masks
+ * regressions.
  */
 internal object GoldenFileAssert {
 
@@ -14,8 +27,16 @@ internal object GoldenFileAssert {
         get() = System.getProperty("golden.update")?.toBooleanStrictOrNull() == true ||
             System.getenv("GOLDEN_UPDATE")?.toBooleanStrictOrNull() == true
 
-    fun assertMatches(shape: String, fileName: String, actual: String) {
-        val resourcePath = "golden/$shape/$fileName"
+    /**
+     * Asserts that [actual] matches the golden file for the given variant and file name.
+     *
+     * @param variant The variant directory under `golden/` (`simple`, `parameterized`, `tab`,
+     *   `screen-ui`, or `sheet-ui`).
+     * @param fileName The simple name of the generated file (e.g. `DebugScreenGraph.kt`).
+     * @param actual The generated source as the processor produced it.
+     */
+    fun assertMatches(variant: String, fileName: String, actual: String) {
+        val resourcePath = "golden/$variant/$fileName"
         val resourceFile = locateResource(resourcePath)
 
         if (updateGoldens) {

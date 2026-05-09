@@ -62,6 +62,15 @@ tasks {
             )
         }
     }
+
+    jar {
+        manifest {
+            attributes(
+                "Implementation-Title" to "app-gradle-plugins",
+                "Implementation-Version" to project.version.toString(),
+            )
+        }
+    }
 }
 
 kotlin {
@@ -133,6 +142,11 @@ gradlePlugin {
     plugins.create("spotlessPlugin") {
         id = "io.github.thomaskioko.gradle.plugins.spotless"
         implementationClass = "io.github.thomaskioko.gradle.plugins.checks.SpotlessPlugin"
+    }
+
+    plugins.create("lintPlugin") {
+        id = "io.github.thomaskioko.gradle.plugins.lint"
+        implementationClass = "io.github.thomaskioko.gradle.plugins.checks.LintPlugin"
     }
 
     plugins.create("resourceGeneratorPlugin") {

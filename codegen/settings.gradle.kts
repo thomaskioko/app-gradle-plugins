@@ -1,5 +1,11 @@
-apply(from = "../gradle/repositories.settings.gradle.kts")
-apply(from = "../gradle/publishing.settings.gradle.kts")
+pluginManagement {
+    includeBuild("../build-logic")
+}
+
+plugins {
+    id("dependency-config")
+    id("publishing-config")
+}
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -9,14 +15,10 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "codegen-plugins"
+rootProject.name = "codegen"
 
 include(
     ":annotations",
     ":processor",
     ":processor-test",
 )
-
-project(":annotations").name = "codegen-annotations"
-project(":processor").name = "codegen-processor"
-project(":processor-test").name = "codegen-processor-test"

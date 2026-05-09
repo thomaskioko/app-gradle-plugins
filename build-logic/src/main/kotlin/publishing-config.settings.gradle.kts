@@ -1,11 +1,6 @@
-// Loads gradle/publishing.properties and injects each entry as an extra property
-// on every project, so `findProperty("VERSION_NAME")` resolves the same value in
-// every composite. Composite-local gradle.properties wins — already-set keys are
-// skipped so POM_NAME / POM_DESCRIPTION per composite still override.
-
 import java.util.Properties
 
-val sharedPropsFile = file("../gradle/publishing.properties")
+val sharedPropsFile = settingsDir.resolve("../gradle/publishing.properties")
 require(sharedPropsFile.isFile) {
     "Expected shared publishing properties at ${sharedPropsFile.absolutePath}"
 }

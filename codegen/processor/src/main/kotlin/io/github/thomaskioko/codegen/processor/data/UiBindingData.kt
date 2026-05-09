@@ -4,20 +4,40 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 
 /**
- * Distinguishes the two UI renderer multibindings: a stack-side `ScreenContent` vs a modal
- * `SheetContent`. Both share the same generated binding shape; the differing bits (content type,
- * destination cast target, whether a `Modifier` is forwarded) are looked up from this kind at
- * generation time.
+ * Whether a [UiBindingData] models a screen renderer or an overlay renderer.
+ *
+ * Screen renderers pair with `@ScreenUi` annotated composables and contribute a `ScreenContent`
+ * to the consumer's screen multibinding. They receive a `Modifier` from the caller. Overlay
+ * renderers pair with `@SheetUi` annotated composables and contribute a `SheetContent` to the
+ * consumer's overlay multibinding. They do not receive a `Modifier` because an overlay decides
+ * its own modal layout in the composable body.
  */
-internal enum class UiBindingKind { Screen, Sheet }
+internal enum class UiBindingKind {
+    /** Renderer for a screen presenter. Pairs with `@ScreenUi`. The generated binding forwards `Modifier`. */
+    Screen,
+
+    /** Renderer for an overlay presenter. Pairs with `@SheetUi`. The generated binding does not forward `Modifier`. */
+    Sheet,
+}
 
 /**
- * Source data for a `@ScreenUi` or `@SheetUi`-annotated composable.
+ * Structured representation of a `@ScreenUi` or `@SheetUi` annotated composable. Produced by
+ * [io.github.thomaskioko.codegen.processor.parser.parseUiBindingData] and consumed by
+ * [io.github.thomaskioko.codegen.processor.codegen.UiBindingGenerator].
  *
- * The processor reads the annotation, resolves the declared presenter type, and produces one of
- * these per match. [UiBindingGenerator] turns it into a
- * `@BindingContainer @ContributesTo(parentScope) object ${functionName}UiBinding` that registers
- * a `ScreenContent` (or `SheetContent`) into the activity-scope multibinding.
+ * The generator emits a `@BindingContainer @ContributesTo(parentScope) object` named
+ * `${functionName}UiBinding` containing one `@Provides @IntoSet` function that returns the
+ * matching `ScreenContent` or `SheetContent` instance.
+ *
+ * @property kind Whether this is a screen renderer or an overlay renderer.
+ * @property composableFunction Reference to the annotated function. Held as a [MemberName] rather
+ *   than a [ClassName] because the generated code calls the composable as a top level function
+ *   through KotlinPoet's `%M` interpolation. Carrying it pre formed avoids re deriving it inside
+ *   the generator.
+ * @property presenterClass The presenter type the composable renders. Used by the generated
+ *   `matches` predicate and by the cast inside the `content` lambda.
+ * @property packageName The composable's package. The generated binding lands in `$packageName.di`.
+ * @property parentScope The parent dependency injection scope the binding contributes to (typically `ActivityScope`).
  */
 internal data class UiBindingData(
     val kind: UiBindingKind,

@@ -23,6 +23,7 @@ subprojects {
 
     pluginManager.apply("com.autonomousapps.dependency-analysis")
     pluginManager.apply("com.diffplug.spotless")
+
     configure<SpotlessExtension> {
         kotlin {
             ktlint(ktlintVersion).editorConfigOverride(mapOf("android" to "true"))
