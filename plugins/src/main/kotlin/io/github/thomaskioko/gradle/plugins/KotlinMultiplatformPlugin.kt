@@ -19,6 +19,36 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTargetWithTests
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 
+/**
+ * Configures a Kotlin Multiplatform module with the project's default targets and settings.
+ *
+ * Apply this plugin on a shared module that ships JVM, Android, and iOS code. The plugin applies
+ * `org.jetbrains.kotlin.multiplatform`, the Android KMP library plugin, and chains [BasePlugin].
+ * It then enables the default source set hierarchy template, registers the JVM target,
+ * `iosArm64`, and `iosSimulatorArm64`, applies the project's common Android configuration, sets
+ * up host tests when `commonTest` or `androidHostTest` source sets exist, wires core library
+ * desugaring when the consumer declares the artifact, applies the project's iOS compiler and
+ * linker options to every native target, hooks variant tests into the [BasePlugin.LINUX_TEST]
+ * and [BasePlugin.IOS_TEST] aggregates, and copies Moko resource bundles next to every Kotlin
+ * Native binary so iOS tests can resolve localized strings.
+ *
+ * Most modules can stop here. Modules that need additional iOS targets, an XCFramework, or
+ * iOS-specific compiler tweaks should call into the `scaffold {}` DSL ([io.github.thomaskioko.gradle.plugins.extensions.BaseExtension])
+ * for those options.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.multiplatform")
+ * }
+ *
+ * scaffold {
+ *   useMetro()
+ *   addAndroidTarget {
+ *     useCompose()
+ *   }
+ * }
+ * ```
+ */
 public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("org.jetbrains.kotlin.multiplatform")

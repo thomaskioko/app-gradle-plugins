@@ -14,6 +14,32 @@ import io.github.thomaskioko.gradle.tasks.release.ReleaseTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * Configures an Android application module and registers the suite's release tasks.
+ *
+ * Apply this plugin on the module that produces the user-installable APK or AAB. The plugin
+ * applies `com.android.application` and chains [AndroidPlugin] for the shared Android
+ * configuration, registers the `app` sub-DSL ([io.github.thomaskioko.gradle.plugins.extensions.AppExtension])
+ * on `scaffold {}`, and registers the `bumpVersion` and `release` tasks that drive the
+ * project's release workflow.
+ *
+ * Reads version metadata from the root `version.txt` file, applies an optional version suffix
+ * from the `app.versionSuffix` Gradle property, wires the `appAuthRedirectScheme` manifest
+ * placeholder, and configures debug and release signing configs. Strips Kotlin builtins, AndroidX
+ * version files, and other library metadata from the release packaging step.
+ *
+ * ```kotlin
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.app")
+ * }
+ *
+ * scaffold {
+ *   android {
+ *     applicationId("com.example.app")
+ *   }
+ * }
+ * ```
+ */
 public abstract class AppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply("com.android.application")

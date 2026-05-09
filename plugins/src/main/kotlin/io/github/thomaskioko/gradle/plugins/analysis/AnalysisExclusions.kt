@@ -3,9 +3,9 @@ package io.github.thomaskioko.gradle.plugins.analysis
 /**
  * Dependency exclusion lists used by the dependency-analysis plugin in `RootPlugin`.
  *
- * Centralized here as a pure data object so additions/removals don't require touching plugin
- * code, and so the rationale per group lives next to the entries. Not exposed as a public DSL —
- * this is internal scaffolding for the plugin suite.
+ * Centralized here as a pure data object so additions and removals do not touch plugin code,
+ * and so the rationale per group lives next to the entries. Not exposed as a public DSL.
+ * Internal scaffolding for the plugin suite.
  */
 internal object AnalysisExclusions {
     // False positives that incorrectly map standard libs to a different configuration.
@@ -24,8 +24,8 @@ internal object AnalysisExclusions {
         "androidx.compose.material:material",
     )
 
-    // Libs declared transitively but used directly — flagged as "used transitive". Suppressed
-    // because they're stable and the noise outweighs the cleanup value.
+    // Libs declared transitively but used directly. Flagged as "used transitive". Suppressed
+    // because they are stable and the noise outweighs the cleanup value.
     val usedTransitive: List<String> = listOf(
         // Common Kotlin dependencies
         "org.jetbrains.kotlin:kotlin-stdlib",
