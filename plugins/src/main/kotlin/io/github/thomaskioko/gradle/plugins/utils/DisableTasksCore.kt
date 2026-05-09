@@ -9,7 +9,7 @@ import org.gradle.api.Project
  *
  * Design principles:
  * - Preserves task graph integrity using `onlyIf { false }`
- * - Handles missing tasks gracefully via `tasks.configureEach` filtering
+ * - Tolerates missing tasks via `tasks.configureEach` filtering rather than `tasks.named`
  * - Skips processing during IDE sync to prevent configuration issues
  */
 
@@ -46,7 +46,7 @@ internal fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Str
  * Safety features:
  * - Skips during IDE sync to prevent build tool conflicts (AGP 8.3+ requirement)
  * - Preserves task graph integrity using `onlyIf` predicate
- * - Handles missing tasks gracefully via `tasks.configureEach` filtering
+ * - Tolerates missing tasks via `tasks.configureEach` filtering rather than `tasks.named`
  */
 internal fun Project.disableTasks(names: List<String>) {
     if (names.isEmpty()) return

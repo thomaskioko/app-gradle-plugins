@@ -12,7 +12,7 @@
 The GitHub Actions workflow will automatically:
 - Extract the version from the tag
 - Extract release notes from CHANGELOG.md
-- Publish to Maven Central
+- Publish to Maven Central. The workflow lists publish tasks per project (see `.github/workflows/publish-release.yml`); when adding a new publishable subproject, add its `publishAndReleaseToMavenCentral` task to that list. There is no automatic discovery.
 - Create a GitHub Release
 
 ## Release Checklist

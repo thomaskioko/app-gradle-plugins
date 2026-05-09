@@ -10,7 +10,25 @@ import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 import org.gradle.jvm.toolchain.JvmVendorSpec
 
 /**
- * `RootPlugin` is a base Gradle plugin that configures common settings for all subprojects.
+ * Configures the root project for the suite. Required on every consumer build.
+ *
+ * Apply this plugin on the root `build.gradle.kts` before any other plugin in the suite. The
+ * plugin checks that it is being applied to the root project and throws otherwise. Subproject
+ * plugins (`app`, `android`, `jvm`, `multiplatform`, `base`) check for this plugin at apply
+ * time and fail with a clear error when it is missing.
+ *
+ * The plugin applies `com.autonomousapps.dependency-analysis` once at the root, registers the
+ * aggregate test tasks ([BasePlugin.LINUX_TEST], [BasePlugin.IOS_TEST], [BasePlugin.ALL_TEST]),
+ * sets the JVM vendor on the daemon toolchain task, configures dependency analysis with the
+ * project's exclusion list and Compose bundles, and configures Gradle Doctor when the consumer
+ * applies it.
+ *
+ * ```kotlin
+ * // root build.gradle.kts
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.root")
+ * }
+ * ```
  */
 public abstract class RootPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {

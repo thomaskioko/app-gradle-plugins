@@ -5,30 +5,42 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import java.util.Properties
 
+/**
+ * Configures the generated `BuildConfig` class produced by the `buildconfig` plugin.
+ *
+ * The plugin generates a Kotlin `BuildConfig` object whose constants come from three sources:
+ * literal values declared through [stringField], [booleanField], and [intField]; entries that
+ * read from `local.properties` or environment variables through [buildConfigField]; and the
+ * project's [packageName].
+ *
+ * ```kotlin
+ * scaffold {
+ *   buildConfig {
+ *     packageName.set("com.example.app")
+ *     stringField("BASE_URL", "https://api.example.com")
+ *     booleanField("ANALYTICS_ENABLED", true)
+ *     buildConfigField("TMDB_API_KEY")
+ *   }
+ * }
+ * ```
+ *
+ * @property packageName Package name written into the generated `BuildConfig` class. Required.
+ * @property stringFields String constants to emit. Keys are constant names; values are constant
+ *   contents. Defaults to an empty map.
+ * @property booleanFields Boolean constants to emit. Keys are constant names; values are
+ *   constant contents. Defaults to an empty map.
+ * @property intFields Int constants to emit. Keys are constant names; values are constant
+ *   contents. Defaults to an empty map.
+ */
 @ScaffoldDsl
 public abstract class BuildConfigExtension(private val project: Project) {
 
-    /**
-     * The package name for the generated BuildConfig class.
-     * Example: "com.thomaskioko.tvmaniac.core.base"
-     */
     public abstract val packageName: Property<String>
 
-    /**
-     * Custom string fields to add to BuildConfig.
-     * Key = constant name, Value = constant value
-     */
     public abstract val stringFields: MapProperty<String, String>
 
-    /**
-     * Custom boolean fields to add to BuildConfig.
-     * Key = constant name, Value = constant value
-     */
     public abstract val booleanFields: MapProperty<String, Boolean>
 
-    /**
-     * Custom int fields to add to BuildConfig.
-     */
     public abstract val intFields: MapProperty<String, Int>
 
     private val localProperties: Properties by lazy {
@@ -47,35 +59,79 @@ public abstract class BuildConfigExtension(private val project: Project) {
     }
 
     /**
-     * Add a custom string constant to BuildConfig.
+     * Adds a `String` constant to the generated `BuildConfig`.
+     *
+     * ```kotlin
+     * scaffold {
+     *   buildConfig {
+     *     stringField("BASE_URL", "https://api.example.com")
+     *   }
+     * }
+     * ```
+     *
+     * @param name Constant name written into `BuildConfig`. Conventionally upper snake case.
+     * @param value Constant value emitted as a Kotlin `String` literal.
      */
     public fun stringField(name: String, value: String) {
         stringFields.put(name, value)
     }
 
     /**
-     * Add a custom boolean constant to BuildConfig.
+     * Adds a `Boolean` constant to the generated `BuildConfig`.
+     *
+     * ```kotlin
+     * scaffold {
+     *   buildConfig {
+     *     booleanField("ANALYTICS_ENABLED", true)
+     *   }
+     * }
+     * ```
+     *
+     * @param name Constant name written into `BuildConfig`. Conventionally upper snake case.
+     * @param value Constant value emitted as a Kotlin `Boolean` literal.
      */
     public fun booleanField(name: String, value: Boolean) {
         booleanFields.put(name, value)
     }
 
     /**
-     * Add a custom int constant to BuildConfig.
+     * Adds an `Int` constant to the generated `BuildConfig`.
+     *
+     * ```kotlin
+     * scaffold {
+     *   buildConfig {
+     *     intField("CACHE_TTL_SECONDS", 300)
+     *   }
+     * }
+     * ```
+     *
+     * @param name Constant name written into `BuildConfig`. Conventionally upper snake case.
+     * @param value Constant value emitted as a Kotlin `Int` literal.
      */
     public fun intField(name: String, value: Int) {
         intFields.put(name, value)
     }
 
     /**
-     * Add a string field that reads from local.properties or environment variables.
+     * Adds a `String` constant whose value comes from `local.properties` or an environment
+     * variable.
      *
-     * This method automatically looks for the value in:
-     * 1. local.properties file (git-ignored, for local development)
-     * 2. Environment variables (for CI/CD)
+     * The lookup order is `local.properties` first (typically used during local development and
+     * git-ignored), then environment variables (typically used on CI). The value is read at
+     * configuration time and emitted as a `String` constant under [name].
      *
-     * @param name The name of the BuildConfig constant and property key (e.g., "TMDB_API_KEY")
-     * @throws IllegalStateException if the value is not found in either location
+     * ```kotlin
+     * scaffold {
+     *   buildConfig {
+     *     buildConfigField("TMDB_API_KEY")
+     *   }
+     * }
+     * ```
+     *
+     * @param name Both the `BuildConfig` constant name and the lookup key in `local.properties`
+     *   or the environment.
+     * @throws IllegalStateException if [name] is not present in `local.properties` and is not
+     *   set as an environment variable.
      */
     public fun buildConfigField(name: String) {
         val value = localProperties.getProperty(name) ?: System.getenv(name)

@@ -1,11 +1,8 @@
 package com.thomaskioko.tvmaniac.presenter.showdetails.di
 
-import com.arkivanov.decompose.ComponentContext
 import com.thomaskioko.tvmaniac.core.base.ActivityScope
 import com.thomaskioko.tvmaniac.navigation.NavDestination
-import com.thomaskioko.tvmaniac.navigation.NavRoute
 import com.thomaskioko.tvmaniac.navigation.NavRouteBinding
-import com.thomaskioko.tvmaniac.navigation.RootChild
 import com.thomaskioko.tvmaniac.navigation.ScreenDestination
 import com.thomaskioko.tvmaniac.showdetails.nav.ShowDetailsRoute
 import dev.zacsweers.metro.ContributesTo
@@ -17,21 +14,15 @@ public interface ShowDetailsNavDestinationBinding {
     public companion object {
         @Provides
         @IntoSet
-        public fun provideShowDetailsNavDestination(graphFactory: ShowDetailsScreenGraph.Factory): NavDestination = object : NavDestination {
-            override fun matches(route: NavRoute): Boolean = route is ShowDetailsRoute
-
-            override fun createChild(
-                route: NavRoute,
-                componentContext: ComponentContext,
-            ): RootChild {
-                val showDetailsRoute = route as ShowDetailsRoute
+        public fun provideShowDetailsNavDestination(graphFactory: ShowDetailsScreenGraph.Factory): NavDestination<*> = NavDestination.Screen(
+            routeClass = ShowDetailsRoute::class,
+            ) { showDetailsRoute, componentContext ->
                 val graph = graphFactory.createShowDetailsGraph(componentContext)
-                return ScreenDestination(graph.showDetailsFactory.create(showDetailsRoute.param))
+                ScreenDestination(graph.showDetailsFactory.create(showDetailsRoute.param))
             }
-        }
 
-        @Provides
-        @IntoSet
-        public fun provideShowDetailsRouteBinding(): NavRouteBinding<*> = NavRouteBinding(ShowDetailsRoute::class, ShowDetailsRoute.serializer())
+            @Provides
+            @IntoSet
+            public fun provideShowDetailsRouteBinding(): NavRouteBinding<*> = NavRouteBinding(ShowDetailsRoute::class, ShowDetailsRoute.serializer())
+        }
     }
-}

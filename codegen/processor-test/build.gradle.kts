@@ -17,8 +17,8 @@ java {
 }
 
 dependencies {
-    testImplementation(project(":codegen-processor"))
-    testRuntimeOnly(project(":codegen-annotations"))
+    testImplementation(project(":processor"))
+    testRuntimeOnly(project(":annotations"))
     testImplementation("dev.zacsweers.kctfork:ksp:0.12.1")
     testImplementation("dev.zacsweers.kctfork:core:0.12.1")
     testImplementation(libs.junit)

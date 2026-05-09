@@ -14,7 +14,43 @@ import io.github.thomaskioko.codegen.processor.util.contributesTo
 import io.github.thomaskioko.codegen.processor.util.graphExtension
 import io.github.thomaskioko.codegen.processor.util.graphExtensionFactory
 
+/**
+ * Generates the Metro `@GraphExtension` interface plus its nested `Factory` for one annotated
+ * presenter.
+ *
+ * Screens and tab roots produce the same graph structure, because the route always doubles as
+ * the scope marker. One generator therefore covers both `ScreenData` and `TabData`.
+ *
+ * ## Output structure
+ *
+ * For a presenter `ShowsPresenter` with `route = ShowsRoute::class` and
+ * `parentScope = ActivityScope::class`, this generator emits:
+ *
+ * ```kotlin
+ * @GraphExtension(ShowsRoute::class)
+ * public interface ShowsScreenGraph {
+ *     public val showsPresenter: ShowsPresenter
+ *
+ *     @ContributesTo(ActivityScope::class)
+ *     @GraphExtension.Factory
+ *     public interface Factory {
+ *         public fun createShowsGraph(@Provides componentContext: ComponentContext): ShowsScreenGraph
+ *     }
+ * }
+ * ```
+ *
+ * The exposed property is the presenter for plain `@Inject` presenters and tabs, or the assisted
+ * factory for parameterized presenters. All names (interface, property, factory function) are
+ * read off the [NavData] rather than re derived here. See
+ * [io.github.thomaskioko.codegen.processor.data.NavData].
+ */
 internal object ScreenGraphGenerator {
+    /**
+     * Generates the graph file for one parsed presenter annotation.
+     *
+     * @param data The parsed annotation, which carries every name and scope the generator needs.
+     * @return The generated graph file as a KotlinPoet [FileSpec].
+     */
     fun generate(data: NavData): FileSpec {
         val factoryInterface = TypeSpec.interfaceBuilder("Factory")
             .addModifiers(KModifier.PUBLIC)
