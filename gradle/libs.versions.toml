@@ -3,7 +3,7 @@ mordant = "3.0.2"
 java-target = "21"
 java-toolchain = "25"
 junit = "4.13.2"
-junit-jupiter = "5.13.4"
+junit-jupiter = "6.0.3"
 ktlint = "1.8.0"
 
 agp = "9.2.0"
