@@ -35,17 +35,13 @@ internal val BindingContainer: ClassName = ClassName(METRO_PACKAGE, "BindingCont
 // NavDestination sealed family the bindings contribute to, the route binding multibinding
 // entries, and the slot child wrappers the factory lambdas produce.
 internal const val NAVIGATION_PACKAGE: String = "com.thomaskioko.tvmaniac.navigation"
-internal val NavRoute: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRoute")
 internal val NavRouteBinding: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRouteBinding")
 internal val NavRootBinding: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRootBinding")
-internal val BaseRoute: ClassName = ClassName(NAVIGATION_PACKAGE, "BaseRoute")
 internal val NavDestination: ClassName = ClassName(NAVIGATION_PACKAGE, "NavDestination")
 internal val NavDestinationScreen: ClassName = NavDestination.nestedClass("Screen")
 internal val NavDestinationOverlay: ClassName = NavDestination.nestedClass("Overlay")
 internal val NavDestinationTabRoot: ClassName = NavDestination.nestedClass("TabRoot")
-internal val RootChild: ClassName = ClassName(NAVIGATION_PACKAGE, "RootChild")
 internal val ScreenDestination: ClassName = ClassName(NAVIGATION_PACKAGE, "ScreenDestination")
-internal val SheetChild: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetChild")
 internal val SheetDestination: ClassName = ClassName(NAVIGATION_PACKAGE, "SheetDestination")
 
 // Consumer UI primitives: the multibinding entry types UiBindingGenerator returns. Their
@@ -58,7 +54,6 @@ internal val SheetContent: ClassName = ClassName(NAVIGATION_UI_PACKAGE, "SheetCo
 // Compose: only UiBindingGenerator references Modifier, and only on the screen path. Overlay
 // renderers do not forward a modifier.
 internal const val COMPOSE_UI_PACKAGE: String = "androidx.compose.ui"
-internal val Modifier: ClassName = ClassName(COMPOSE_UI_PACKAGE, "Modifier")
 
 // Consumer home navigation: TabChild is the wrapper the tab root factory lambda always wraps its
 // produced presenter in.
