@@ -1,10 +1,31 @@
 # Examples
 
-Concrete input and generated output for every annotation shape. Each example is taken from the golden fixtures used by `codegen-processor-test`.
+Concrete input and generated output for every annotation variant. Each example is taken from the
+golden fixtures used by `codegen-processor-test`, so the output matches what the processor
+produces in a real build.
 
-## Shape 1: Simple `@NavScreen` (plain `@Inject`)
+Each section shows the annotated declaration the consumer writes, then every Kotlin file the
+processor writes to disk for that input. Generated files land in a `<package>.di` sub-package
+next to the annotated symbol. For how each file is built from the input, see
+[architecture/generators.md](architecture/generators.md) and
+[architecture/parsers.md](architecture/parsers.md).
 
-Use this shape for a root destination whose presenter needs no runtime parameters. Everything it depends on is provided by Metro. The processor sees a plain `@Inject` constructor and generates a graph that exposes the presenter instance directly, plus a `NavDestination` that instantiates it with just a `ComponentContext`.
+## Contents
+
+1. [`@NavDestination(kind = SCREEN)`, presenter with no runtime parameters](#1-navdestinationkind--screen-presenter-with-no-runtime-parameters)
+2. [`@NavDestination(kind = SCREEN)`, parameterized presenter](#2-navdestinationkind--screen-parameterized-presenter)
+3. [`@NavDestination(kind = OVERLAY)`](#3-navdestinationkind--overlay)
+4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind--tab_root)
+5. [`@ScreenUi`](#5-screenui)
+6. [`@SheetUi`](#6-sheetui)
+
+## 1. `@NavDestination(kind = SCREEN)`, presenter with no runtime parameters
+
+Use `@NavDestination(kind = SCREEN)` on a presenter declared with a plain `@Inject` constructor when the presenter needs no runtime parameters from the route. Every
+dependency the presenter takes is provided by Metro from the surrounding dependency graph. `@NavDestination` generates a graph that exposes the presenter instance
+directly, plus a `NavDestination.Screen` factory that builds it from a `ComponentContext` alone.
+
+This is the simpler of the two SCREEN forms. The other (next section) covers presenters that take one runtime parameter through `@AssistedInject`.
 
 ### Input
 
@@ -12,10 +33,14 @@ Use this shape for a root destination whose presenter needs no runtime parameter
 package com.thomaskioko.tvmaniac.debug.presenter
 
 @Inject
-@NavScreen(route = DebugRoute::class, parentScope = ActivityScope::class)
+@NavDestination(
+    route = DebugRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.SCREEN,
+)
 public class DebugPresenter(
     componentContext: ComponentContext,
-    private val navigator: DebugNavigator,
+    private val navigator: Navigator,
     // ... more deps
 ) : ComponentContext by componentContext
 ```
@@ -47,11 +72,10 @@ public interface DebugNavDestinationBinding {
     public companion object {
         @Provides
         @IntoSet
-        public fun provideDebugNavDestination(graphFactory: DebugScreenGraph.Factory): NavDestination = object : NavDestination {
-            override fun matches(route: NavRoute): Boolean = route is DebugRoute
-
-            override fun createChild(route: NavRoute, componentContext: ComponentContext): RootChild =
-                ScreenDestination(presenter = graphFactory.createDebugGraph(componentContext).debugPresenter)
+        public fun provideDebugNavDestination(graphFactory: DebugScreenGraph.Factory): NavDestination<*> = NavDestination.Screen(
+            routeClass = DebugRoute::class,
+        ) { _, componentContext ->
+            ScreenDestination(graphFactory.createDebugGraph(componentContext).debugPresenter)
         }
 
         @Provides
@@ -62,9 +86,14 @@ public interface DebugNavDestinationBinding {
 }
 ```
 
-## Shape 2: Parameterized `@NavScreen` (`@AssistedInject`)
+## 2. `@NavDestination(kind = SCREEN)`, parameterized presenter
 
-Use this shape when the presenter needs a value carried on the route itself, such as a show id or an episode id that identifies the specific instance of the screen. The processor detects `@AssistedInject` with a nested `@AssistedFactory`, exposes the factory on the graph, and generates a `NavDestination.createChild` that casts the incoming route and threads its property through `factory.create(...)`.
+Use `@NavDestination(kind = SCREEN)` on a presenter declared with `@AssistedInject` and a nested `@AssistedFactory` when the presenter needs one runtime value supplied
+through the route, such as a show ID or an episode ID that identifies the specific instance of the screen. The runtime value lives as a property on the route class.
+
+The difference from the previous section is the presenter's constructor: `@AssistedInject` plus an `@Assisted` parameter on one constructor argument and a nested
+`@AssistedFactory` interface. `@NavDestination` detects the assisted factory automatically, exposes it on the generated graph in place of the presenter, and generates a
+factory lambda that reads the matching property off the incoming route and threads it through `factory.create(...)`.
 
 ### Input
 
@@ -72,7 +101,11 @@ Use this shape when the presenter needs a value carried on the route itself, suc
 package com.thomaskioko.tvmaniac.presenter.showdetails
 
 @AssistedInject
-@NavScreen(route = ShowDetailsRoute::class, parentScope = ActivityScope::class)
+@NavDestination(
+    route = ShowDetailsRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.SCREEN,
+)
 public class ShowDetailsPresenter(
     @Assisted private val param: ShowDetailsParam,
     componentContext: ComponentContext,
@@ -117,14 +150,11 @@ public interface ShowDetailsNavDestinationBinding {
         @IntoSet
         public fun provideShowDetailsNavDestination(
             graphFactory: ShowDetailsScreenGraph.Factory,
-        ): NavDestination = object : NavDestination {
-            override fun matches(route: NavRoute): Boolean = route is ShowDetailsRoute
-
-            override fun createChild(route: NavRoute, componentContext: ComponentContext): RootChild {
-                val showRoute = route as ShowDetailsRoute
-                val graph = graphFactory.createShowDetailsGraph(componentContext)
-                return ScreenDestination(graph.showDetailsFactory.create(showRoute.param))
-            }
+        ): NavDestination<*> = NavDestination.Screen(
+            routeClass = ShowDetailsRoute::class,
+        ) { showDetailsRoute, componentContext ->
+            val graph = graphFactory.createShowDetailsGraph(componentContext)
+            ScreenDestination(graph.showDetailsFactory.create(showDetailsRoute.param))
         }
 
         @Provides
@@ -135,18 +165,106 @@ public interface ShowDetailsNavDestinationBinding {
 }
 ```
 
-### Route / factory shape invariant
+### Route and factory rules
 
-The processor expects:
+If you violate either of these rules the processor reports a compile error pointing at the offending declaration. The rules let the processor match the route property to
+the assisted factory parameter.
 
-- Exactly one `@Assisted` constructor parameter on the presenter.
-- Exactly one property on the route class whose type matches the assisted parameter's type.
+- The presenter must have exactly one `@Assisted` constructor parameter.
+- The route class must have exactly one property whose type matches the assisted parameter's type.
 
-If either invariant is violated, the processor emits a compile error pointing at the offending declaration.
+## 3. `@NavDestination(kind = OVERLAY)`
 
-## Shape 3: `@TabScreen`
+Use `@NavDestination(kind = OVERLAY)` for a modal destination presented on top of the current screen through Decompose's slot mechanism, such as a bottom sheet, dialog,
+or menu. The difference from a SCREEN destination is twofold: the route must implement `NavRoute` plus a marker interface (in Tv Maniac, `OverlayRoute`) that tells the
+consumer's navigator to route the destination into the overlay slot instead of pushing it onto the back stack, and the generated binding contributes a
+`NavDestination.Overlay` instead of a `NavDestination.Screen`.
 
-Use this shape for a tab inside a host screen (e.g. the home screen's bottom tabs). Tabs don't participate in the root navigation stack, so they contribute a `TabDestination` into the host's multibinding instead of a `NavDestination`. No `NavRouteBinding` is emitted because the host feature owns its own config serialization.
+`@NavDestination(kind = OVERLAY)` works with both plain `@Inject` and `@AssistedInject` presenters; the example below uses the parameterized form. The full runtime flow
+lives in [architecture/consumer-contract.md](architecture/consumer-contract.md#runtime-flow).
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.presentation.episodedetail
+
+@AssistedInject
+@NavDestination(
+    route = EpisodeSheetRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.OVERLAY,
+)
+public class EpisodeSheetPresenter(
+    @Assisted private val param: EpisodeSheetParam,
+    componentContext: ComponentContext,
+    // ... deps
+) {
+    @AssistedFactory
+    public fun interface Factory {
+        public fun create(param: EpisodeSheetParam): EpisodeSheetPresenter
+    }
+}
+```
+
+Where `EpisodeSheetRoute` is:
+
+```kotlin
+@Serializable
+public data class EpisodeSheetRoute(public val param: EpisodeSheetParam) : NavRoute, OverlayRoute
+```
+
+### Generated: `EpisodeSheetScreenGraph.kt`
+
+```kotlin
+@GraphExtension(EpisodeSheetRoute::class)
+public interface EpisodeSheetScreenGraph {
+    public val episodeSheetFactory: EpisodeSheetPresenter.Factory
+
+    @ContributesTo(ActivityScope::class)
+    @GraphExtension.Factory
+    public interface Factory {
+        public fun createEpisodeSheetGraph(@Provides componentContext: ComponentContext): EpisodeSheetScreenGraph
+    }
+}
+```
+
+### Generated: `EpisodeSheetNavDestinationBinding.kt`
+
+```kotlin
+@ContributesTo(ActivityScope::class)
+public interface EpisodeSheetNavDestinationBinding {
+    public companion object {
+        @Provides
+        @IntoSet
+        public fun provideEpisodeSheetNavDestination(
+            graphFactory: EpisodeSheetScreenGraph.Factory,
+        ): NavDestination<*> = NavDestination.Overlay(
+            routeClass = EpisodeSheetRoute::class,
+        ) { episodeSheetRoute, componentContext ->
+            val graph = graphFactory.createEpisodeSheetGraph(componentContext)
+            ScreenDestination(graph.episodeSheetFactory.create(episodeSheetRoute.param))
+        }
+
+        @Provides
+        @IntoSet
+        public fun provideEpisodeSheetRouteBinding(): NavRouteBinding<*> =
+            NavRouteBinding(EpisodeSheetRoute::class, EpisodeSheetRoute.serializer())
+    }
+}
+```
+
+The graph file is identical in form to example 2's `ShowDetailsScreenGraph`. The only difference between SCREEN and OVERLAY output is that the binding contributes a
+`NavDestination.Overlay` instead of a `NavDestination.Screen`. The consumer's navigator inspects that subclass at runtime to decide whether to push the destination onto
+the back stack or render it in Decompose's overlay slot.
+
+## 4. `@NavDestination(kind = TAB_ROOT)`
+
+Use `@NavDestination(kind = TAB_ROOT)` for the destination shown when the user selects one of the bottom navigation tabs. The difference from SCREEN and OVERLAY
+destinations is the route type: a tab root's route is a `NavRoot` `data object` rather than a `NavRoute` `data class`, so the route carries no payload. Tab presenters
+therefore use plain `@Inject` only; `@NavDestination` reports a compile error if a tab presenter declares a nested `@AssistedFactory`.
+
+The generated binding contributes a `NavDestination.TabRoot` (instead of `Screen` or `Overlay`) plus a `NavRootBinding<*>` (instead of `NavRouteBinding<*>`) so the tab
+root participates in polymorphic save and restore alongside the other tabs.
 
 ### Input
 
@@ -154,106 +272,74 @@ Use this shape for a tab inside a host screen (e.g. the home screen's bottom tab
 package com.thomaskioko.tvmaniac.discover.presenter
 
 @Inject
-@TabScreen(config = HomeConfig.Discover::class, parentScope = HomeRoute::class)
+@NavDestination(
+    route = DiscoverRoot::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.TAB_ROOT,
+)
 public class DiscoverShowsPresenter(
     componentContext: ComponentContext,
     // ... deps
 ) : ComponentContext by componentContext
 ```
 
-The generated tab graph is `@GraphExtension(HomeConfig.Discover::class)`. The config class itself is the scope marker. The factory is `@ContributesTo(HomeRoute::class)` so that every tab joins the host home graph whose scope is `HomeRoute`.
+Where `DiscoverRoot` is:
+
+```kotlin
+@Serializable
+public data object DiscoverRoot : NavRoot
+```
+
+### Generated: `DiscoverShowsTabGraph.kt`
+
+```kotlin
+@GraphExtension(DiscoverRoot::class)
+public interface DiscoverShowsTabGraph {
+    public val discoverShowsPresenter: DiscoverShowsPresenter
+
+    @ContributesTo(ActivityScope::class)
+    @GraphExtension.Factory
+    public interface Factory {
+        public fun createDiscoverShowsTabGraph(@Provides componentContext: ComponentContext): DiscoverShowsTabGraph
+    }
+}
+```
 
 ### Generated: `DiscoverShowsTabDestinationBinding.kt`
 
 ```kotlin
-@ContributesTo(HomeRoute::class)
+@ContributesTo(ActivityScope::class)
 public interface DiscoverShowsTabDestinationBinding {
     public companion object {
         @Provides
         @IntoSet
-        public fun provideDiscoverShowsTabDestination(
+        public fun provideDiscoverShowsNavDestination(
             graphFactory: DiscoverShowsTabGraph.Factory,
-        ): TabDestination = object : TabDestination {
-            override fun matches(config: HomeConfig): Boolean = config is HomeConfig.Discover
-
-            override fun createChild(config: HomeConfig, componentContext: ComponentContext): TabChild<*> =
-                TabChild(graphFactory.createDiscoverShowsTabGraph(componentContext).discoverShowsPresenter)
-        }
-    }
-}
-```
-
-Notice: no `NavRouteBinding` provider. Home owns its own `HomeConfig` serialization so the route binding multibinding is not used for tabs.
-
-## Shape 4: `@NavSheet`
-
-Use this shape for a modal sheet — bottom sheet, dialog, or overlay — presented on top of the current destination via Decompose's `childSlot`. The sheet has its own `SheetConfig` carrying any assisted parameters, and requires `@AssistedInject` so those parameters can flow from the config into the presenter. The generated binding mirrors `@NavScreen` but targets the sheet multibindings (`SheetChildFactory` + `SheetConfigBinding`) so the slot survives process death without a central registry.
-
-### Input
-
-```kotlin
-package com.thomaskioko.tvmaniac.presenter.episodedetail
-
-@AssistedInject
-@NavSheet(
-    route = EpisodeSheetConfig::class,
-    parentScope = ActivityScope::class,
-)
-public class EpisodeDetailSheetPresenter(
-    @Assisted public val episodeId: Long,
-    @Assisted public val source: ScreenSource,
-    componentContext: ComponentContext,
-    // ... deps
-) {
-    @AssistedFactory
-    public fun interface Factory {
-        public fun create(episodeId: Long, source: ScreenSource): EpisodeDetailSheetPresenter
-    }
-}
-```
-
-`EpisodeSheetConfig` is a `@Serializable` data class in the feature's `nav/api` module that implements the consumer's `SheetConfig` marker. The generated sheet graph is `@GraphExtension(EpisodeSheetConfig::class)`. The config class itself is the scope marker.
-
-### Generated: `EpisodeDetailSheetDestinationBinding.kt`
-
-```kotlin
-@ContributesTo(ActivityScope::class)
-public interface EpisodeDetailSheetDestinationBinding {
-    public companion object {
-        @Provides
-        @IntoSet
-        public fun provideEpisodeDetailSheetChildFactory(
-            graphFactory: EpisodeDetailSheetScreenGraph.Factory,
-        ): SheetChildFactory = object : SheetChildFactory {
-            override fun matches(config: SheetConfig): Boolean = config is EpisodeSheetConfig
-
-            override fun createChild(
-                config: SheetConfig,
-                componentContext: ComponentContext,
-            ): SheetChild {
-                val sheetConfig = config as EpisodeSheetConfig
-                return SheetDestination(
-                    presenter = graphFactory.createEpisodeDetailSheetGraph(componentContext)
-                        .episodeDetailSheetFactory.create(sheetConfig.episodeId, sheetConfig.source),
-                )
-            }
+        ): NavDestination<*> = NavDestination.TabRoot(
+            routeClass = DiscoverRoot::class,
+        ) { _, componentContext ->
+            TabChild(graphFactory.createDiscoverShowsTabGraph(componentContext).discoverShowsPresenter)
         }
 
         @Provides
         @IntoSet
-        public fun provideEpisodeDetailSheetConfigBinding(): SheetConfigBinding<*> =
-            SheetConfigBinding(EpisodeSheetConfig::class, EpisodeSheetConfig.serializer())
+        public fun provideDiscoverShowsRootBinding(): NavRootBinding<*> =
+            NavRootBinding(DiscoverRoot::class, DiscoverRoot.serializer())
     }
 }
 ```
 
-Notice the shape is parallel to `@NavScreen`: a `@ContributesTo(parentScope)` interface whose companion contributes two `@IntoSet` providers. `SheetChildFactory` feeds the `Set<SheetChildFactory>` multibinding that the root presenter walks when the sheet slot activates. `SheetConfigBinding<*>` feeds the polymorphic `KSerializer<SheetConfig>` used by Decompose's `childSlot`, so the sheet slot survives process death without any central registry.
+The tab graph is contributed to `parentScope` (typically `ActivityScope`), the same scope as the unified `Set<NavDestination<*>>`. The consumer's home presenter filters
+by the `TabRoot` subclass and renders the active root.
 
-The processor supports multiple `@Assisted` parameters for sheets. It maps each assisted constructor parameter to a route property by type and order.
+## 5. `@ScreenUi`
 
-## Shape 5: `@ScreenUi`
+Use `@ScreenUi` on the Android `@Composable` function that renders a screen presenter. The annotation generates a `ScreenContent` binding that joins the composable to the
+`Set<ScreenContent>` multibinding the navigation host iterates to pick the right renderer for the active screen. `@ScreenUi` replaces the mechanical binding file each
+composable would otherwise need.
 
-Use this shape on the Android `@Composable` that renders a root-stack screen. The annotation generates the small `ScreenContent` binding that joins the composable to the `Set<ScreenContent>` multibinding the root Compose stack iterates to pick the right renderer. One annotation replaces a small but entirely mechanical binding file per composable.
+The previous four sections cover the presenter-side annotation. `@ScreenUi` covers the Android UI-side annotation that pairs with a `kind = SCREEN` presenter at runtime.
+The next section covers the overlay equivalent, `@SheetUi`.
 
 ### Input
 
@@ -308,15 +394,22 @@ public object DebugMenuScreenUiBinding {
 }
 ```
 
-Notice the `@BindingContainer + public object` shape rather than the `interface + companion object` used by `@NavScreen` output. The Android-only `ui` source set does not pick up authored `@Provides @IntoSet` declarations inside an interface companion unless Metro's `generateContributionProviders` is enabled, which is disabled in the shared scaffold. The generator targets the object form so the contribution is discovered without that flag. See the note in [annotations.md](annotations.md#screenui) for details.
+The `@BindingContainer object` structure rather than `interface + companion object` is deliberate. The Android only `ui` source set does not pick up `@Provides @IntoSet`
+declarations from a companion object the way the shared Kotlin Multiplatform source set does, so emitting the interface form would silently produce an empty multibinding
+at runtime. The full reasoning lives in
+[architecture/generators.md](architecture/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
-### Function shape invariant
+### Function signature requirement
 
-The annotated function must accept exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator calls them by name, so renaming either breaks the generated code at compile time.
+The annotated function must accept exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator calls them by
+name, so renaming either causes the generated code to fail at the next compile.
 
-## Shape 6: `@SheetUi`
+## 6. `@SheetUi`
 
-Use this shape on the Android `@Composable` that renders a modal sheet. Parallel to `@ScreenUi`, but contributes a `SheetContent` into `Set<SheetContent>` instead of a `ScreenContent` into `Set<ScreenContent>`.
+Use `@SheetUi` on the Android `@Composable` function that renders an overlay presenter. The difference from `@ScreenUi` is the multibinding the generated code contributes
+to: `@SheetUi` adds a `SheetContent` into `Set<SheetContent>` because the consumer's overlay slot iterates the sheet set, while `@ScreenUi` adds a `ScreenContent` into
+`Set<ScreenContent>` because the navigation stack iterates the screen set. `@SheetUi` also does not forward `Modifier` to the composable; `@ScreenUi` does. The reason is
+at the end of this section.
 
 ### Input
 
@@ -370,4 +463,6 @@ public object EpisodeSheetUiBinding {
 }
 ```
 
-The sheet renderer receives no `Modifier`. `SheetContent.content` is `@Composable (SheetChild) -> Unit`; the modal presentation (`ModalBottomSheet` or similar) is set up inside the composable body. The annotated function still accepts a `modifier: Modifier = Modifier` parameter for consistency with other composables, but the generator does not forward it.
+The overlay renderer does not receive a modifier. `SheetContent.content` is typed as `@Composable (SheetChild) -> Unit`. Modal layout decisions (a `ModalBottomSheet`, for
+example) belong inside the composable body, not at the call site. The annotated function still accepts a `modifier: Modifier = Modifier` parameter for consistency with
+other composables, but the generator does not forward it.

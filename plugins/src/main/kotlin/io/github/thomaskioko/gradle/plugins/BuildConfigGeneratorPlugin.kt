@@ -8,20 +8,23 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
- * Gradle plugin that generates BuildConfig.kt with compile-time constants.
+ * Generates a Kotlin `BuildConfig` object with compile-time constants.
  *
- * This plugin integrates with Kotlin Multiplatform projects to provide
- * build-time configuration values without storing secrets in source control.
+ * Apply this plugin on a Kotlin Multiplatform module that needs build-time constants without
+ * storing secrets in source control. The plugin registers the `buildConfig {}` extension
+ * ([io.github.thomaskioko.gradle.plugins.extensions.BuildConfigExtension]), the
+ * `generateBuildConfig` task, makes every Kotlin compile task depend on the generator, and adds
+ * the generated sources to `commonMain`. Constants can be declared as literal values or read at
+ * configuration time from `local.properties` or environment variables.
  *
- * Usage in build.gradle.kts:
- * ```
+ * ```kotlin
  * plugins {
- *     id("io.github.thomaskioko.gradle.plugins.buildconfig")
+ *   id("io.github.thomaskioko.gradle.plugins.buildconfig")
  * }
  *
  * buildConfig {
- *     packageName.set("com.thomaskioko.tvmaniac.core.base")
- *     buildConfigField("TMDB_API_KEY")
+ *   packageName.set("com.thomaskioko.tvmaniac.core.base")
+ *   buildConfigField("TMDB_API_KEY")
  * }
  * ```
  */

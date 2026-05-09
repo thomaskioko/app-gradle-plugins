@@ -8,8 +8,8 @@ on:
   workflow_call:
 
 jobs:
-  formatting:
-    name: Check Formatting
+  static-analysis:
+    name: Static Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +22,21 @@ jobs:
       - name: Check code formatting
         run: ./gradlew spotlessCheck
 
+      - name: Check dependency health
+        run: ./gradlew buildHealthAll --no-configuration-cache
+
+      - name: Upload static analysis reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: static-analysis-reports
+          path: |
+            **/build/reports/dependency-analysis/
+
   build:
     name: Build
     runs-on: ubuntu-latest
+    needs: static-analysis
 
     steps:
       - name: Checkout
@@ -36,7 +48,14 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Build plugins
-        run: ./gradlew build --stacktrace
+        run: |
+          ./gradlew build \
+            :plugins:build \
+            :codegen:annotations:build \
+            :codegen:processor:build \
+            :codegen:processor-test:build \
+            :lint-rules:build \
+            --stacktrace
 
       - name: Upload build reports
         if: failure()
@@ -47,25 +66,10 @@ jobs:
             **/build/reports/
             **/build/test-results/
 
-  validate:
-    name: Validate Plugins
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Gradle
-        uses: ./.github/actions/gradle-setup
-
-      - name: Validate plugin descriptors
-        run: ./gradlew :plugins:validatePlugins --stacktrace
-
-  functional-test:
-    name: Functional Tests (TestKit)
-    runs-on: ubuntu-latest
-    needs: build
+    needs: static-analysis
 
     steps:
       - name: Checkout
@@ -80,34 +84,11 @@ jobs:
       - name: Run functional tests
         run: ./gradlew :plugins:functionalTest --stacktrace
 
-      - name: Upload functional test reports
+      - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: functional-test-reports
+          name: test-reports
           path: |
             plugins/build/reports/tests/functionalTest/
             plugins/build/test-results/functionalTest/
-
-  dependency-health:
-    name: Dependency Health
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Gradle
-        uses: ./.github/actions/gradle-setup
-
-      - name: Check dependency health
-        run: ./gradlew buildHealthAll --no-configuration-cache
-
-      - name: Upload dependency health reports
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: dependency-health-reports
-          path: |
-            **/build/reports/dependency-analysis/

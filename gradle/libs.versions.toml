@@ -3,7 +3,8 @@ mordant = "3.0.2"
 java-target = "21"
 java-toolchain = "25"
 junit = "4.13.2"
-ktlint = "1.4.0"
+junit-jupiter = "5.13.4"
+ktlint = "1.8.0"
 
 agp = "9.2.0"
 baselineprofile = "1.4.1"
@@ -41,6 +42,16 @@ ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
 junit = { module = "junit:junit", version.ref = "junit" }
+
+# ktlint custom rule authoring (consumed by the lint-rules composite build)
+ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-core", version.ref = "ktlint" }
+ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint" }
+ktlint-test = { module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version = "2.0.17" }
 
 [plugins]
 app-root = { id = "io.github.thomaskioko.gradle.plugins.root" }

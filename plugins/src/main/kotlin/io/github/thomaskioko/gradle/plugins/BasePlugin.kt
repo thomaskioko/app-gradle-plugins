@@ -19,11 +19,55 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
+/**
+ * Common Kotlin and JVM configuration applied to every subproject in the suite.
+ *
+ * Every other subproject plugin (`app`, `android`, `jvm`, `multiplatform`) applies this plugin
+ * itself, so consumers do not apply it directly. Applying any of those plugins without
+ * `io.github.thomaskioko.gradle.plugins.root` on the root project throws a `GradleException` at
+ * apply-time so the missing root setup is caught early.
+ *
+ * The plugin registers the `scaffold {}` extension, applies Spotless, configures the JVM and
+ * Kotlin toolchains, sets the project-wide compiler flags (explicit API mode, language version,
+ * progressive mode, opt-ins, JVM target), and turns on reproducible JAR output.
+ *
+ * ```kotlin
+ * // settings.gradle.kts (root)
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.root")
+ * }
+ *
+ * // module build.gradle.kts
+ * plugins {
+ *   id("io.github.thomaskioko.gradle.plugins.multiplatform")
+ * }
+ *
+ * scaffold {
+ *   addJvmTarget()
+ *   addAndroidTarget()
+ * }
+ * ```
+ */
 public abstract class BasePlugin : Plugin<Project> {
     public companion object {
+        /**
+         * Name of the aggregate task that runs every JVM and Linux-runnable test on the host.
+         * Subproject plugins attach their variant test tasks to this aggregate via `dependsOn`.
+         */
         public const val LINUX_TEST: String = "linuxTest"
+
+        /**
+         * Name of the aggregate task that runs the iOS simulator tests. Wired up only on
+         * Kotlin Multiplatform modules with iOS targets.
+         */
         public const val IOS_TEST: String = "iosTest"
+
+        /**
+         * Name of the aggregate task that runs both [LINUX_TEST] and [IOS_TEST] together. Used
+         * by CI pipelines that want a single entry point covering every test on every host.
+         */
         public const val ALL_TEST: String = "ciTest"
+
         internal const val ROOT_PLUGIN_ID: String = "io.github.thomaskioko.gradle.plugins.root"
     }
 

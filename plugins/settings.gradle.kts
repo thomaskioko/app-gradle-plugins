@@ -1,5 +1,11 @@
-apply(from = "../gradle/repositories.settings.gradle.kts")
-apply(from = "../gradle/publishing.settings.gradle.kts")
+pluginManagement {
+    includeBuild("../build-logic")
+}
+
+plugins {
+    id("dependency-config")
+    id("publishing-config")
+}
 
 dependencyResolutionManagement {
     versionCatalogs {

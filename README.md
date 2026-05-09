@@ -39,7 +39,7 @@ plugins {
 
 ## Required Setup
 
-Apply `io.github.thomaskioko.gradle.plugins.root` to the **root project's** `build.gradle.kts`. This is required — applying any other plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) without `root` on the root project throws a `GradleException` at apply-time.
+Apply `io.github.thomaskioko.gradle.plugins.root` to the **root project's** `build.gradle.kts`. This is required. Applying any other plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) without `root` on the root project throws a `GradleException` at apply-time.
 
 ```kotlin
 // Root build.gradle.kts
@@ -231,7 +231,7 @@ scaffold {
 
 ### Root Project Plugin
 
-Configures the root project with dependency analysis, the aggregate test tasks (`linuxTest`, `iosTest`, `ciTest`), version checks, and common tooling. **Required**: must be applied on the root project before any other plugin in this suite — see [Required Setup](#required-setup).
+Configures the root project with dependency analysis, the aggregate test tasks (`linuxTest`, `iosTest`, `ciTest`), version checks, and common tooling. **Required**: must be applied on the root project before any other plugin in this suite. See [Required Setup](#required-setup).
 
 ```kotlin
 plugins {
@@ -248,6 +248,34 @@ plugins {
     id("io.github.thomaskioko.gradle.plugins.spotless")
 }
 ```
+
+### Lint Plugin
+
+Layers a custom ktlint rule set on top of Spotless's standard checks. Apply once to the **root project**; the plugin propagates configuration to every subproject and applies Spotless transitively.
+
+```kotlin
+// Root build.gradle.kts
+plugins {
+    alias(libs.plugins.app.root)
+    alias(libs.plugins.app.lint)
+}
+```
+
+The plugin reads its own version from the JAR manifest's `Implementation-Version` attribute and resolves `io.github.thomaskioko.gradle.plugins:lint-rules:<own-version>` automatically. There is no version literal to maintain in consumer projects. Bumping `app-gradle-plugins` in `libs.versions.toml` automatically pulls the matching `lint-rules` artifact.
+
+#### Rules shipped in `lint-rules`
+
+| Rule ID                                        | Enforces                                                                                                                                                                                   |
+|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `tvmaniac:no-mutating-router-import`           | No `com.arkivanov.decompose.router.{stack,slot}.*` imports outside `/navigation/` modules, except read-only `ChildStack` and `ChildSlot` types that render-site presenters and UIs need.   |
+| `tvmaniac:no-navigation-construct-outside-nav` | No `StackNavigation<>()` / `SlotNavigation<>()` constructor calls outside `/navigation/` modules.                                                                                          |
+| `tvmaniac:no-custom-navigator-interface`       | No custom `XxxNavigator` interfaces. Only the canonical `Navigator` and `SheetNavigator` are allowed.                                                                                      |
+| `tvmaniac:no-style-wrapper-in-preview`         | No `TvManiacTheme { ... }` or `TvManiacBackground { ... }` wrappers inside `@Preview`-family functions; the styling is applied automatically by `TvManiacPreviewWrapperProvider`.          |
+| `tvmaniac:test-name-format`                    | `@Test` (and `@ParameterizedTest`, `@RepeatedTest`) functions must be named `should X given Y` or `should X when Y` (backticked) / `shouldXGivenY` (camelCase, used in `src/androidTest`). |
+
+The rules are TvManiac-specific. Other consumers of `app-gradle-plugins` are not forced into them: only projects that explicitly apply `app.lint` get the rules.
+
+`SpotlessPlugin` reads the property via `Project.findProperty(...)`, so values set programmatically (extras) and via `-P` flags also work.
 
 ## Configuration Requirements
 
