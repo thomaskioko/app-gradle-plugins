@@ -30,6 +30,7 @@ internal object FileGenerator {
             ScreenGraphGenerator.generate(data),
             NavDestinationBindingGenerator.generate(data),
         )
+
         is TabData -> listOf(
             ScreenGraphGenerator.generate(data),
             TabDestinationBindingGenerator.generate(data),
