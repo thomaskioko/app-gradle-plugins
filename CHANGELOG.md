@@ -17,6 +17,10 @@ See [annotations.md](codegen/docs/annotations.md), [examples.md](codegen/docs/ex
 
 - `tvmaniac:presenter-needs-codegen-annotation` now accepts `@ChildPresenter` as a satisfying annotation, so child presenters routed through the new codegen path no longer need an `editorconfig` exemption.
 
+### Fix
+- Apply `com.autonomousapps.dependency-analysis` per subproject.
+- Default `appAuthRedirectScheme` test manifest placeholder on KMP Android targets so transitive AppAuth dependencies do not break `processAndroidHostTestManifest` / `processAndroidDeviceTestManifest`.
+
 ## 0.7.7 *(2026-05-10)*
 
 ### Navigation

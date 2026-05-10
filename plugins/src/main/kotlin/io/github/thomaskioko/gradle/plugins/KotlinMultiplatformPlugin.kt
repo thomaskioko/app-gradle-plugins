@@ -1,9 +1,12 @@
 package io.github.thomaskioko.gradle.plugins
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.api.variant.HasDeviceTests
+import com.android.build.api.variant.HasHostTests
 import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.setup.setupTests
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
+import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.disableMultiplatformTasks
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
@@ -108,9 +111,23 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
 
         target.tasks.withType(Test::class.java).configureEach(Test::setupTests)
         target.configureMultiplatformTests()
+        target.configureTestManifestPlaceholders()
         target.disableMultiplatformTasks()
 
         configureMokoResourceBundleCopy(target)
+    }
+
+    private fun Project.configureTestManifestPlaceholders() {
+        androidComponents {
+            onVariants { variant ->
+                (variant as? HasHostTests)?.hostTests?.values?.forEach { hostTest ->
+                    hostTest.manifestPlaceholders.put("appAuthRedirectScheme", "tvmaniac-test")
+                }
+                (variant as? HasDeviceTests)?.deviceTests?.values?.forEach { deviceTest ->
+                    deviceTest.manifestPlaceholders.put("appAuthRedirectScheme", "tvmaniac-test")
+                }
+            }
+        }
     }
 
     private fun Project.configureMultiplatformTests() {

@@ -17,11 +17,12 @@ import org.gradle.jvm.toolchain.JvmVendorSpec
  * plugins (`app`, `android`, `jvm`, `multiplatform`, `base`) check for this plugin at apply
  * time and fail with a clear error when it is missing.
  *
- * The plugin applies `com.autonomousapps.dependency-analysis` once at the root, registers the
- * aggregate test tasks ([BasePlugin.LINUX_TEST], [BasePlugin.IOS_TEST], [BasePlugin.ALL_TEST]),
- * sets the JVM vendor on the daemon toolchain task, configures dependency analysis with the
- * project's exclusion list and Compose bundles, and configures Gradle Doctor when the consumer
- * applies it.
+ * The plugin applies `com.autonomousapps.dependency-analysis` at the root for the aggregate
+ * `buildHealth` task and the DSL configuration; `BasePlugin` re-applies the plugin on every
+ * subproject so per-project analysis contributes to the aggregate. Registers the aggregate test
+ * tasks ([BasePlugin.LINUX_TEST], [BasePlugin.IOS_TEST], [BasePlugin.ALL_TEST]), sets the JVM
+ * vendor on the daemon toolchain task, configures dependency analysis with the project's
+ * exclusion list and Compose bundles, and configures Gradle Doctor when the consumer applies it.
  *
  * ```kotlin
  * // root build.gradle.kts
