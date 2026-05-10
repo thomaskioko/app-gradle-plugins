@@ -27,9 +27,10 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
  * `io.github.thomaskioko.gradle.plugins.root` on the root project throws a `GradleException` at
  * apply-time so the missing root setup is caught early.
  *
- * The plugin registers the `scaffold {}` extension, applies Spotless, configures the JVM and
- * Kotlin toolchains, sets the project-wide compiler flags (explicit API mode, language version,
- * progressive mode, opt-ins, JVM target), and turns on reproducible JAR output.
+ * The plugin registers the `scaffold {}` extension, applies Spotless, applies the
+ * dependency-analysis plugin per subproject so `buildHealth` aggregates every module, configures
+ * the JVM and Kotlin toolchains, sets the project-wide compiler flags (explicit API mode,
+ * language version, progressive mode, opt-ins, JVM target), and turns on reproducible JAR output.
  *
  * ```kotlin
  * // settings.gradle.kts (root)
@@ -75,6 +76,7 @@ public abstract class BasePlugin : Plugin<Project> {
         requireRootPluginApplied(target)
 
         target.plugins.apply("io.github.thomaskioko.gradle.plugins.spotless")
+        target.plugins.apply("com.autonomousapps.dependency-analysis")
 
         target.scaffoldProperties()
         target.extensions.create("scaffold", BaseExtension::class.java)
