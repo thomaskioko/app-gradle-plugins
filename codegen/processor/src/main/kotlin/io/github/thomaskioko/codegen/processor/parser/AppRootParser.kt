@@ -110,6 +110,7 @@ private fun inferBoundInterface(
 
     return when (candidates.size) {
         1 -> candidates.first()
+
         0 -> {
             logger.error(
                 "@${Constants.APP_ROOT} requires the implementation to extend exactly one " +
@@ -118,6 +119,7 @@ private fun inferBoundInterface(
             )
             null
         }
+
         else -> {
             val names = candidates.joinToString(", ") { it.simpleName }
             logger.error(
