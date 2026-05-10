@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.publish)
+    alias(libs.plugins.spotless)
 }
 
 group = property("GROUP").toString()

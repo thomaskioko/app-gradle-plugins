@@ -23,3 +23,12 @@ tasks.register("buildHealthAll") {
     dependsOn(gradle.includedBuild("lint-rules").task(":buildHealth"))
     dependsOn(gradle.includedBuild("codegen").task(":buildHealth"))
 }
+
+tasks.register("spotlessApplyAll") {
+    group = "formatting"
+    description = "Run spotlessApply across root + plugins + lint-rules + codegen composite builds."
+    dependsOn("spotlessApply")
+    dependsOn(gradle.includedBuild("plugins").task(":spotlessApply"))
+    dependsOn(gradle.includedBuild("lint-rules").task(":spotlessApply"))
+    dependsOn(gradle.includedBuild("codegen").task(":spotlessApply"))
+}
