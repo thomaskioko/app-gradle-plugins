@@ -16,13 +16,13 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
  *
  * The rule fires on a top-level `@Composable` function that declares a parameter named
  * `presenter` or `rootPresenter` and is missing every accepted codegen UI annotation
- * (`@ScreenUi`, `@SheetUi`, `@AppRootUi`). Without one of those annotations the navigation host
- * cannot dispatch the composable through `Set<ScreenContent>`, `Set<SheetContent>`, or the
- * generated `AppRootProvider`, so the composable is unreachable.
+ * (`@ScreenUi`, `@SheetUi`, `@TabUi`, `@AppRootUi`). Without one of those annotations the
+ * navigation host cannot dispatch the composable through `Set<ScreenContent>`,
+ * `Set<SheetContent>`, or the generated `AppRootProvider`, so the composable is unreachable.
  *
- * Tab-root screens dispatched manually inside a parent host (for example the screens invoked
- * from the home host's `Children` block) opt out by listing their simple function name in
- * `ktlint_tvmaniac_unrouted_screens` in the project `.editorconfig`.
+ * Screens dispatched manually inside a parent host (rare; the standard tab path is `@TabUi`) opt
+ * out by listing their simple function name in `ktlint_tvmaniac_unrouted_screens` in the project
+ * `.editorconfig`.
  *
  * ## Example
  *
@@ -101,15 +101,16 @@ public class ComposeScreenCodegenAnnotationRule :
         internal val UI_CODEGEN_ANNOTATIONS: Set<String> = setOf(
             "ScreenUi",
             "SheetUi",
+            "TabUi",
             "AppRootUi",
         )
 
         internal fun errorMessage(functionName: String): String =
             "$functionName is a @Composable function that accepts a presenter parameter, but is " +
                 "missing a codegen UI annotation. Add @ScreenUi(...) for a stack screen, @SheetUi(...) " +
-                "for a modal overlay, or @AppRootUi(...) for the application's host composable. If the " +
-                "screen is dispatched manually inside a parent host (for example a tab-root screen " +
-                "invoked from a `Children` block), add its simple name to " +
-                "`ktlint_tvmaniac_unrouted_screens` in `.editorconfig`."
+                "for a modal overlay, @TabUi(...) for a bottom-nav tab pager page, or @AppRootUi(...) " +
+                "for the application's host composable. If the screen is dispatched manually inside a " +
+                "parent host, add its simple name to `ktlint_tvmaniac_unrouted_screens` in " +
+                "`.editorconfig`."
     }
 }
