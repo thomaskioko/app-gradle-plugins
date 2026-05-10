@@ -81,7 +81,7 @@ The consumer's serialization layer iterates this multibinding to build a `Serial
 and restores it on relaunch, it uses that module to encode and decode each route. The codegen never serialises anything itself; it only contributes the entries the
 consumer's serialization layer needs.
 
-Tabs use the parallel `NavRootBinding` so that `NavRoot` instances participate in the same polymorphic save and restore alongside `NavRoute` instances.
+Tabs use the parallel `NavRootBinding` so that `NavRoot` instances participate in the same polymorphic save and restore alongside `NavRoute` instances. Tab bindings additionally contribute the `NavRoot` singleton itself into `Set<NavRoot>`, which navigators iterate to enumerate the available tabs without consulting destination factories.
 
 ## Why constants rather than configuration
 

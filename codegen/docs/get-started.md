@@ -50,7 +50,7 @@ The shared code presenter annotations (target `CLASS`, live in the Kotlin Multip
    - `SCREEN` and `OVERLAY` generate a graph scoped to the route plus a binding that contributes `NavDestination.Screen` (or `Overlay`) and `NavRouteBinding`. The
      processor auto-detects `@AssistedInject` with a nested `@AssistedFactory` to switch between the two presenter forms (one with no runtime parameters, one
      parameterized).
-   - `TAB_ROOT` generates a graph scoped to the root plus a binding that contributes `NavDestination.TabRoot` and `NavRootBinding`. Plain `@Inject` only.
+   - `TAB_ROOT` generates a graph scoped to the root plus a binding that contributes `NavDestination.TabRoot`, `NavRootBinding`, and the route singleton into `Set<NavRoot>`. Plain `@Inject` only.
 2. `@AppRoot(parentScope)` marks the application's `@AssistedInject` root presenter implementation. The processor generates the `@BindingContainer` that wires the
    nested `@AssistedFactory` to the bound presenter interface at the parent scope. The root is bound directly into the scope rather than exposed through a graph
    extension because the activity holds it for the lifetime of the scope.
