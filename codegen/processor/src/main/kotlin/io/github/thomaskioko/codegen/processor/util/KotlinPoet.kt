@@ -30,6 +30,17 @@ internal fun bindingContainer(): AnnotationSpec =
     AnnotationSpec.builder(BindingContainer).build()
 
 /**
+ * Builds the `@SingleIn([scope]::class)` annotation that scopes a `@Provides` function to the
+ * lifetime of the given dependency injection scope.
+ *
+ * @param scope The scope the bound instance lives in.
+ */
+internal fun singleIn(scope: ClassName): AnnotationSpec =
+    AnnotationSpec.builder(SingleIn)
+        .addMember("%T::class", scope)
+        .build()
+
+/**
  * Builds the `@GraphExtension([scope]::class)` annotation that every generated graph interface
  * carries. This is the Metro annotation that declares a graph fragment scoped to the given type.
  *

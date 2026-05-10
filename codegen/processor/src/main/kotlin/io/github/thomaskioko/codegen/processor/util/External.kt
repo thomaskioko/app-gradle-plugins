@@ -30,6 +30,7 @@ internal val GraphExtension: ClassName = ClassName(METRO_PACKAGE, "GraphExtensio
 internal val Provides: ClassName = ClassName(METRO_PACKAGE, "Provides")
 internal val IntoSet: ClassName = ClassName(METRO_PACKAGE, "IntoSet")
 internal val BindingContainer: ClassName = ClassName(METRO_PACKAGE, "BindingContainer")
+internal val SingleIn: ClassName = ClassName(METRO_PACKAGE, "SingleIn")
 
 // Consumer navigation primitives: route supertypes (NavRoute, NavRoot, BaseRoute), the
 // NavDestination sealed family the bindings contribute to, the route binding multibinding
@@ -51,9 +52,13 @@ internal const val NAVIGATION_UI_PACKAGE: String = "com.thomaskioko.tvmaniac.nav
 internal val ScreenContent: ClassName = ClassName(NAVIGATION_UI_PACKAGE, "ScreenContent")
 internal val SheetContent: ClassName = ClassName(NAVIGATION_UI_PACKAGE, "SheetContent")
 
-// Compose: only UiBindingGenerator references Modifier, and only on the screen path. Overlay
-// renderers do not forward a modifier.
+// Compose: only UiBindingGenerator references Modifier indirectly (through the consumer's
+// ScreenContent lambda type). AppRootUiBindingGenerator emits the @Composable annotation and
+// the Modifier parameter directly, so it references both ClassName constants below.
 internal const val COMPOSE_UI_PACKAGE: String = "androidx.compose.ui"
+internal const val COMPOSE_RUNTIME_PACKAGE: String = "androidx.compose.runtime"
+internal val Composable: ClassName = ClassName(COMPOSE_RUNTIME_PACKAGE, "Composable")
+internal val Modifier: ClassName = ClassName(COMPOSE_UI_PACKAGE, "Modifier")
 
 // Consumer home navigation: TabChild is the wrapper the tab root factory lambda always wraps its
 // produced presenter in.

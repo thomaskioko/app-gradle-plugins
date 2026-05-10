@@ -171,6 +171,9 @@ internal object TestStubs {
 
         @Target(AnnotationTarget.FUNCTION)
         public annotation class IntoSet
+
+        @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+        public annotation class SingleIn(val scope: KClass<*>)
     """.trimIndent()
 
     val composeUi = "ComposeUi.kt" to """
@@ -179,6 +182,13 @@ internal object TestStubs {
         public interface Modifier {
             public companion object : Modifier
         }
+
+        @Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.PROPERTY_GETTER)
+        public annotation class Composable
+    """.trimIndent()
+
+    val composeRuntime = "ComposeRuntime.kt" to """
+        package androidx.compose.runtime
 
         @Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.PROPERTY_GETTER)
         public annotation class Composable
@@ -214,4 +224,9 @@ internal object TestStubs {
     val tabStubs: List<Pair<String, String>> = baseStubs + listOf(homeNav, homeConfig)
 
     val uiStubs: List<Pair<String, String>> = baseStubs + listOf(composeUi, navigationUi)
+
+    val tabUiStubs: List<Pair<String, String>> = uiStubs + listOf(homeNav)
+
+    val appRootUiStubs: List<Pair<String, String>> =
+        baseStubs + listOf(composeUi, composeRuntime, navigationUi)
 }

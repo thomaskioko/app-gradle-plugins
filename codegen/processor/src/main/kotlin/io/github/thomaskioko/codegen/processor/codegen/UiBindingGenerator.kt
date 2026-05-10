@@ -15,6 +15,7 @@ import io.github.thomaskioko.codegen.processor.util.ScreenContent
 import io.github.thomaskioko.codegen.processor.util.ScreenDestination
 import io.github.thomaskioko.codegen.processor.util.SheetContent
 import io.github.thomaskioko.codegen.processor.util.SheetDestination
+import io.github.thomaskioko.codegen.processor.util.TabChild
 import io.github.thomaskioko.codegen.processor.util.bindingContainer
 import io.github.thomaskioko.codegen.processor.util.contributesTo
 
@@ -150,5 +151,6 @@ internal object UiBindingGenerator {
     private fun variantFor(kind: UiBindingKind): Variant = when (kind) {
         UiBindingKind.Screen -> Variant(ScreenContent, ScreenDestination, forwardsModifier = true)
         UiBindingKind.Sheet -> Variant(SheetContent, SheetDestination, forwardsModifier = false)
+        UiBindingKind.Tab -> Variant(ScreenContent, TabChild, forwardsModifier = true)
     }
 }

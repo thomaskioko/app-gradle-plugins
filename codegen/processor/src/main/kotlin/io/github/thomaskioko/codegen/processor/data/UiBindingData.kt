@@ -18,6 +18,9 @@ internal enum class UiBindingKind {
 
     /** Renderer for an overlay presenter. Pairs with `@SheetUi`. The generated binding does not forward `Modifier`. */
     Sheet,
+
+    /** Renderer for a tab-root presenter. Pairs with `@TabUi`. The generated binding downcasts to `TabChild` and forwards `Modifier`. */
+    Tab,
 }
 
 /**
