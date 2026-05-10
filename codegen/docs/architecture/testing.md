@@ -33,9 +33,12 @@ the actual `@NavDestination` symbol, not a stub.
 `TestStubs.kt` carries minimal source level fakes of the consumer project types the generator references. Each stub is a `Pair<String, String>` of file name and source
 text. Three lists group them by what each set of tests needs.
 
-- `baseStubs` covers the common set: Decompose `ComponentContext`, `ActivityScope`, the navigation primitives, Metro annotations, `kotlinx.serialization`. Every test pulls these.
-- `tabStubs` adds the `TabChild` type from the home navigation package (`com.thomaskioko.tvmaniac.home.nav`). Tab root tests pull these.
-- `uiStubs` adds the Compose annotations and the navigation UI primitives (`ScreenContent`, `SheetContent`). `@ScreenUi` and `@SheetUi` tests pull these.
+- `baseStubs` covers the common set: Decompose `ComponentContext`, `ActivityScope`, the navigation primitives, Metro annotations (including `@SingleIn`),
+  `kotlinx.serialization`. Every test pulls these.
+- `tabStubs` adds the `TabChild` type from the home navigation package (`com.thomaskioko.tvmaniac.home.nav`). Tab root tests and `@TabUi` tests pull these.
+- `uiStubs` adds the Compose UI annotations and the navigation UI primitives (`ScreenContent`, `SheetContent`). `@ScreenUi`, `@SheetUi`, and `@TabUi` tests pull these.
+- `appRootUiStubs` adds the same UI primitives plus a separate `androidx.compose.runtime.Composable` stub because `@AppRootUi` emits the annotation directly on the
+  generated extension. `@AppRootUi` tests pull these.
 
 The stubs are deliberately minimal. Their type signatures must match the constants in
 `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/util/External.kt` exactly. Compilation in the test suite is the contract that catches drift: if
@@ -44,17 +47,23 @@ the stubs and `External.kt` disagree, end to end compilation fails. Updating one
 ## Goldens
 
 Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, actual)`. Goldens live under
-`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. Five variants:
+`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. Nine variants:
 
 - `simple/` for `@NavDestination(kind = SCREEN)` with plain `@Inject`.
 - `parameterized/` for `@NavDestination(kind = SCREEN)` with `@AssistedInject`.
 - `tab/` for `@NavDestination(kind = TAB_ROOT)`.
 - `screen-ui/` for `@ScreenUi`.
 - `sheet-ui/` for `@SheetUi`.
+- `tab-ui/` for `@TabUi`.
+- `child-presenter/` for `@ChildPresenter`.
+- `app-root/` for `@AppRoot`.
+- `app-root-ui/` for `@AppRootUi`.
 
 Test coverage is grouped by annotation, not by variant. `NavDestinationTest` covers all three `@NavDestination` kinds (SCREEN, OVERLAY, TAB_ROOT) plus the parameterized
-SCREEN variant. `ScreenUiTest` covers `@ScreenUi`. `SheetUiTest` covers `@SheetUi`. `ErrorPathTest` exercises the parser validation branches and asserts on the
-compilation messages rather than against a golden file.
+SCREEN variant. `ScreenUiTest` covers `@ScreenUi`. `SheetUiTest` covers `@SheetUi`. `TabUiTest` covers `@TabUi`. `ChildPresenterTest` covers `@ChildPresenter`. `AppRootTest`
+covers `@AppRoot` plus three error paths (missing `@AssistedInject`, missing nested factory, missing bound interface). `AppRootUiTest` covers `@AppRootUi` plus two error
+paths (no non-modifier parameter, presenter type mismatch). `ErrorPathTest` exercises the navigation-side parser validation branches and asserts on the compilation
+messages rather than against a golden file.
 
 `GoldenFileAssert` normalises both expected and actual by trimming trailing whitespace per line and trimming the file as a whole before comparing, so trailing newline
 drift does not cause flakes.

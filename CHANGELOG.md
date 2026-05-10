@@ -1,6 +1,30 @@
 Change Log
 ==========
 
+## 0.7.7 *(2026-05-10)*
+
+### Navigation
+
+Two new annotations cover the application's root host. The pair eliminates the manual `@BindingContainer` that consumers used to write for the root presenter and the multi-argument call site every activity used to make to render the root composable.
+
+- `@AppRoot` targets an `@AssistedInject` presenter implementation. The processor reads the nested `@AssistedFactory`, infers the bound interface from the implementation's supertypes, and emits a `<InterfaceName>BindingContainer` that contributes `@Provides @SingleIn(parentScope)` for the bound interface. Consumers replace their hand-written root binding container with one annotation.
+- `@AppRootUi` targets the host `@Composable` function. The processor reads the function's non-modifier parameters and emits an `AppRootProvider` interface plus a `@Composable AppRootProvider.AppRootContent(modifier)` extension. Consumers make their activity-scope `@DependencyGraph` extend the generated `AppRootProvider`, and the activity invokes `graph.AppRootContent()` instead of forwarding each dependency by hand.
+
+The codegen now publishes `@SingleIn`, `@Composable`, and `Modifier` in addition to the previously-published Metro and Decompose constants. See [annotations.md](codegen/docs/annotations.md), [examples.md](codegen/docs/examples.md) sections 7 and 8, and [architecture/consumer-contract.md](codegen/docs/architecture/consumer-contract.md) for the full surface.
+
+### Lint rules
+
+Two new ktlint rules enforce that the codegen annotations above are actually applied. Forgetting either annotation now fails the build at lint time rather than slipping through to runtime.
+
+- `tvmaniac:presenter-needs-codegen-annotation` flags any top-level class whose name ends with `Presenter` and is annotated with `@Inject` or `@AssistedInject` but is missing both `@NavDestination` and `@AppRoot`. Classes carrying a `@Contributes...` Metro annotation are exempt; child presenters routed through a manual `@GraphExtension` opt out via the new `ktlint_tvmaniac_unrouted_presenters` editorconfig property.
+- `tvmaniac:compose-screen-needs-codegen-annotation` flags any top-level `@Composable` function with a `presenter` or `rootPresenter` parameter that is missing `@ScreenUi`, `@SheetUi`, and `@AppRootUi`. Tab-root screens dispatched manually inside a parent host opt out via the new `ktlint_tvmaniac_unrouted_screens` editorconfig property.
+
+
+### KSP
+
+- Register the `kspCommonMainKotlinMetadata` output (`build/generated/ksp/metadata/commonMain/kotlin`) as a `commonMain` Kotlin source directory for KMP projects, and wire every `KotlinCompilationTask` and per-target `ksp*` task to depend on it. Resolves IDE `Unresolved reference` warnings for KSP-generated symbols (Metro `@GraphExtension`, navigation codegen) referenced from `commonMain`.
+- `useCodegen()` now registers the navigation codegen processor only on `kspCommonMainMetadata` for KMP projects (via the new `addKspDependencyForCommonMain` helper). Combined with the metadata srcDir registration above, this avoids duplicate generation that would otherwise occur when per-target ksp tasks reprocessed commonMain sources.
+
 ## 0.7.6 *(2026-05-09)*
 
 ### Navigation

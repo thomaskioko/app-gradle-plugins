@@ -1,12 +1,15 @@
 # Parsers
 
-The parser layer maps KSP symbols into the typed intermediate values described in [data-model.md](data-model.md). Two parser files live under
+The parser layer maps KSP symbols into the typed intermediate values described in [data-model.md](data-model.md). Five parser files live under
 `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/parser/`:
 
 - `NavDestinationParser.kt` covers the `@NavDestination` path for all three destination kinds.
-- `UiParser.kt` covers `@ScreenUi` and `@SheetUi`.
+- `UiParser.kt` covers `@ScreenUi`, `@SheetUi`, and `@TabUi`.
+- `ChildPresenterParser.kt` covers `@ChildPresenter` on parent-owned child presenters.
+- `AppRootParser.kt` covers `@AppRoot` on the root presenter implementation.
+- `AppRootUiParser.kt` covers `@AppRootUi` on the host composable.
 
-Both parsers share `AnnotationArguments.kt`, a small set of KSP extension helpers.
+All five parsers share `AnnotationArguments.kt`, a small set of KSP extension helpers.
 
 ## Annotation argument helpers
 
@@ -55,12 +58,49 @@ later restored, which defeats the polymorphic save and restore the rest of the c
 
 ## UiParser
 
-`parseUiBindingData` is shared by `@ScreenUi` and `@SheetUi`. The caller passes a `UiBindingKind` (`Screen` or `Sheet`) and the parser configures itself accordingly. It
-rejects functions in the default package (the generated binding needs a non empty package to land in), records the function as a `MemberName`, reads `presenter` and
-`parentScope` as `ClassName` instances, and returns a `UiBindingData`.
+`parseUiBindingData` is shared by `@ScreenUi`, `@SheetUi`, and `@TabUi`. The caller passes a `UiBindingKind` (`Screen`, `Sheet`, or `Tab`) and the parser configures itself
+accordingly. It rejects functions in the default package (the generated binding needs a non empty package to land in), records the function as a `MemberName`, reads
+`presenter` and `parentScope` as `ClassName` instances, and returns a `UiBindingData`.
 
-There is no `@AssistedInject` detection branch on the UI side. The generated binding has the same structure for both `@ScreenUi` and `@SheetUi`. The fields that vary by
-kind (the content type, the destination cast target, whether to forward `Modifier`) are picked at generation time, not at parse time. See [generators.md](generators.md).
+There is no `@AssistedInject` detection branch on the UI side. The generated binding has the same structure for all three kinds. The fields that vary by kind (the content
+type, the destination cast target, whether to forward `Modifier`) are picked at generation time, not at parse time. See [generators.md](generators.md).
+
+## ChildPresenterParser
+
+`parseChildPresenterData` reads `@ChildPresenter`, captures the annotated class as a `ClassName`, derives the base name (the simple name with the `Presenter` suffix
+stripped), and reads `scope` and `parentScope` as `ClassName` instances. It returns a `ChildPresenterData` whose derived properties (`graphClassName`,
+`graphFactoryFunName`, `graphPropertyName`) the generator consumes verbatim.
+
+The parser is intentionally minimal. There is no `@AssistedInject` detection branch and no nested factory walk; child presenters always use plain `@Inject` because the
+parent host instantiates them through `Decompose.childContext(key)` rather than from a route payload. The processor entry checks that the annotated symbol is a class
+before delegating; the parser itself does not need to re-validate the symbol kind.
+
+## AppRootParser
+
+`parseAppRootData` reads `@AppRoot`, validates the annotated class, and returns an `AppRootData`. Validation runs in three steps:
+
+1. The class must carry `@AssistedInject`. Missing the annotation is a compile error pinned to the class declaration. `@AppRoot` does not generate Metro injection, only
+   the binding container that calls the assisted factory; the factory itself still needs `@AssistedInject` for Metro to instantiate it.
+2. The class must declare a nested `@AssistedFactory` interface with exactly one function. The function's name (typically `create`) is captured for use in the generated
+   provider body.
+3. The class must extend exactly one non-marker interface. `inferBoundInterface` walks the resolved supertypes, skips `kotlin.Any` and `com.arkivanov.decompose.ComponentContext`,
+   and asserts that exactly one candidate remains. Zero is a compile error (the consumer forgot to declare the bound interface). More than one is a compile error (the
+   processor cannot pick one).
+
+The bound interface is what the generated provider returns. The processor uses the inferred name to derive the binding object name (`<InterfaceName>BindingContainer`)
+and the provide function name (`provide<InterfaceName>`). These names are part of the contract the consumer commits to; goldens lock them down.
+
+## AppRootUiParser
+
+`parseAppRootUiData` reads `@AppRootUi`, validates the annotated function, and returns an `AppRootUiData`. The parser walks the function's parameter list in declaration
+order, looks for a final parameter named `modifier` whose type is `androidx.compose.ui.Modifier`, and treats every other parameter as a graph dependency. The graph
+dependencies become properties on the generated `AppRootProvider` interface; the modifier (when present) is forwarded by the generated extension.
+
+The first non-modifier parameter type must equal the annotation's `presenter` argument. Mismatch is a compile error: it indicates that either the annotation or the
+composable was changed without updating the other. The check is shallow (compares canonical names as strings) but catches the common case of a presenter rename.
+
+Tabs through the same single-`@AppRootUi`-per-round restriction as the navigator-side annotations, but enforced at the processor entry rather than at parse time. The
+duplicate check lives in `processAppRootUi` because it tracks state across symbols within one round; the parser stays a pure function.
 
 ## Error reporting
 

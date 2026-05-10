@@ -18,6 +18,10 @@ next to the annotated symbol. For how each file is built from the input, see
 4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind--tab_root)
 5. [`@ScreenUi`](#5-screenui)
 6. [`@SheetUi`](#6-sheetui)
+7. [`@TabUi`](#7-tabui)
+8. [`@ChildPresenter`](#8-childpresenter)
+9. [`@AppRoot`](#9-approot)
+10. [`@AppRootUi`](#10-approotui)
 
 ## 1. `@NavDestination(kind = SCREEN)`, presenter with no runtime parameters
 
@@ -466,3 +470,290 @@ public object EpisodeSheetUiBinding {
 The overlay renderer does not receive a modifier. `SheetContent.content` is typed as `@Composable (SheetChild) -> Unit`. Modal layout decisions (a `ModalBottomSheet`, for
 example) belong inside the composable body, not at the call site. The annotated function still accepts a `modifier: Modifier = Modifier` parameter for consistency with
 other composables, but the generator does not forward it.
+
+## 7. `@TabUi`
+
+Use `@TabUi` on the Android `@Composable` function that renders one tab pager page. The annotation generates a `ScreenContent` binding identical in shape to the
+`@ScreenUi` output, but the generated predicate matches `TabChild<*>` rather than `ScreenDestination<*>`. Use it on the four bottom-bar tab pages (Discover, Library,
+Progress, Profile) where the active child is a `TabChild`-wrapped tab presenter rather than a `ScreenDestination`-wrapped routed screen.
+
+The previous section covered the overlay renderer (`@SheetUi`). The next section covers the parent-owned child presenter (`@ChildPresenter`). The next two cover the
+application root pair (`@AppRoot` and `@AppRootUi`).
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.discover.ui
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.discover.presenter.DiscoverShowsPresenter
+import io.github.thomaskioko.codegen.annotations.TabUi
+
+@TabUi(presenter = DiscoverShowsPresenter::class, parentScope = ActivityScope::class)
+@Composable
+public fun DiscoverScreen(
+    presenter: DiscoverShowsPresenter,
+    modifier: Modifier = Modifier,
+) {
+    // ...
+}
+```
+
+### Generated: `DiscoverScreenUiBinding.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.discover.ui.di
+
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.discover.presenter.DiscoverShowsPresenter
+import com.thomaskioko.tvmaniac.discover.ui.DiscoverScreen
+import com.thomaskioko.tvmaniac.home.nav.TabChild
+import com.thomaskioko.tvmaniac.navigation.ui.ScreenContent
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
+
+@BindingContainer
+@ContributesTo(ActivityScope::class)
+public object DiscoverScreenUiBinding {
+    @Provides
+    @IntoSet
+    public fun provideDiscoverScreenContent(): ScreenContent = ScreenContent(
+        matches = { (it as? TabChild<*>)?.presenter is DiscoverShowsPresenter },
+        content = { child, modifier ->
+            DiscoverScreen(
+                presenter = (child as TabChild<*>).presenter as DiscoverShowsPresenter,
+                modifier = modifier,
+            )
+        },
+    )
+}
+```
+
+The output joins the same `Set<ScreenContent>` multibinding the navigation host iterates. The host treats `TabChild` and `ScreenDestination` the same way: it walks the
+set, finds the entry whose predicate returns `true` for the active child, and invokes that entry's `content` lambda.
+
+## 8. `@ChildPresenter`
+
+Use `@ChildPresenter` on a presenter class owned by a parent host presenter rather than navigated to through a route. The annotation generates a `<Presenter>ChildGraph`
+graph extension exposing the presenter as a property plus a nested factory contributing to the parent's scope. The pattern fits tab pagers (Tv Maniac's progress tab
+hosts an Up Next page and a Calendar page) and any other host presenter that constructs sibling presenters with `Decompose.childContext(key)`.
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.presentation.upnext
+
+@Inject
+@ChildPresenter(
+    scope = ProgressChildScope::class,
+    parentScope = ProgressRoot::class,
+)
+public class UpNextPresenter(
+    componentContext: ComponentContext,
+    // ... deps
+) : ComponentContext by componentContext
+```
+
+### Generated: `UpNextChildGraph.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.presentation.upnext.di
+
+import com.arkivanov.decompose.ComponentContext
+import com.thomaskioko.tvmaniac.presentation.upnext.UpNextPresenter
+import com.thomaskioko.tvmaniac.progress.nav.ProgressChildScope
+import com.thomaskioko.tvmaniac.progress.nav.ProgressRoot
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.GraphExtension
+import dev.zacsweers.metro.Provides
+
+@GraphExtension(ProgressChildScope::class)
+public interface UpNextChildGraph {
+    public val upNextPresenter: UpNextPresenter
+
+    @ContributesTo(ProgressRoot::class)
+    @GraphExtension.Factory
+    public interface Factory {
+        public fun createUpNextGraph(@Provides componentContext: ComponentContext): UpNextChildGraph
+    }
+}
+```
+
+### Parent presenter wiring
+
+The parent host (here `ProgressPresenter`) takes one factory parameter per child. Each factory call gets a `Decompose.childContext(key)` so the children stay alive
+together with independent lifecycles:
+
+```kotlin
+@Inject
+@NavDestination(
+    route = ProgressRoot::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.TAB_ROOT,
+)
+public class ProgressPresenter(
+    componentContext: ComponentContext,
+    upNextGraphFactory: UpNextChildGraph.Factory,
+    calendarGraphFactory: CalendarChildGraph.Factory,
+) : ComponentContext by componentContext {
+    public val upNextPresenter: UpNextPresenter =
+        upNextGraphFactory.createUpNextGraph(childContext(key = "UpNext")).upNextPresenter
+    public val calendarPresenter: CalendarPresenter =
+        calendarGraphFactory.createCalendarGraph(childContext(key = "Calendar")).calendarPresenter
+}
+```
+
+The factory function name is unique per child (`create<BaseName>Graph`) so two child graphs contributing to the same parent scope (`ProgressRoot::class` here) do not
+collide.
+
+## 9. `@AppRoot`
+
+Use `@AppRoot` on the application's `@AssistedInject` root presenter implementation. The annotation generates the activity-scope `@BindingContainer` that wires the
+nested `@AssistedFactory` to the bound presenter interface. The output replaces the hand-written binding container the consumer would otherwise have to keep in sync
+with the factory function name and the bound interface name.
+
+`@AppRoot` differs from `@NavDestination` in two ways. The root has no route, so the annotation does not take a `route` parameter. The root is bound to its public
+interface at the parent scope rather than exposed through a `@GraphExtension`, so the generated artifact is a binding container, not a graph plus a destination binding.
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.presenter.root
+
+@AppRoot(parentScope = ActivityScope::class)
+@AssistedInject
+public class DefaultRootPresenter(
+    @Assisted componentContext: ComponentContext,
+    // ... deps
+) : RootPresenter, ComponentContext by componentContext {
+
+    @AssistedFactory
+    public fun interface Factory {
+        public fun create(componentContext: ComponentContext): DefaultRootPresenter
+    }
+}
+```
+
+Where `RootPresenter` is the bound interface declared in the same module:
+
+```kotlin
+public interface RootPresenter {
+    // ... presenter contract
+}
+```
+
+### Generated: `RootPresenterBindingContainer.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.presenter.root.di
+
+@BindingContainer
+@ContributesTo(ActivityScope::class)
+public object RootPresenterBindingContainer {
+    @Provides
+    @SingleIn(ActivityScope::class)
+    public fun provideRootPresenter(componentContext: ComponentContext, factory: DefaultRootPresenter.Factory): RootPresenter = factory.create(componentContext)
+}
+```
+
+The `object` name is derived from the bound interface (`RootPresenter` becomes `RootPresenterBindingContainer`). The `@Provides` function name follows the same pattern
+(`provideRootPresenter`). The bound interface is inferred from the implementation's supertypes; `ComponentContext`, used as a delegate, is filtered out.
+
+## 10. `@AppRootUi`
+
+Use `@AppRootUi` on the host composable that wraps every other screen. The annotation generates a provider interface declaring one property for each non-modifier
+parameter on the composable plus a `@Composable AppRootProvider.AppRootContent(modifier)` extension that invokes the composable using the receiver's properties. The
+activity-scope graph extends the generated provider, and the activity invokes `graph.AppRootContent()` instead of forwarding each dependency by hand.
+
+The host composable is not a member of the `Set<ScreenContent>` multibinding the navigation system iterates. It is the host that publishes that set to its descendants.
+`@ScreenUi` does not apply for that reason. `@AppRootUi` exists so the codegen can emit a provider interface keyed off the composable's parameter list.
+
+### Input
+
+```kotlin
+package com.thomaskioko.tvmaniac.app.ui
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.thomaskioko.tvmaniac.core.base.ActivityScope
+import com.thomaskioko.tvmaniac.navigation.ui.ScreenContent
+import com.thomaskioko.tvmaniac.navigation.ui.SheetContent
+import com.thomaskioko.tvmaniac.presenter.root.RootPresenter
+import io.github.thomaskioko.codegen.annotations.AppRootUi
+
+@AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)
+@Composable
+public fun RootScreen(
+    rootPresenter: RootPresenter,
+    screenContents: Set<ScreenContent>,
+    sheetContents: Set<SheetContent>,
+    modifier: Modifier = Modifier,
+) {
+    // ... compose UI here, including the navigation host
+}
+```
+
+### Generated: `RootScreenAppRootUiBinding.kt`
+
+```kotlin
+package com.thomaskioko.tvmaniac.app.ui.di
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.thomaskioko.tvmaniac.app.ui.RootScreen
+import com.thomaskioko.tvmaniac.navigation.ui.ScreenContent
+import com.thomaskioko.tvmaniac.navigation.ui.SheetContent
+import com.thomaskioko.tvmaniac.presenter.root.RootPresenter
+import kotlin.collections.Set
+
+public interface AppRootProvider {
+    public val rootPresenter: RootPresenter
+
+    public val screenContents: Set<ScreenContent>
+
+    public val sheetContents: Set<SheetContent>
+}
+
+@Composable
+public fun AppRootProvider.AppRootContent(modifier: Modifier = Modifier) {
+    RootScreen(
+        rootPresenter = rootPresenter,
+        screenContents = screenContents,
+        sheetContents = sheetContents,
+        modifier = modifier,
+    )
+}
+```
+
+### Consumer wiring
+
+The consumer makes its activity-scope `@DependencyGraph` extend `AppRootProvider`. The graph already exposes the three properties; the only change is making the
+contract explicit:
+
+```kotlin
+@DependencyGraph(ActivityScope::class)
+public interface ActivityGraph : AppRootProvider {
+    override val rootPresenter: RootPresenter
+    override val screenContents: Set<ScreenContent>
+    override val sheetContents: Set<SheetContent>
+    // ... other graph members
+}
+```
+
+The activity then invokes the host with one call:
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val graph = ActivityGraph.create(this)
+        setContent {
+            graph.AppRootContent()
+        }
+    }
+}
+```
