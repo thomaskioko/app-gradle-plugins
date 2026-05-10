@@ -32,3 +32,12 @@ tasks.register("spotlessApplyAll") {
     dependsOn(gradle.includedBuild("lint-rules").task(":spotlessApply"))
     dependsOn(gradle.includedBuild("codegen").task(":spotlessApply"))
 }
+
+tasks.register("spotlessCheckAll") {
+    group = "verification"
+    description = "Run spotlessCheck across root + plugins + lint-rules + codegen composite builds."
+    dependsOn("spotlessCheck")
+    dependsOn(gradle.includedBuild("plugins").task(":spotlessCheck"))
+    dependsOn(gradle.includedBuild("lint-rules").task(":spotlessCheck"))
+    dependsOn(gradle.includedBuild("codegen").task(":spotlessCheck"))
+}
