@@ -84,6 +84,24 @@ class ComposeScreenCodegenAnnotationRuleTest {
     }
 
     @Test
+    fun `does not flag Composable with TabUi annotation`() {
+        assertThat(
+            // language=kotlin
+            """
+            package test
+
+            @TabUi(presenter = DiscoverShowsPresenter::class, parentScope = ActivityScope::class)
+            @Composable
+            fun DiscoverScreen(
+                presenter: DiscoverShowsPresenter,
+                modifier: Modifier = Modifier,
+            ) {
+            }
+            """.trimIndent(),
+        ).hasNoLintViolations()
+    }
+
+    @Test
     fun `does not flag Composable without presenter parameter`() {
         assertThat(
             // language=kotlin

@@ -37,6 +37,7 @@ internal val SingleIn: ClassName = ClassName(METRO_PACKAGE, "SingleIn")
 // entries, and the slot child wrappers the factory lambdas produce.
 internal const val NAVIGATION_PACKAGE: String = "com.thomaskioko.tvmaniac.navigation"
 internal val NavRouteBinding: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRouteBinding")
+internal val NavRoot: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRoot")
 internal val NavRootBinding: ClassName = ClassName(NAVIGATION_PACKAGE, "NavRootBinding")
 internal val NavDestination: ClassName = ClassName(NAVIGATION_PACKAGE, "NavDestination")
 internal val NavDestinationScreen: ClassName = NavDestination.nestedClass("Screen")

@@ -1,6 +1,22 @@
 Change Log
 ==========
 
+## 0.7.8 *(2026-05-10)*
+
+### Navigation
+
+Three additions extend the codegen surface so consumers no longer hand-write tab pager renderers, parent-owned child presenter graphs, or the `NavRoot` multibinding.
+
+- `@TabUi` targets a `@Composable` function as the renderer for one tab pager page. The generated `ScreenContent` binding mirrors `@ScreenUi` except the matcher casts the active child to `TabChild<*>` rather than `ScreenDestination<*>`. Use it on bottom-bar tab pages whose presenters are wrapped as `TabChild` rather than pushed onto a stack.
+- `@ChildPresenter` targets a presenter constructed by another presenter rather than navigated to through a route. The processor emits a `<Presenter>ChildGraph` graph extension exposing the presenter as a property plus a `@ContributesTo(parentScope) @GraphExtension.Factory` whose `create<BaseName>Graph` function takes a `ComponentContext` and returns the graph. Multiple children may share a `scope`; each gets its own graph extension and its own factory function (the unique name avoids return-type collisions when both factories contribute to the same parent scope).
+- `@NavDestination(kind = TAB_ROOT)` now also contributes the route singleton itself into `Set<NavRoot>`. Consumers no longer need to keep a hand-written `<Feature>RootBinding` next to each tab to populate that set. The new contribution lives inside the existing `<Presenter>TabDestinationBinding` file alongside the `NavDestination<*>` and `NavRootBinding<*>` entries.
+
+See [annotations.md](codegen/docs/annotations.md), [examples.md](codegen/docs/examples.md) sections 4, 7, and 8, and [architecture/consumer-contract.md](codegen/docs/architecture/consumer-contract.md) for the full surface.
+
+### Lint rules
+
+- `tvmaniac:presenter-needs-codegen-annotation` now accepts `@ChildPresenter` as a satisfying annotation, so child presenters routed through the new codegen path no longer need an `editorconfig` exemption.
+
 ## 0.7.7 *(2026-05-10)*
 
 ### Navigation

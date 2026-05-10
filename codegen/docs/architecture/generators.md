@@ -6,7 +6,7 @@ The generator layer turns the typed intermediate values from [data-model.md](dat
 - `FileGenerator.kt` is the router that picks which generators run for each `NavData`.
 - `ScreenGraphGenerator.kt` emits the `@GraphExtension` interface plus its nested factory.
 - `NavDestinationBindingGenerator.kt` emits the `NavDestination` and `NavRouteBinding` companion object bindings for screens and overlays.
-- `TabDestinationBindingGenerator.kt` emits the `NavDestination.TabRoot` and `NavRootBinding` bindings for tab roots.
+- `TabDestinationBindingGenerator.kt` emits the `NavDestination.TabRoot`, the `NavRootBinding`, and the `NavRoot` singleton bindings for tab roots.
 - `UiBindingGenerator.kt` emits the `@BindingContainer` object that contributes `ScreenContent` or `SheetContent` for composables annotated with `@ScreenUi`, `@SheetUi`,
   or `@TabUi`. The `kind` field on `UiBindingData` selects the variant.
 - `ChildGraphGenerator.kt` emits the `<Presenter>ChildGraph` graph extension plus its nested factory for classes annotated with `@ChildPresenter`.
@@ -68,7 +68,7 @@ runtime parameter) would extend that one method.
 
 ## TabDestinationBindingGenerator
 
-Mirrors `NavDestinationBindingGenerator` for tab roots. It contributes `NavDestination.TabRoot(...)` and `NavRootBinding<*>` instead of `Screen` and `NavRouteBinding`.
+Mirrors `NavDestinationBindingGenerator` for tab roots. It contributes `NavDestination.TabRoot(...)` and `NavRootBinding<*>` instead of `Screen` and `NavRouteBinding`, plus a third `provide<BaseName>NavRoot()` function that contributes the route singleton into `Set<NavRoot>`. The third entry replaces the hand-written `<Feature>RootBinding` files consumers used to keep alongside each tab.
 The factory lambda always wraps the produced presenter in `TabChild(...)` rather than `ScreenDestination(...)`. There is no parameterized branch because tabs are always
 plain `@Inject`, enforced upstream by the parser.
 

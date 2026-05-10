@@ -268,7 +268,8 @@ destinations is the route type: a tab root's route is a `NavRoot` `data object` 
 therefore use plain `@Inject` only; `@NavDestination` reports a compile error if a tab presenter declares a nested `@AssistedFactory`.
 
 The generated binding contributes a `NavDestination.TabRoot` (instead of `Screen` or `Overlay`) plus a `NavRootBinding<*>` (instead of `NavRouteBinding<*>`) so the tab
-root participates in polymorphic save and restore alongside the other tabs.
+root participates in polymorphic save and restore alongside the other tabs. It also contributes the route singleton itself into `Set<NavRoot>`, replacing the
+hand-written `<Feature>RootBinding` files consumers used to keep next to each tab.
 
 ### Input
 
@@ -327,6 +328,10 @@ public interface DiscoverShowsTabDestinationBinding {
 
         @Provides
         @IntoSet
+        public fun provideDiscoverShowsNavRoot(): NavRoot = DiscoverRoot
+
+        @Provides
+        @IntoSet
         public fun provideDiscoverShowsRootBinding(): NavRootBinding<*> =
             NavRootBinding(DiscoverRoot::class, DiscoverRoot.serializer())
     }
@@ -334,7 +339,8 @@ public interface DiscoverShowsTabDestinationBinding {
 ```
 
 The tab graph is contributed to `parentScope` (typically `ActivityScope`), the same scope as the unified `Set<NavDestination<*>>`. The consumer's home presenter filters
-by the `TabRoot` subclass and renders the active root.
+by the `TabRoot` subclass and renders the active root. The third contribution feeds `Set<NavRoot>`, which a navigator typically iterates to enumerate the available
+tabs without inspecting destination factories.
 
 ## 5. `@ScreenUi`
 

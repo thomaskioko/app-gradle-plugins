@@ -81,6 +81,7 @@ For a presenter `com.example.feature.presenter.FooPresenter` annotated `@NavDest
 - `FooNavDestinationBinding.kt` is a Metro `@ContributesTo(parentScope)` interface with a companion that contributes:
     - `@IntoSet NavDestination<*>`: the matching `NavDestination.Screen` (or `Overlay`, or `TabRoot`) instance.
     - `@IntoSet NavRouteBinding<*>` for `SCREEN` or `OVERLAY`, or `@IntoSet NavRootBinding<*>` for `TAB_ROOT`.
+    - `@IntoSet NavRoot` for `TAB_ROOT` only: the route singleton itself, contributed to `Set<NavRoot>` so consumers do not have to keep a parallel binding next to each tab.
 
 See [examples.md](examples.md) for concrete output for each kind.
 
@@ -90,7 +91,7 @@ See [examples.md](examples.md) for concrete output for each kind.
 |---|---|---|
 | `SCREEN` | `@Inject` (no runtime parameters) or `@AssistedInject` (parameterized) | `NavDestination.Screen` plus `NavRouteBinding<*>` |
 | `OVERLAY` | Same as `SCREEN` | `NavDestination.Overlay` plus `NavRouteBinding<*>` |
-| `TAB_ROOT` | `@Inject` only (no `@AssistedInject`) | `NavDestination.TabRoot` plus `NavRootBinding<*>` |
+| `TAB_ROOT` | `@Inject` only (no `@AssistedInject`) | `NavDestination.TabRoot` plus `NavRootBinding<*>` plus the `NavRoot` singleton into `Set<NavRoot>` |
 
 For `SCREEN` and `OVERLAY` the processor auto-detects whether your presenter accepts a runtime parameter from the route. A plain `@Inject` constructor produces a graph
 that exposes the presenter directly. An `@AssistedInject` constructor with a nested `@AssistedFactory` produces a graph that exposes the factory; the generated binding
