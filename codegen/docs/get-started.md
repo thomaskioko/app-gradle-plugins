@@ -41,22 +41,34 @@ For how the processor turns each annotation into Metro plus Decompose code, see 
 
 ## Supported annotations
 
-Three annotations cover every variant the processor knows how to generate. See [annotations.md](annotations.md) for the full reference and [examples.md](examples.md) for
+Seven annotations cover every variant the processor knows how to generate. See [annotations.md](annotations.md) for the full reference and [examples.md](examples.md) for
 concrete inputs and outputs.
 
-The shared code presenter annotation (target `CLASS`, lives in the Kotlin Multiplatform `presenter` module):
+The shared code presenter annotations (target `CLASS`, live in the Kotlin Multiplatform `presenter` module):
 
 1. `@NavDestination(route, parentScope, kind)` is one annotation for every navigation destination. `kind` is one of `DestinationKind.SCREEN`, `OVERLAY`, or `TAB_ROOT`.
    - `SCREEN` and `OVERLAY` generate a graph scoped to the route plus a binding that contributes `NavDestination.Screen` (or `Overlay`) and `NavRouteBinding`. The
      processor auto-detects `@AssistedInject` with a nested `@AssistedFactory` to switch between the two presenter forms (one with no runtime parameters, one
      parameterized).
    - `TAB_ROOT` generates a graph scoped to the root plus a binding that contributes `NavDestination.TabRoot` and `NavRootBinding`. Plain `@Inject` only.
+2. `@AppRoot(parentScope)` marks the application's `@AssistedInject` root presenter implementation. The processor generates the `@BindingContainer` that wires the
+   nested `@AssistedFactory` to the bound presenter interface at the parent scope. The root is bound directly into the scope rather than exposed through a graph
+   extension because the activity holds it for the lifetime of the scope.
+3. `@ChildPresenter(scope, parentScope)` marks a presenter constructed by another presenter rather than navigated to through a route, such as a tab pager's pages. The
+   processor generates a `<Presenter>ChildGraph` graph extension exposing the presenter as a property plus a factory contributing to the parent host's scope. The parent
+   host takes one factory per child and instantiates each child with a `Decompose.childContext(key)`.
 
 The Android UI renderer annotations (target `FUNCTION`, live in the Android `ui` module):
 
-2. `@ScreenUi` marks a `@Composable` function as the Android renderer for a screen presenter defined in the shared Kotlin Multiplatform layer. It generates a
+4. `@ScreenUi` marks a `@Composable` function as the Android renderer for a screen presenter defined in the shared Kotlin Multiplatform layer. It generates a
    `@BindingContainer` object that contributes a `ScreenContent` into `Set<ScreenContent>` so the navigation host can iterate the set and render the right screen.
-3. `@SheetUi` marks a `@Composable` function as the Android renderer for a modal overlay presenter. It contributes a `SheetContent` into `Set<SheetContent>`.
+5. `@SheetUi` marks a `@Composable` function as the Android renderer for a modal overlay presenter. It contributes a `SheetContent` into `Set<SheetContent>`.
+6. `@TabUi` marks a `@Composable` function as the Android renderer for one tab pager page. The generated binding is identical in shape to a `@ScreenUi` binding except
+   that the predicate matches `TabChild<*>` rather than `ScreenDestination<*>`. Use it on the four bottom-bar tab pages where the active child is a `TabChild`-wrapped tab
+   presenter rather than a `ScreenDestination`-wrapped routed screen.
+7. `@AppRootUi(presenter, parentScope)` marks the host composable that wraps every other screen. The processor reads the function's non-modifier parameters and emits an
+   `AppRootProvider` interface plus a `@Composable AppRootProvider.AppRootContent(modifier)` extension. The activity-scope graph extends `AppRootProvider`, and the
+   activity invokes `graph.AppRootContent()` instead of forwarding each dependency by hand.
 
 ## Dependency
 
@@ -130,8 +142,48 @@ public fun DebugMenuScreen(
 ) { ... }
 ```
 
-Build the modules. KSP generates the graph and navigation binding into the presenter module's `di/` package, and the `ScreenContent` binding into the `ui` module's `di/`
-package. No further wiring is required inside each module.
+For the application's root, annotate the root presenter implementation and the host composable (one pair per project):
+
+```kotlin
+@AppRoot(parentScope = ActivityScope::class)
+@AssistedInject
+public class DefaultRootPresenter(
+    @Assisted componentContext: ComponentContext,
+    // ... deps
+) : RootPresenter, ComponentContext by componentContext {
+
+    @AssistedFactory
+    public fun interface Factory {
+        public fun create(componentContext: ComponentContext): DefaultRootPresenter
+    }
+}
+
+@AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)
+@Composable
+public fun RootScreen(
+    rootPresenter: RootPresenter,
+    screenContents: Set<ScreenContent>,
+    sheetContents: Set<SheetContent>,
+    modifier: Modifier = Modifier,
+) { ... }
+```
+
+Make the activity-scope graph extend the generated `AppRootProvider` so the generated extension resolves at the call site:
+
+```kotlin
+@DependencyGraph(ActivityScope::class)
+public interface ActivityGraph : AppRootProvider {
+    override val rootPresenter: RootPresenter
+    override val screenContents: Set<ScreenContent>
+    override val sheetContents: Set<SheetContent>
+    // ...
+}
+```
+
+The activity then invokes `graph.AppRootContent()` instead of forwarding each parameter to `RootScreen` by hand.
+
+Build the modules. KSP generates the graph and navigation binding into the presenter module's `di/` package, the `ScreenContent` binding into the `ui` module's `di/`
+package, and the root binding container plus the `AppRootProvider` interface into their respective modules. No further wiring is required inside each module.
 
 The app module must declare a direct `implementation` dependency on each feature `ui` module, not a transitive one. A transitive `implementation` dependency through a
 root `ui` module does not put the generated bindings on the app's compile classpath. Metro then reports a build error because the `Set<ScreenContent>` (or

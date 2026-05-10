@@ -8,9 +8,12 @@ Decompose's `ChildStack`, `ChildSlot`, and `ComponentContext` primitives directl
 
 One annotation (`@NavDestination`) covers stack screens, modal overlays, and bottom navigation tab
 roots. Two more (`@ScreenUi`, `@SheetUi`) cover the renderer bindings that join Android composables
-to the navigation host. The processor emits the boilerplate that each destination would otherwise
-need: a Metro `@GraphExtension` graph, a `NavDestination` binding for the Decompose host, and a UI
-renderer binding for the Android side.
+to the navigation host. Two more (`@AppRoot`, `@AppRootUi`) cover the application's root presenter
+and the host composable that wraps every other screen. The processor emits the boilerplate that
+each destination would otherwise need: a Metro `@GraphExtension` graph, a `NavDestination` binding
+for the Decompose host, a UI renderer binding for the Android side, the activity-scope binding
+container for the root presenter, and the provider interface plus extension that lets the activity
+render the root with one call.
 
 ## What you need
 

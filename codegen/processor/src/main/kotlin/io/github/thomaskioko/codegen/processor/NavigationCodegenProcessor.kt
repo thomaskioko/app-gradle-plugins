@@ -10,22 +10,29 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
+import io.github.thomaskioko.codegen.processor.codegen.AppRootBindingGenerator
+import io.github.thomaskioko.codegen.processor.codegen.AppRootUiBindingGenerator
+import io.github.thomaskioko.codegen.processor.codegen.ChildGraphGenerator
 import io.github.thomaskioko.codegen.processor.codegen.FileGenerator
 import io.github.thomaskioko.codegen.processor.codegen.UiBindingGenerator
 import io.github.thomaskioko.codegen.processor.data.NavData
 import io.github.thomaskioko.codegen.processor.data.UiBindingKind
+import io.github.thomaskioko.codegen.processor.parser.parseAppRootData
+import io.github.thomaskioko.codegen.processor.parser.parseAppRootUiData
+import io.github.thomaskioko.codegen.processor.parser.parseChildPresenterData
 import io.github.thomaskioko.codegen.processor.parser.parseNavDestinationData
 import io.github.thomaskioko.codegen.processor.parser.parseUiBindingData
 
 /**
- * The KSP processor that turns navigation codegen annotations into Metro graph extensions and
+ * KSP processor that turns navigation codegen annotations into Metro graph extensions and
  * navigation bindings. Loaded once per build by KSP through [NavigationCodegenProcessorProvider].
  *
- * The processor walks three annotation queries in order: `@NavDestination` (presenter classes),
- * `@ScreenUi`, and `@SheetUi` (composable functions). Each match goes through a parser to produce
- * a typed intermediate representation, then through a generator to produce one or more
- * [FileSpec] outputs that KSP writes to disk. The full pipeline and the rationale behind each
- * step are documented in `codegen/docs/architecture/pipeline.md`.
+ * The processor walks seven annotation queries in order. Three target presenter classes in shared
+ * Kotlin Multiplatform modules: `@NavDestination`, `@AppRoot`, and `@ChildPresenter`. Four target
+ * composable functions in Android UI modules: `@ScreenUi`, `@SheetUi`, `@TabUi`, and `@AppRootUi`.
+ * Each match goes through a parser to produce a typed intermediate representation, then through a
+ * generator to produce one or more [FileSpec] outputs that KSP writes to disk. Full pipeline and
+ * rationale behind each step live in `codegen/docs/architecture/pipeline.md`.
  *
  * The processor never throws on bad input. Every validation failure is reported through
  * [KSPLogger.error] pinned to the offending symbol, and KSP turns that into a compile error at
@@ -42,7 +49,7 @@ public class NavigationCodegenProcessor(
     private val logger: KSPLogger,
 ) : SymbolProcessor {
     /**
-     * Runs one KSP round. Iterates the three annotations the processor knows about, hands each
+     * Runs one KSP round. Iterates the seven annotations the processor knows about, hands each
      * symbol to the matching parser and generator, and returns an empty list of deferred symbols
      * because this processor produces nothing on subsequent rounds.
      *
@@ -56,7 +63,76 @@ public class NavigationCodegenProcessor(
         }
         processUiBinding(resolver, Constants.SCREEN_UI_FQN, Constants.SCREEN_UI, UiBindingKind.Screen)
         processUiBinding(resolver, Constants.SHEET_UI_FQN, Constants.SHEET_UI, UiBindingKind.Sheet)
+        processUiBinding(resolver, Constants.TAB_UI_FQN, Constants.TAB_UI, UiBindingKind.Tab)
+        processAppRoot(resolver)
+        processAppRootUi(resolver)
+        processChildPresenter(resolver)
         return emptyList()
+    }
+
+    /**
+     * Processes the `@ChildPresenter` annotation. Each annotated class produces one
+     * `<Presenter>ChildGraph` graph extension.
+     */
+    private fun processChildPresenter(resolver: Resolver) {
+        for (symbol in resolver.getSymbolsWithAnnotation(Constants.CHILD_PRESENTER_FQN)) {
+            val declaration = symbol as? KSClassDeclaration ?: run {
+                logger.error("@${Constants.CHILD_PRESENTER} can only be applied to classes", symbol)
+                continue
+            }
+            val data = parseChildPresenterData(declaration, logger) ?: continue
+            writeFiles(declaration, listOf(ChildGraphGenerator.generate(data)))
+        }
+    }
+
+    /**
+     * Processes the `@AppRoot` annotation. For each annotated implementation, [parseAppRootData]
+     * produces an [io.github.thomaskioko.codegen.processor.data.AppRootData] and
+     * [AppRootBindingGenerator] emits one binding file. A symbol that is not a class is reported
+     * as a compile error at its declaration site.
+     *
+     * @param resolver KSP's lookup interface for the current round.
+     */
+    private fun processAppRoot(resolver: Resolver) {
+        for (symbol in resolver.getSymbolsWithAnnotation(Constants.APP_ROOT_FQN)) {
+            val declaration = symbol as? KSClassDeclaration ?: run {
+                logger.error("@${Constants.APP_ROOT} can only be applied to classes", symbol)
+                continue
+            }
+            val data = parseAppRootData(declaration, logger) ?: continue
+            writeFiles(declaration, listOf(AppRootBindingGenerator.generate(data)))
+        }
+    }
+
+    /**
+     * Processes the `@AppRootUi` annotation. For each annotated composable, [parseAppRootUiData]
+     * produces an [io.github.thomaskioko.codegen.processor.data.AppRootUiData] and
+     * [AppRootUiBindingGenerator] emits one binding file containing the `AppRootProvider`
+     * interface and the `AppRootContent` extension. A symbol that is not a function is reported
+     * as a compile error at its declaration site. More than one annotated function in a single
+     * round is reported as a compile error pinned to the second.
+     *
+     * @param resolver KSP's lookup interface for the current round.
+     */
+    private fun processAppRootUi(resolver: Resolver) {
+        var seen = false
+        for (symbol in resolver.getSymbolsWithAnnotation(Constants.APP_ROOT_UI_FQN)) {
+            val function = symbol as? KSFunctionDeclaration ?: run {
+                logger.error("@${Constants.APP_ROOT_UI} can only be applied to functions", symbol)
+                continue
+            }
+            if (seen) {
+                logger.error(
+                    "@${Constants.APP_ROOT_UI} may be applied to at most one composable per " +
+                        "compilation. Remove the duplicate.",
+                    function,
+                )
+                continue
+            }
+            val data = parseAppRootUiData(function, logger) ?: continue
+            writeFunctionFiles(function, listOf(AppRootUiBindingGenerator.generate(data)))
+            seen = true
+        }
     }
 
     /**

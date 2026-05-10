@@ -8,7 +8,7 @@ KSP loads it through `NavigationCodegenProcessorProvider` and calls `process(res
 A KSP round is one pass of the processor over the current source set. KSP can run multiple rounds when other processors produce new symbols, but this codegen never
 produces input for itself, so it runs once per build and returns an empty list of deferred symbols.
 
-Each call walks three annotation queries in order. The fully qualified names are kept as `const val` declarations in `Constants.kt` so the processor and its tests share a
+Each call walks seven annotation queries in order. The fully qualified names are kept as `const val` declarations in `Constants.kt` so the processor and its tests share a
 single source of truth.
 
 ```kotlin
@@ -18,22 +18,43 @@ override fun process(resolver: Resolver): List<KSAnnotated> {
     }
     processUiBinding(resolver, Constants.SCREEN_UI_FQN, Constants.SCREEN_UI, UiBindingKind.Screen)
     processUiBinding(resolver, Constants.SHEET_UI_FQN, Constants.SHEET_UI, UiBindingKind.Sheet)
+    processUiBinding(resolver, Constants.TAB_UI_FQN, Constants.TAB_UI, UiBindingKind.Tab)
+    processAppRoot(resolver)
+    processAppRootUi(resolver)
+    processChildPresenter(resolver)
     return emptyList()
 }
 ```
 
-`processAnnotation` and `processUiBinding` are the two private helpers that cover the two kinds of annotated symbol the processor recognises. Both follow the same steps:
-read the matching symbols from KSP, type check each one, pass it to a parser, route the parser's result to a generator. They differ only in the symbol kind they accept.
+Five private helpers cover the kinds of annotated symbol the processor recognises. `processAnnotation` and `processUiBinding` cover the navigation annotations; three
+named helpers (`processAppRoot`, `processAppRootUi`, `processChildPresenter`) cover the standalone class and function targets. All five follow the same steps: read the
+matching symbols from KSP, type check each one, pass it to a parser, route the parser's result to a generator. They differ only in the symbol kind they accept and the
+data type they produce.
 
-## Two paths
+## Five paths
 
-`processAnnotation` is the path for class targets. Currently only `@NavDestination` uses it. KSP returns every class declaration carrying the annotation; the helper hands
-each to the parser, which returns a `NavData?`. A null return means the parser already logged a compile error and the helper skips the symbol. A non null return goes to
-`FileGenerator.generate(data)`, which produces the graph file and the binding file. `writeFiles` writes them through KSP's `CodeGenerator`.
+`processAnnotation` is the path for class targets that produce a `NavData`. Currently only `@NavDestination` uses it. KSP returns every class declaration carrying the
+annotation; the helper hands each to the parser, which returns a `NavData?`. A null return means the parser already logged a compile error and the helper skips the
+symbol. A non null return goes to `FileGenerator.generate(data)`, which produces the graph file and the binding file. `writeFiles` writes them through KSP's
+`CodeGenerator`.
 
-`processUiBinding` is the path for function targets. Both `@ScreenUi` and `@SheetUi` use it. KSP returns every function declaration carrying the annotation; the helper
-hands each to `parseUiBindingData`, which returns a `UiBindingData?`. A non null result goes directly to `UiBindingGenerator.generate(data)` (there is no router wrapper
-because each annotation produces exactly one file).
+`processUiBinding` is the path for function targets that produce a `UiBindingData`. `@ScreenUi`, `@SheetUi`, and `@TabUi` all use it, distinguished by a `UiBindingKind`
+enum value the caller passes in. KSP returns every function declaration carrying the annotation; the helper hands each to `parseUiBindingData`, which returns a
+`UiBindingData?`. A non null result goes directly to `UiBindingGenerator.generate(data)` (there is no router wrapper because each annotation produces exactly one file).
+
+`processAppRoot` is the path for `@AppRoot`. KSP returns every class declaration carrying the annotation; the helper hands each to `parseAppRootData`, which returns an
+`AppRootData?`. A non null result goes directly to `AppRootBindingGenerator.generate(data)`. The data type is independent of `NavData` because the generated binding
+container has a different structure than a destination binding (it is a `@BindingContainer object` that exposes the bound interface, not an interface plus companion
+contributing into a multibinding).
+
+`processAppRootUi` is the path for `@AppRootUi`. KSP returns every function declaration carrying the annotation; the helper rejects more than one annotated function per
+round and reports a compile error pointing at the duplicate. A single annotation goes to `parseAppRootUiData`, which returns an `AppRootUiData?`. A non null result goes
+directly to `AppRootUiBindingGenerator.generate(data)`. The data type is independent of `UiBindingData` because the generated artifact is a provider interface plus an
+extension, not a `ScreenContent` or `SheetContent` multibinding entry.
+
+`processChildPresenter` is the path for `@ChildPresenter`. KSP returns every class declaration carrying the annotation; the helper hands each to
+`parseChildPresenterData`, which returns a `ChildPresenterData?`. A non null result goes directly to `ChildGraphGenerator.generate(data)`. The data type is independent of
+`NavData` because the generated artifact is a graph extension exposing a single presenter, with no destination binding entry alongside it.
 
 ## File writing
 

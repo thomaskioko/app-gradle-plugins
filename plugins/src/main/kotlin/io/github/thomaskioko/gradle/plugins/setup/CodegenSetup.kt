@@ -1,7 +1,7 @@
 package io.github.thomaskioko.gradle.plugins.setup
 
 import io.github.thomaskioko.gradle.plugins.utils.addImplementationDependency
-import io.github.thomaskioko.gradle.plugins.utils.addKspDependencyForAllTargets
+import io.github.thomaskioko.gradle.plugins.utils.addKspDependencyForCommonMain
 import io.github.thomaskioko.gradle.plugins.utils.getDependency
 import org.gradle.api.Project
 
@@ -13,5 +13,5 @@ internal fun Project.setupCodegen() {
 
     setupKsp()
     addImplementationDependency(getDependency("codegen-annotations"))
-    addKspDependencyForAllTargets(getDependency("codegen-processor"))
+    addKspDependencyForCommonMain(getDependency("codegen-processor"))
 }

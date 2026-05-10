@@ -1,18 +1,24 @@
 # Generators
 
-The generator layer turns the typed intermediate values from [data-model.md](data-model.md) into KotlinPoet `FileSpec` outputs. Five generator files live under
+The generator layer turns the typed intermediate values from [data-model.md](data-model.md) into KotlinPoet `FileSpec` outputs. Eight generator files live under
 `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/codegen/`:
 
 - `FileGenerator.kt` is the router that picks which generators run for each `NavData`.
 - `ScreenGraphGenerator.kt` emits the `@GraphExtension` interface plus its nested factory.
 - `NavDestinationBindingGenerator.kt` emits the `NavDestination` and `NavRouteBinding` companion object bindings for screens and overlays.
 - `TabDestinationBindingGenerator.kt` emits the `NavDestination.TabRoot` and `NavRootBinding` bindings for tab roots.
-- `UiBindingGenerator.kt` emits the `@BindingContainer` object that contributes `ScreenContent` or `SheetContent` for composables annotated with `@ScreenUi` or `@SheetUi`.
+- `UiBindingGenerator.kt` emits the `@BindingContainer` object that contributes `ScreenContent` or `SheetContent` for composables annotated with `@ScreenUi`, `@SheetUi`,
+  or `@TabUi`. The `kind` field on `UiBindingData` selects the variant.
+- `ChildGraphGenerator.kt` emits the `<Presenter>ChildGraph` graph extension plus its nested factory for classes annotated with `@ChildPresenter`.
+- `AppRootBindingGenerator.kt` emits the `@BindingContainer` object that wires the nested `@AssistedFactory` to the bound interface for classes annotated with `@AppRoot`.
+- `AppRootUiBindingGenerator.kt` emits the `AppRootProvider` interface plus the `@Composable AppRootProvider.AppRootContent(modifier)` extension for composables
+  annotated with `@AppRootUi`.
 
 `BindingFiles.kt` holds a shared scaffold that both destination binding generators reuse.
 
-The two paths (one for annotated presenter classes, one for annotated composable functions) converge on KotlinPoet types but never share a generator entry point.
-Presenter classes route through `FileGenerator`; composables go directly to `UiBindingGenerator`.
+The five paths (presenter `@NavDestination`, composable `@ScreenUi`/`@SheetUi`/`@TabUi`, presenter `@AppRoot`, composable `@AppRootUi`, presenter `@ChildPresenter`)
+converge on KotlinPoet types but never share a generator entry point. Presenter classes for `@NavDestination` route through `FileGenerator`; everything else is dispatched
+directly from the processor entry to its dedicated generator.
 
 ## FileGenerator routing
 
@@ -89,14 +95,38 @@ site.
 <providers> } }` scaffold that both `NavDestinationBindingGenerator` and `TabDestinationBindingGenerator` reuse. `UiBindingGenerator` does not use it because it emits a
 `@BindingContainer object` instead of an `interface + companion`. The next section explains the difference.
 
+## AppRootBindingGenerator
+
+Produces a single `@BindingContainer @ContributesTo(parentScope) object <InterfaceName>BindingContainer` whose only function is annotated `@Provides @SingleIn(parentScope)`,
+takes a `ComponentContext` and the nested `@AssistedFactory`, and returns the bound interface. The function body is one expression: `return factory.<factoryFunctionName>(componentContext)`.
+The factory function name comes from `AppRootData.factoryFunctionName`, captured at parse time so a non-default name (`build`, `make`, etc.) works without generator
+changes.
+
+The output is intentionally byte-equivalent to the hand-written binding container the consumer would otherwise have to keep in sync. The reasoning: the generator
+replaces a manually written file. Diffing the generated output against a checked-in golden lets contributors verify the equivalence at every change.
+
+## AppRootUiBindingGenerator
+
+Produces one `FileSpec` containing two declarations:
+
+- An `AppRootProvider` interface with one `val` for each non-modifier parameter on the annotated composable. The properties are declared in declaration order; their
+  names and types are read off `AppRootUiData.parameters`.
+- A `@Composable AppRootProvider.AppRootContent(modifier: Modifier = Modifier)` extension that invokes the composable through `MemberName`, passing each parameter from
+  the matching property on the receiver. When `AppRootUiData.hasModifier` is `true`, the extension forwards `modifier`; otherwise the parameter is omitted from the
+  invocation.
+
+The extension lives on the generated provider interface, not on a specific consumer graph type. Consumers make their `@DependencyGraph` extend `AppRootProvider`, which
+keeps the codegen independent of the consumer's graph type and avoids a circular module dependency between `features/root/ui` (where the annotated composable lives)
+and the consumer's `:app` module (where the graph lives).
+
 ## Two output structure decisions
 
 Two non obvious choices in the output that are worth understanding before editing a generator.
 
 ### `@BindingContainer object` for UI bindings, `interface + companion` for destination bindings
 
-The bindings the codegen emits for `@NavDestination` use Metro's `interface + companion object` structure. The bindings the codegen emits for `@ScreenUi` and `@SheetUi`
-use Metro's `@BindingContainer object` structure instead. The reason is a Metro detail.
+The bindings the codegen emits for `@NavDestination` use Metro's `interface + companion object` structure. The bindings the codegen emits for `@ScreenUi`, `@SheetUi`, and
+`@TabUi` use Metro's `@BindingContainer object` structure instead. The reason is a Metro detail.
 
 `@Provides @IntoSet` declarations inside an `interface + companion object` only become contributions when Metro's `generateContributionProviders` flag is enabled, and
 that flag is disabled in the consumer scaffold. The presenter side bindings work with the interface form because the consumer's Kotlin Multiplatform source set picks them

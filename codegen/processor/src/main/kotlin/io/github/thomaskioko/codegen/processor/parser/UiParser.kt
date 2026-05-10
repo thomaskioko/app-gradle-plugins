@@ -40,6 +40,7 @@ internal fun parseUiBindingData(
     val (fqn, shortName) = when (kind) {
         UiBindingKind.Screen -> Constants.SCREEN_UI_FQN to Constants.SCREEN_UI
         UiBindingKind.Sheet -> Constants.SHEET_UI_FQN to Constants.SHEET_UI
+        UiBindingKind.Tab -> Constants.TAB_UI_FQN to Constants.TAB_UI
     }
     val annotation = function.annotations.firstOrNull { ann ->
         ann.annotationType.resolve().declaration.qualifiedName?.asString() == fqn

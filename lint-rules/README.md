@@ -2,10 +2,11 @@
 
 A small ktlint rule set that enforces project specific conventions for the codebase. This is loaded into
 Spotless through the lint convention plugin in `plugins/`.
-Six rules cover:
+Eight rules cover:
 - Navigation layering
 - Compose preview styling
 - Metro Dependency injection cleanup
+- Codegen annotation discipline (presenter and Compose screen)
 - Test naming
 
 ## Rules
@@ -98,6 +99,65 @@ class FooImpl : Foo
 
 The fix is autocorrect-able. The rule covers both class-level `@Inject` and primary-constructor-level `@Inject` (`@Inject constructor(...)`); either is removed when a `@Contributes...` annotation is present on the class.
 
+### `tvmaniac:presenter-needs-codegen-annotation`
+
+Requires every Metro injected presenter class to also carry a codegen annotation that wires it into the navigation system. The rule fires on a top level class whose simple name ends with `Presenter`, that is annotated with `@Inject` or `@AssistedInject`, and that is missing every accepted codegen annotation (`@NavDestination`, `@AppRoot`).
+
+```kotlin
+// Forbidden:
+@Inject
+class TrendingShowsPresenter(...)
+
+// Allowed:
+@Inject
+@NavDestination(
+    route = TrendingShowsRoute::class,
+    parentScope = ActivityScope::class,
+    kind = DestinationKind.SCREEN,
+)
+class TrendingShowsPresenter(...)
+
+// Allowed (root presenter):
+@AppRoot(parentScope = ActivityScope::class)
+@AssistedInject
+class DefaultRootPresenter(...) : RootPresenter
+```
+
+Classes annotated with `@ContributesBinding`, `@ContributesIntoSet`, or `@ContributesIntoMap` are exempt because Metro wires them through the binding rather than through codegen. Abstract and interface presenters are exempt for the same reason. Child presenters that are exposed through a manual `@GraphExtension` opt out by listing their simple class name in `ktlint_tvmaniac_unrouted_presenters`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
+
+### `tvmaniac:compose-screen-needs-codegen-annotation`
+
+Requires every Compose function that takes a presenter parameter to carry a codegen UI annotation that wires it into the navigation host's renderer multibinding. The rule fires on a top level `@Composable` function that declares a parameter named `presenter` or `rootPresenter` and is missing every accepted codegen UI annotation (`@ScreenUi`, `@SheetUi`, `@AppRootUi`).
+
+```kotlin
+// Forbidden:
+@Composable
+fun TrendingShowsScreen(
+    presenter: TrendingShowsPresenter,
+    modifier: Modifier = Modifier,
+) { ... }
+
+// Allowed:
+@ScreenUi(presenter = TrendingShowsPresenter::class, parentScope = ActivityScope::class)
+@Composable
+fun TrendingShowsScreen(
+    presenter: TrendingShowsPresenter,
+    modifier: Modifier = Modifier,
+) { ... }
+
+// Allowed (host composable):
+@AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)
+@Composable
+fun RootScreen(
+    rootPresenter: RootPresenter,
+    screenContents: Set<ScreenContent>,
+    sheetContents: Set<SheetContent>,
+    modifier: Modifier = Modifier,
+) { ... }
+```
+
+Tab root screens dispatched manually inside a parent host opt out by listing their simple function name in `ktlint_tvmaniac_unrouted_screens`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
+
 ### `tvmaniac:test-name-format`
 
 Enforces the BDD style `should X given Y` (or `should X when Y`) test naming convention. Both backticked and camelCase forms are accepted; camelCase is needed for `src/androidTest/` because DEX format 037 forbids spaces in identifiers.
@@ -113,6 +173,35 @@ Enforces the BDD style `should X given Y` (or `should X when Y`) test naming con
 ```
 
 The rule covers `@Test`, `@ParameterizedTest`, and `@RepeatedTest`. Lifecycle annotations (`@BeforeTest`, `@AfterEach`, etc.) are ignored because they are setup and teardown hooks, not tests.
+
+## Configuring codegen exemptions
+
+The `tvmaniac:presenter-needs-codegen-annotation` and `tvmaniac:compose-screen-needs-codegen-annotation` rules each read one `.editorconfig` property listing the names that opt out of the requirement.
+
+### `ktlint_tvmaniac_unrouted_presenters`
+
+Comma separated simple class names of presenters that are intentionally not wired through codegen. Useful for child presenters exposed through a manual `@GraphExtension` (for example pager children inside a parent presenter).
+
+```
+[*.{kt,kts}]
+ktlint_tvmaniac_unrouted_presenters = UpNextPresenter, CalendarPresenter
+```
+
+- **Default**: empty. Every Metro injected `Presenter` class must carry `@NavDestination` or `@AppRoot`.
+- **Whitespace** around entries is trimmed; **blank entries** are ignored.
+- Setting the property to `unset` (or leaving the value empty) keeps the default empty list.
+
+### `ktlint_tvmaniac_unrouted_screens`
+
+Comma separated simple function names of Compose screens that are dispatched manually inside a parent host (for example tab root screens invoked from the home host's `Children` block).
+
+```
+[*.{kt,kts}]
+ktlint_tvmaniac_unrouted_screens = DiscoverScreen, LibraryScreen, ProfileScreen, ProgressScreen
+```
+
+- **Default**: empty. Every `@Composable` function with a presenter parameter must carry `@ScreenUi`, `@SheetUi`, or `@AppRootUi`.
+- Whitespace and blank entry handling matches `ktlint_tvmaniac_unrouted_presenters`.
 
 ## Configuring the navigation layer
 
