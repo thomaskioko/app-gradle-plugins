@@ -244,5 +244,16 @@ class NavDestinationTest {
             setOf("DiscoverTabGraph.kt", "DiscoverTabDestinationBinding.kt"),
             files.keys,
         )
+
+        GoldenFileAssert.assertMatches(
+            "tab",
+            "DiscoverTabGraph.kt",
+            files.getValue("DiscoverTabGraph.kt"),
+        )
+        GoldenFileAssert.assertMatches(
+            "tab",
+            "DiscoverTabDestinationBinding.kt",
+            files.getValue("DiscoverTabDestinationBinding.kt"),
+        )
     }
 }
