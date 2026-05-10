@@ -3,6 +3,8 @@ package io.github.thomaskioko.gradle.plugins.lint
 import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
+import io.github.thomaskioko.gradle.plugins.lint.codegen.ComposeScreenCodegenAnnotationRule
+import io.github.thomaskioko.gradle.plugins.lint.codegen.PresenterCodegenAnnotationRule
 import io.github.thomaskioko.gradle.plugins.lint.metro.MetroRedundantInjectRule
 import io.github.thomaskioko.gradle.plugins.lint.navigation.NoCustomNavigatorInterfaceRule
 import io.github.thomaskioko.gradle.plugins.lint.navigation.NoMutatingRouterImportRule
@@ -29,6 +31,13 @@ import io.github.thomaskioko.gradle.plugins.lint.tests.TestNameFormatRule
  *   styling wrappers inside `@Preview` composables (configurable via `.editorconfig`).
  * - [MetroRedundantInjectRule] (`tvmaniac:metro-redundant-inject`) removes redundant `@Inject`
  *   on classes that already declare a Metro `@Contributes...` annotation.
+ * - [PresenterCodegenAnnotationRule] (`tvmaniac:presenter-needs-codegen-annotation`) requires
+ *   every Metro-injected `Presenter` class to carry `@NavDestination` or `@AppRoot` so the
+ *   codegen processor wires it into the navigation graph.
+ * - [ComposeScreenCodegenAnnotationRule] (`tvmaniac:compose-screen-needs-codegen-annotation`)
+ *   requires every `@Composable` function with a presenter parameter to carry `@ScreenUi`,
+ *   `@SheetUi`, or `@AppRootUi` so the codegen processor wires it into the renderer
+ *   multibinding.
  * - [TestNameFormatRule] (`tvmaniac:test-name-format`) enforces the `should X given Y` test
  *   naming convention.
  *
@@ -43,7 +52,8 @@ public class TvManiacRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET_ID))
         RuleProvider { NoCustomNavigatorInterfaceRule() },
         RuleProvider { NoStyleWrapperInPreviewRule() },
         RuleProvider { MetroRedundantInjectRule() },
-        RuleProvider { TestNameFormatRule() },
+        RuleProvider { PresenterCodegenAnnotationRule() },
+        RuleProvider { ComposeScreenCodegenAnnotationRule() },
     )
 
     private companion object {
