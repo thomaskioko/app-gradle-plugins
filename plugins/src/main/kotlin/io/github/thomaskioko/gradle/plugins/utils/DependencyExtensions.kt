@@ -74,6 +74,25 @@ private fun Project.addKspDependencyForAllTargets(
     }
 }
 
+/**
+ * Registers a KSP processor that should run only against `commonMain` sources.
+ *
+ * For Kotlin Multiplatform projects, attaches [dependency] to the `kspCommonMainMetadata`
+ * configuration so the processor runs once on shared sources and downstream targets pick the
+ * generated symbols up through the `commonMain` source set wired by `setupKsp`. Single-platform
+ * projects fall back to the default `ksp` configuration.
+ *
+ * Prefer this over [addKspDependencyForAllTargets] for processors whose annotations live in
+ * `commonMain`, since attaching the same processor to per-target configurations would generate
+ * the same classes again from each target compilation and trigger redeclaration errors.
+ */
+internal fun Project.addKspDependencyForCommonMain(dependency: Provider<MinimalExternalModuleDependency>) {
+    when {
+        isKmpProject() -> dependencies.add("kspCommonMainMetadata", dependency)
+        else -> dependencies.add("ksp", dependency)
+    }
+}
+
 private fun Project.isKmpProject(): Boolean = extensions.findByType(KotlinMultiplatformExtension::class.java) != null
 
 private fun Project.addKspDependencyForKmp(
