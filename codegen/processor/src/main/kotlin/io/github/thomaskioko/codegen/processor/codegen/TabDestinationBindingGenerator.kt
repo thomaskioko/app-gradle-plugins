@@ -8,6 +8,7 @@ import io.github.thomaskioko.codegen.processor.data.TabData
 import io.github.thomaskioko.codegen.processor.util.IntoSet
 import io.github.thomaskioko.codegen.processor.util.NavDestination
 import io.github.thomaskioko.codegen.processor.util.NavDestinationTabRoot
+import io.github.thomaskioko.codegen.processor.util.NavRoot
 import io.github.thomaskioko.codegen.processor.util.NavRootBinding
 import io.github.thomaskioko.codegen.processor.util.Provides
 import io.github.thomaskioko.codegen.processor.util.TabChild
@@ -20,7 +21,8 @@ import io.github.thomaskioko.codegen.processor.util.parameterizedByStar
  * destination function returns a `NavDestination.TabRoot` rather than a `NavDestination.Screen`,
  * and the factory lambda wraps the produced presenter in `TabChild(...)` rather than
  * `ScreenDestination(...)`. The route binding function returns `NavRootBinding<*>` instead of
- * `NavRouteBinding<*>`.
+ * `NavRouteBinding<*>`. A third function contributes the route singleton itself into
+ * `Set<NavRoot>` so consumers do not have to hand-write a parallel binding next to each tab.
  *
  * There is no parameterized branch. Tab roots must use plain `@Inject`. The parser
  * ([io.github.thomaskioko.codegen.processor.parser.parseNavDestinationData]) rejects
@@ -45,6 +47,10 @@ import io.github.thomaskioko.codegen.processor.util.parameterizedByStar
  *
  *         @Provides
  *         @IntoSet
+ *         public fun provideDiscoverNavRoot(): NavRoot = DiscoverRoot
+ *
+ *         @Provides
+ *         @IntoSet
  *         public fun provideDiscoverRootBinding(): NavRootBinding<*> =
  *             NavRootBinding(DiscoverRoot::class, DiscoverRoot.serializer())
  *     }
@@ -62,6 +68,7 @@ internal object TabDestinationBindingGenerator {
         bindingName = data.bindingClassName,
         parentScope = data.parentScope,
         destinationFun(data),
+        navRootFun(data),
         rootBindingFun(data),
     )
 
@@ -94,6 +101,20 @@ internal object TabDestinationBindingGenerator {
                     .add("}\n")
                     .build(),
             )
+            .build()
+
+    /**
+     * Builds the `provide<BaseName>NavRoot` function. Returns the route singleton typed as
+     * `NavRoot` and contributes it to `Set<NavRoot>`, replacing the hand-written
+     * `<Feature>RootBinding` files that consumers used to keep alongside each tab.
+     */
+    private fun navRootFun(data: TabData): FunSpec =
+        FunSpec.builder("provide${data.baseName}NavRoot")
+            .addModifiers(KModifier.PUBLIC)
+            .addAnnotation(Provides)
+            .addAnnotation(IntoSet)
+            .returns(NavRoot)
+            .addStatement("return %T", data.scope)
             .build()
 
     /**
