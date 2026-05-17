@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.7.9 *(2026-05-17)*
+
+- Fix dependency analysis configuration
+
 ## 0.7.8 *(2026-05-10)*
 
 ### Navigation

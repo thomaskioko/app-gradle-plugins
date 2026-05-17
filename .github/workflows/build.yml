@@ -81,7 +81,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Run functional tests
+      - name: Run tests
         run: ./gradlew :plugins:functionalTest --stacktrace
 
       - name: Upload test reports
