@@ -110,6 +110,12 @@ public abstract class RootPlugin : Plugin<Project> {
             analysis.useTypesafeProjectAccessors(true)
 
             analysis.issues { issues ->
+                AnalysisExclusions.ignoredModules.forEach { projectPath ->
+                    issues.project(projectPath) { project ->
+                        project.onAny { issue -> issue.severity("ignore") }
+                    }
+                }
+
                 issues.all { project ->
                     project.onAny {
                         it.severity("fail")
@@ -119,10 +125,6 @@ public abstract class RootPlugin : Plugin<Project> {
                         it.exclude(*AnalysisExclusions.incorrectConfiguration.toTypedArray())
                     }
 
-                    project.onRedundantPlugins {
-                        it.severity("fail")
-                    }
-
                     project.onUnusedDependencies {
                         it.exclude(*AnalysisExclusions.unusedDependencies.toTypedArray())
                     }
@@ -130,6 +132,42 @@ public abstract class RootPlugin : Plugin<Project> {
                     project.onUsedTransitiveDependencies {
                         it.severity("warn")
                         it.exclude(*AnalysisExclusions.usedTransitive.toTypedArray())
+                    }
+
+                    project.onCompileOnly {
+                        it.severity("warn")
+                    }
+
+                    project.onRuntimeOnly {
+                        it.severity("warn")
+                    }
+
+                    project.onUnusedAnnotationProcessors {
+                        it.severity("warn")
+                    }
+
+                    project.onModuleStructure {
+                        it.severity("warn")
+                    }
+
+                    project.onDuplicateClassWarnings {
+                        it.severity("warn")
+                    }
+
+                    AnalysisExclusions.ignoredIncorrectConfigurationSourceSets.forEach { sourceSetName ->
+                        project.sourceSet(sourceSetName) { perSourceSet ->
+                            perSourceSet.onIncorrectConfiguration { issue ->
+                                issue.severity("ignore")
+                            }
+                        }
+                    }
+
+                    AnalysisExclusions.ignoredUsedTransitiveSourceSets.forEach { sourceSetName ->
+                        project.sourceSet(sourceSetName) { perSourceSet ->
+                            perSourceSet.onUsedTransitiveDependencies { issue ->
+                                issue.severity("ignore")
+                            }
+                        }
                     }
                 }
             }
