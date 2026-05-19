@@ -88,10 +88,6 @@ internal object AnalysisExclusions {
         "io.kotest:kotest-assertions-shared",
     )
 
-    val ignoredModules: List<String> = listOf(
-        ":ios-framework",
-    )
-
     // KMP test source sets where DAGP's "incorrect configuration" advice produces
     // api(...) recommendations that Kotlin warns are unsupported and slated for removal.
     val ignoredIncorrectConfigurationSourceSets: List<String> = listOf(
