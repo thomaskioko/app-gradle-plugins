@@ -110,12 +110,6 @@ public abstract class RootPlugin : Plugin<Project> {
             analysis.useTypesafeProjectAccessors(true)
 
             analysis.issues { issues ->
-                AnalysisExclusions.ignoredModules.forEach { projectPath ->
-                    issues.project(projectPath) { project ->
-                        project.onAny { issue -> issue.severity("ignore") }
-                    }
-                }
-
                 issues.all { project ->
                     project.onAny {
                         it.severity("fail")
