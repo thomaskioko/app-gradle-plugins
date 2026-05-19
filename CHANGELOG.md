@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+an## 0.8.0 *(2026-05-19)*
+
+- Refactor dependency analysis exclusions to a DSL-based configuration
+- `tvmaniac:no-manual-nav-binding` flags manual bindings  `@Provides @IntoSet` providers returning
+  `NavRoot`, `NavRootBinding`, `NavDestination`, or `NavRouteBinding`. The codegen processor owns
+  those multibindings whenever a presenter is annotated with `@NavDestination` or `@AppRoot`, so
+  any hand-written contribution duplicates the generated provider.
+
 ## 0.7.9 *(2026-05-17)*
 
 - Fix dependency analysis configuration
