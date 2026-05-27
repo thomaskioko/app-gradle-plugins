@@ -16,7 +16,7 @@ kotlinPoet = "2.3.0"
 ksp="2.3.8"
 metro = "1.1.1"
 publish = "0.36.0"
-spotless = "8.4.0"
+spotless = "8.6.0"
 
 [libraries]
 mordant-core = { module = "com.github.ajalt.mordant:mordant-core", version.ref = "mordant" }
