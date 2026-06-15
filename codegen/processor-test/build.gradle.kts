@@ -19,8 +19,8 @@ java {
 dependencies {
     testImplementation(project(":processor"))
     testRuntimeOnly(project(":annotations"))
-    testImplementation("dev.zacsweers.kctfork:ksp:0.12.1")
-    testImplementation("dev.zacsweers.kctfork:core:0.12.1")
+    testImplementation(libs.kctfork.ksp)
+    testImplementation(libs.kctfork.core)
     testImplementation(libs.junit)
     testImplementation(libs.ksp.api)
     testImplementation(libs.kotlin.compiler.embeddable)
