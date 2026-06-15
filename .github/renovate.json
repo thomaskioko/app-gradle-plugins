@@ -29,6 +29,12 @@
                 "org.jetbrains.kotlin*",
                 "com.google.devtools.ksp*"
             ]
+        },
+        {
+            "groupName": "kctfork",
+            "matchPackageNames": [
+                "dev.zacsweers.kctfork:*"
+            ]
         }
     ]
 }
