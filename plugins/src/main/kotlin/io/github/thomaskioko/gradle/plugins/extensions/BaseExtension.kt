@@ -4,6 +4,7 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
 import com.autonomousapps.DependencyAnalysisExtension
 import io.github.thomaskioko.gradle.plugins.setup.setupCodegen
+import io.github.thomaskioko.gradle.plugins.setup.setupFeatureFlagCodegen
 import io.github.thomaskioko.gradle.plugins.setup.setupKotlinInject
 import io.github.thomaskioko.gradle.plugins.setup.setupMetro
 import io.github.thomaskioko.gradle.plugins.setup.setupSerialization
@@ -200,6 +201,30 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      */
     public fun useCodegen() {
         project.setupCodegen()
+    }
+
+    /**
+     * Applies KSP and adds the feature flag codegen processor and annotations.
+     *
+     * The codegen reads `@FeatureFlag`-decorated qualifier annotations and emits one
+     * `<QualifierBaseName>Binding.kt` per qualifier into the qualifier's package. Each generated
+     * file contains a `@ContributesTo(AppScope::class)` interface with two `@Provides` methods that
+     * wire the flag through the consumer's `FeatureFlagFactory` and into the
+     * `Set<FeatureFlag<Boolean>>` multibinding. See `codegen/docs/featureflag.md` for the full
+     * contract.
+     *
+     * Independent from [useCodegen]; modules that consume both navigation and feature flag codegen
+     * call both functions.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useMetro()
+     *   useFeatureFlagCodegen()
+     * }
+     * ```
+     */
+    public fun useFeatureFlagCodegen() {
+        project.setupFeatureFlagCodegen()
     }
 
     /**
