@@ -52,6 +52,8 @@ jobs:
           ./gradlew build \
             :plugins:build \
             :codegen:annotations:build \
+            :codegen:featureflag-annotations:build \
+            :codegen:featureflag-processor:build \
             :codegen:processor:build \
             :codegen:processor-test:build \
             :lint-rules:build \

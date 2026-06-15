@@ -28,6 +28,8 @@ rootProject.name = "codegen"
 
 include(
     ":annotations",
+    ":featureflag-annotations",
     ":processor",
+    ":featureflag-processor",
     ":processor-test",
 )

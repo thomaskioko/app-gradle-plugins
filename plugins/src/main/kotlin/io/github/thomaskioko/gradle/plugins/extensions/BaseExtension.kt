@@ -2,7 +2,9 @@ package io.github.thomaskioko.gradle.plugins.extensions
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
+import com.autonomousapps.DependencyAnalysisExtension
 import io.github.thomaskioko.gradle.plugins.setup.setupCodegen
+import io.github.thomaskioko.gradle.plugins.setup.setupFeatureFlagCodegen
 import io.github.thomaskioko.gradle.plugins.setup.setupKotlinInject
 import io.github.thomaskioko.gradle.plugins.setup.setupMetro
 import io.github.thomaskioko.gradle.plugins.setup.setupSerialization
@@ -44,6 +46,68 @@ import java.net.URI
  */
 @ScaffoldDsl
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
+    /**
+     * Silences DAGP's "unused dependencies" check for the named Gradle project paths.
+     *
+     * The call routes to the root project's `DependencyAnalysisExtension`, so each named module's
+     * unused-dependency analysis output is suppressed regardless of which scaffold the call lives
+     * in. Appropriate when a module contributes Metro bindings into a consumer's graph via
+     * `@ContributesBinding` codegen on Kotlin/Native targets, or any other compile-time
+     * contribution mechanism that DAGP cannot trace via JVM/Android bytecode.
+     *
+     * ```kotlin
+     * scaffold {
+     *   ignoreUnused(":data:request-manager:testing")
+     * }
+     * ```
+     *
+     * @param projectPaths Gradle project paths (for example `":data:request-manager:testing"`)
+     *   whose unused-dependency analysis output should be silenced.
+     */
+    public fun ignoreUnused(vararg projectPaths: String) {
+        project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
+            analysis.issues { issues ->
+                projectPaths.forEach { projectPath ->
+                    issues.project(projectPath) { perProject ->
+                        perProject.onUnusedDependencies { it.severity("ignore") }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Silences every DAGP issue category (`onAny`) for the named Gradle project paths. Use
+     * sparingly.
+     *
+     * The call routes to the root project's `DependencyAnalysisExtension`, so the named module's
+     * analysis output is suppressed regardless of which scaffold the call lives in. Appropriate
+     * for a Kotlin/Native-only framework module whose dependencies are entirely consumed by the
+     * iOS app and never by another JVM or Android consumer, where DAGP's model genuinely does
+     * not apply. Replaces the previous hardcoded `AnalysisExclusions.ignoredModules` list with
+     * an explicit per-module opt-in.
+     *
+     * ```kotlin
+     * scaffold {
+     *   ignoreAll(":ios-framework")
+     * }
+     * ```
+     *
+     * @param projectPaths Gradle project paths (for example `":ios-framework"`) whose DAGP
+     *   analysis output should be silenced.
+     */
+    public fun ignoreAll(vararg projectPaths: String) {
+        project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
+            analysis.issues { issues ->
+                projectPaths.forEach { projectPath ->
+                    issues.project(projectPath) { perProject ->
+                        perProject.onAny { it.severity("ignore") }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Adds compiler opt-in entries to every Kotlin compilation in the project.
      *
@@ -137,6 +201,30 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      */
     public fun useCodegen() {
         project.setupCodegen()
+    }
+
+    /**
+     * Applies KSP and adds the feature flag codegen processor and annotations.
+     *
+     * The codegen reads `@FeatureFlag`-decorated qualifier annotations and emits one
+     * `<QualifierBaseName>Binding.kt` per qualifier into the qualifier's package. Each generated
+     * file contains a `@ContributesTo(AppScope::class)` interface with two `@Provides` methods that
+     * wire the flag through the consumer's `FeatureFlagFactory` and into the
+     * `Set<FeatureFlag<Boolean>>` multibinding. See `codegen/docs/featureflag.md` for the full
+     * contract.
+     *
+     * Independent from [useCodegen]; modules that consume both navigation and feature flag codegen
+     * call both functions.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useMetro()
+     *   useFeatureFlagCodegen()
+     * }
+     * ```
+     */
+    public fun useFeatureFlagCodegen() {
+        project.setupFeatureFlagCodegen()
     }
 
     /**

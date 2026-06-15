@@ -18,7 +18,9 @@ java {
 
 dependencies {
     testImplementation(project(":processor"))
+    testImplementation(project(":featureflag-processor"))
     testRuntimeOnly(project(":annotations"))
+    testRuntimeOnly(project(":featureflag-annotations"))
     testImplementation(libs.kctfork.ksp)
     testImplementation(libs.kctfork.core)
     testImplementation(libs.junit)

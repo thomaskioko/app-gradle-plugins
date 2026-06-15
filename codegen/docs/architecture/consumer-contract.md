@@ -40,6 +40,27 @@ annotation directly on the generated `AppRootContent` extension.
 interface (`RootPresenter` in Tv Maniac), the implementation type, and the host composable all flow through from the annotated symbol via the parser. Consumers can
 rename or repackage these without touching the codegen.
 
+## Feature flag primitives
+
+The feature flag codegen tier in `codegen/featureflag-processor` adds two consumer-side hardcoded names, listed in
+`codegen/featureflag-processor/src/main/kotlin/io/github/thomaskioko/codegen/featureflag/processor/util/External.kt`.
+
+**Consumer feature flag primitives** under `com.thomaskioko.tvmaniac.featureflags`:
+
+- `FeatureFlag<T>`. The generic interface consumers inject. `FeatureFlagBindingGenerator` parameterises it with `Boolean` in every generated `@Provides` function and
+  `@IntoSet` rebind. Changing the package or renaming the interface breaks every generated binding.
+- `FeatureFlagFactory`. The construction surface. The generator emits `factory.boolean(key, title, description, defaultValue, dateAdded)` calls referencing this type.
+  The factory must declare a `boolean(...)` method with that exact signature; the generator does not branch on alternative shapes.
+
+**Feature flag Metro primitives.** Same `dev.zacsweers.metro` package as the navigation contract, but the feature flag generator also references `AppScope` directly as
+the scope marker for `@ContributesTo(AppScope::class)` and `@SingleIn(AppScope::class)`. Consumers that contribute their feature flags into a different scope must fork
+the processor and edit the matching `External.kt` constant.
+
+**kotlinx.datetime.** `kotlinx.datetime.LocalDate` is the only datetime reference. The generator parses the annotation's `dateAdded` ISO String at codegen time and emits
+a `LocalDate(year, month, day)` constructor call. Consumers must keep `kotlinx-datetime` on the classpath of every module that declares `@FeatureFlag` qualifiers.
+
+The full feature flag codegen reference lives in [featureflag.md](../featureflag.md). The validation rules and error markers are documented there.
+
 ## Runtime flow
 
 The pieces above interact at runtime when the user navigates to a destination. Tracing one navigation request from start to render makes the contract concrete.

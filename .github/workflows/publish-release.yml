@@ -42,6 +42,8 @@ jobs:
           ./gradlew \
             :plugins:publishAndReleaseToMavenCentral \
             :codegen:annotations:publishAndReleaseToMavenCentral \
+            :codegen:featureflag-annotations:publishAndReleaseToMavenCentral \
+            :codegen:featureflag-processor:publishAndReleaseToMavenCentral \
             :codegen:processor:publishAndReleaseToMavenCentral \
             :lint-rules:publishAndReleaseToMavenCentral \
             --no-configuration-cache --stacktrace \

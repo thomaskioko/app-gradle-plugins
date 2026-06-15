@@ -4,6 +4,7 @@ import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 import io.github.thomaskioko.gradle.plugins.lint.codegen.ComposeScreenCodegenAnnotationRule
+import io.github.thomaskioko.gradle.plugins.lint.codegen.NoManualNavBindingRule
 import io.github.thomaskioko.gradle.plugins.lint.codegen.PresenterCodegenAnnotationRule
 import io.github.thomaskioko.gradle.plugins.lint.metro.MetroRedundantInjectRule
 import io.github.thomaskioko.gradle.plugins.lint.navigation.NoCustomNavigatorInterfaceRule
@@ -38,6 +39,10 @@ import io.github.thomaskioko.gradle.plugins.lint.tests.TestNameFormatRule
  *   requires every `@Composable` function with a presenter parameter to carry `@ScreenUi`,
  *   `@SheetUi`, or `@AppRootUi` so the codegen processor wires it into the renderer
  *   multibinding.
+ * - [NoManualNavBindingRule] (`tvmaniac:no-manual-nav-binding`) forbids hand-written
+ *   `@Provides @IntoSet` providers for `NavRoot`, `NavRootBinding`, `NavDestination`, or
+ *   `NavRouteBinding`. Codegen owns those multibindings whenever a presenter is annotated with
+ *   `@NavDestination` or `@AppRoot`.
  * - [TestNameFormatRule] (`tvmaniac:test-name-format`) enforces the `should X given Y` test
  *   naming convention.
  *
@@ -54,6 +59,7 @@ public class TvManiacRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET_ID))
         RuleProvider { MetroRedundantInjectRule() },
         RuleProvider { PresenterCodegenAnnotationRule() },
         RuleProvider { ComposeScreenCodegenAnnotationRule() },
+        RuleProvider { NoManualNavBindingRule() },
     )
 
     private companion object {
