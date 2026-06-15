@@ -1,7 +1,20 @@
 Change Log
 ==========
 
-an## 0.8.0 *(2026-05-19)*
+## 0.9.0 *(unreleased)*
+
+### Feature flag codegen
+
+New codegen generation module that eliminates the boilerplate every typed feature flag would otherwise require by hand. Decorate a `@Qualifier`-annotated annotation class with `@FeatureFlag(key, title, description, defaultValue, dateAdded)` and the processor emits one `<QualifierBaseName>Binding.kt` next to the qualifier containing the `@Provides @SingleIn @<Qualifier>` factory call plus the `@Provides @IntoSet` rebind into the `Set<FeatureFlag<Boolean>>` multibinding. The hand-written `FlagBindings` interface goes away.
+
+- New module `codegen/featureflag-annotations` (KMP). Public `@FeatureFlag` annotation class. Published as `codegen-featureflag-annotations`.
+- New module `codegen/featureflag-processor` (JVM). `FeatureFlagCodegenProcessor` plus `FeatureFlagBindingGenerator`. Validation covers `InvalidTarget`, `MissingQualifier`, `EmptyKey`, `EmptyTitle`, and `InvalidDate` with each error pinned to the offending symbol. Published as `codegen-featureflag-processor`.
+- New `useFeatureFlagCodegen()` DSL on `BaseExtension`. Mirrors `useCodegen()`: applies KSP (and Metro if absent), registers the processor against `kspCommonMain`, adds the annotation jar to `commonMainImplementation`.
+- Golden tests under `codegen/processor-test/src/test/resources/golden/featureflag/{simple,multi}/`. Update via `-Pgolden.update=true`.
+- Docs at `codegen/docs/featureflag.md`. Consumer contract extended at `codegen/docs/architecture/consumer-contract.md`.
+
+
+## 0.8.0 *(2026-05-19)*
 
 - Refactor dependency analysis exclusions to a DSL-based configuration
 - `tvmaniac:no-manual-nav-binding` flags manual bindings  `@Provides @IntoSet` providers returning
