@@ -3,18 +3,20 @@ package io.github.thomaskioko.codegen.featureflag.processor
 import com.squareup.kotlinpoet.ClassName
 
 /**
- * Typed intermediate representation of one `@FeatureFlag`-decorated qualifier annotation.
+ * Typed intermediate representation of one `@FeatureFlag`-decorated anchor.
  *
  * Produced by [FeatureFlagCodegenProcessor] after parsing the annotation arguments and computing
- * the base name. Consumed by [FeatureFlagBindingGenerator] to emit the per-qualifier binding file.
+ * the base name. Consumed by [FeatureFlagQualifierGenerator] to emit the qualifier file and by
+ * [FeatureFlagBindingGenerator] to emit the binding file.
  *
- * @property packageName Package of the annotated qualifier class. The generated binding file
- *   lives in the same package so it sits next to the qualifier declaration.
- * @property qualifierClassName Fully qualified name of the annotated qualifier class. Referenced
- *   by the generated `@Provides` function and the `@IntoSet` rebind parameter.
- * @property baseName The qualifier's simple name with a trailing `Qualifier` suffix removed (if
- *   present). Drives the generated interface name (`<baseName>Binding`) and the generated function
- *   names (`provide<baseName>`, `bind<baseName>`).
+ * @property packageName Package of the annotated anchor. The generated qualifier and binding files
+ *   live in the same package so they sit next to the anchor declaration.
+ * @property qualifierClassName Fully qualified name of the generated qualifier annotation
+ *   (`<packageName>.<baseName>Qualifier`). Referenced by the generated `@Provides` function and the
+ *   `@IntoSet` rebind parameter.
+ * @property baseName The anchor's simple name verbatim. Drives the generated qualifier name
+ *   (`<baseName>Qualifier`), the generated interface name (`<baseName>Binding`), and the generated
+ *   function names (`provide<baseName>`, `bind<baseName>`).
  * @property key Firebase Remote Config key. Passed verbatim to `factory.boolean(...)`.
  * @property title Human-readable name. Passed verbatim to `factory.boolean(...)`.
  * @property description One-line summary. Passed verbatim to `factory.boolean(...)`.
