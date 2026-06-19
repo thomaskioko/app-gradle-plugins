@@ -15,8 +15,8 @@ only one apply only that one.
 Each typed feature flag needs three artifacts that the consumer would otherwise write by hand, all
 of which derive entirely from the flag name plus the metadata on `@FeatureFlag`:
 
-1. A `<BaseName>Qualifier` annotation, marked with Metro's `@Qualifier` — the per-flag handle
-   consumers inject.
+1. A `<BaseName>Qualifier` annotation, marked with Metro's `@Qualifier` (the per-flag handle
+   consumers inject).
 2. A `@Provides @SingleIn(AppScope::class) @<BaseName>Qualifier` function returning
    `FeatureFlag<Boolean>` by calling `factory.boolean(key, title, description, defaultValue,
    dateAdded)`.
@@ -66,8 +66,8 @@ scaffold {
 `useFeatureFlagCodegen()` applies KSP (and Metro, if absent), adds the annotation jar to
 `commonMainImplementation`, and registers the processor against **all targets** via
 `addKspDependencyForAllTargets` (its target-name mapping rewrites `metadata` to
-`kspCommonMainMetadata`). Registering every target is what makes platform-scoped flags work — see
-[Platform isolation](#platform-isolation).
+`kspCommonMainMetadata`). Registering every target is what makes platform-scoped flags work (see
+[Platform isolation](#platform-isolation)).
 
 ## Annotation reference
 
@@ -86,13 +86,13 @@ scaffold {
 it to `kotlinx.datetime.LocalDate` at codegen time and emits a `LocalDate(year, month, day)`
 constructor call in the generated binding.
 
-`platform` is the `Platform` enum — `ALL` (default), `IOS`, or `JVM`. Leave it unset for a normal
+`platform` is the `Platform` enum: `ALL` (default), `IOS`, or `JVM`. Leave it unset for a normal
 flag; set it only to scope a flag to one platform (see [Platform isolation](#platform-isolation)).
-The generated output is identical regardless of platform — the field only decides which compilation
+The generated output is identical regardless of platform; the field only decides which compilation
 emits it.
 
 The base name comes from the anchor's simple name verbatim. Name the anchor `XxxFlag`, never
-`XxxFlagQualifier` — the generator appends `Qualifier`/`Binding`, so a `Qualifier` suffix would
+`XxxFlagQualifier`: the generator appends `Qualifier`/`Binding`, so a `Qualifier` suffix would
 produce a doubled `XxxFlagQualifierQualifier`.
 
 ## Example
@@ -149,13 +149,13 @@ public interface ContinueWatchingNitroFlagBinding {
 
 ## Platform isolation
 
-The `platform` field scopes a flag to one platform at compile time — not a runtime filter. The
+The `platform` field scopes a flag to one platform at compile time, not a runtime filter. The
 anchor always stays in `commonMain`; the field is the only control:
 
 - `platform = Platform.ALL` (default) → generated once for every graph (Android and iOS).
 - `platform = Platform.IOS` → generated only into the iOS targets; absent from the Android binary.
 - `platform = Platform.JVM` → generated only into the Android/JVM targets; absent from iOS. `JVM`
-  covers the Android target and any plain `jvm` target — KSP reports the two identically, so there
+  covers the Android target and any plain `jvm` target; KSP reports the two identically, so there
   is no Android-only value.
 
 ```kotlin
@@ -183,14 +183,14 @@ on its platform:
 - **Graph contribution.** The generated `<BaseName>Binding` carries `@ContributesTo(AppScope::class)`
   and exists only in that platform's compilation, so it contributes to only that platform's Metro
   `Set<FeatureFlag<Boolean>>` multibinding. Android and iOS are separate `AppScope` graphs, and the
-  other platform's binary never contains the code — absence is a compile-time guarantee, not a
+  other platform's binary never contains the code. Absence is a compile-time guarantee, not a
   runtime filter.
 - **Debug screen.** The shared consumer-side interactor and presenter inject the whole
   `Set<FeatureFlag<Boolean>>`, not any individual qualifier, so a platform flag surfaces on that
   platform's debug screen with no shared-code change.
 - **Boundary.** The generated `<BaseName>Qualifier` lives only in that platform's source set, so only
   that platform's source can inject the flag by qualifier. Shared/common code sees it only
-  anonymously through the multibinding — enough to list and toggle it on the debug screen, but code
+  anonymously through the multibinding. That is enough to list and toggle it on the debug screen, but code
   that reads the flag by its qualifier must live in the same platform source set as the anchor.
 
 ## Validation
