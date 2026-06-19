@@ -53,11 +53,11 @@ The feature flag codegen tier in `codegen/featureflag-processor` adds two consum
   The factory must declare a `boolean(...)` method with that exact signature; the generator does not branch on alternative shapes.
 
 **Feature flag Metro primitives.** Same `dev.zacsweers.metro` package as the navigation contract, but the feature flag generator also references `AppScope` directly as
-the scope marker for `@ContributesTo(AppScope::class)` and `@SingleIn(AppScope::class)`. Consumers that contribute their feature flags into a different scope must fork
-the processor and edit the matching `External.kt` constant.
+the scope marker for `@ContributesTo(AppScope::class)` and `@SingleIn(AppScope::class)`, and `Qualifier` to stamp the generated `<BaseName>Qualifier` annotation
+(`FeatureFlagQualifierGenerator`). Consumers that contribute their feature flags into a different scope must fork the processor and edit the matching `External.kt` constant.
 
 **kotlinx.datetime.** `kotlinx.datetime.LocalDate` is the only datetime reference. The generator parses the annotation's `dateAdded` ISO String at codegen time and emits
-a `LocalDate(year, month, day)` constructor call. Consumers must keep `kotlinx-datetime` on the classpath of every module that declares `@FeatureFlag` qualifiers.
+a `LocalDate(year, month, day)` constructor call. Consumers must keep `kotlinx-datetime` on the classpath of every module that declares `@FeatureFlag` anchors.
 
 The full feature flag codegen reference lives in [featureflag.md](../featureflag.md). The validation rules and error markers are documented there.
 
