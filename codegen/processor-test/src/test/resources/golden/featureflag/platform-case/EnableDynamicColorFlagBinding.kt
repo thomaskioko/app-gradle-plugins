@@ -11,19 +11,19 @@ import kotlin.Boolean
 import kotlinx.datetime.LocalDate
 
 @ContributesTo(AppScope::class)
-public interface SimklLoginFlagBinding {
+public interface EnableDynamicColorFlagBinding {
   @Provides
   @SingleIn(AppScope::class)
-  @SimklLoginFlagQualifier
-  public fun provideSimklLoginFlag(factory: FeatureFlagFactory): FeatureFlag<Boolean> = factory.boolean(
-      key = "simkl_login_enabled",
-      title = "Simkl Login",
-      description = "Show the Simkl login entry point on the settings screen.",
+  @EnableDynamicColorFlagQualifier
+  public fun provideEnableDynamicColorFlag(factory: FeatureFlagFactory): FeatureFlag<Boolean> = factory.boolean(
+      key = "enable_dynamic_color",
+      title = "Dynamic Color",
+      description = "Apply the Android Material You dynamic color scheme.",
       defaultValue = false,
-      dateAdded = LocalDate(2026, 5, 17),
+      dateAdded = LocalDate(2026, 6, 18),
   )
 
   @Provides
   @IntoSet
-  public fun bindSimklLoginFlag(@SimklLoginFlagQualifier flag: FeatureFlag<Boolean>): FeatureFlag<Boolean> = flag
+  public fun bindEnableDynamicColorFlag(@EnableDynamicColorFlagQualifier flag: FeatureFlag<Boolean>): FeatureFlag<Boolean> = flag
 }

@@ -10,15 +10,13 @@ import org.junit.Test
 class FeatureFlagMultiFlagTest {
 
     @Test
-    fun `should generate one binding file per FeatureFlag-decorated qualifier`() {
+    fun `should generate a qualifier and binding pair per FeatureFlag-decorated anchor`() {
         val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
-            "Qualifiers.kt" to """
+            "Flags.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
-                import dev.zacsweers.metro.Qualifier
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "enable_continue_watching_nitro",
                     title = "Progress Endpoint",
@@ -26,9 +24,8 @@ class FeatureFlagMultiFlagTest {
                     defaultValue = false,
                     dateAdded = "2026-05-20",
                 )
-                public annotation class ContinueWatchingNitroFlagQualifier
+                public object ContinueWatchingNitroFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "simkl_login_enabled",
                     title = "Simkl Login",
@@ -36,7 +33,7 @@ class FeatureFlagMultiFlagTest {
                     defaultValue = false,
                     dateAdded = "2026-05-17",
                 )
-                public annotation class SimklLoginFlagQualifier
+                public object SimklLoginFlag
             """.trimIndent(),
         )
 
@@ -49,15 +46,30 @@ class FeatureFlagMultiFlagTest {
 
         val files = result.generatedFiles
         assertEquals(
-            "Expected exactly 2 generated files, got ${files.keys}",
-            setOf("ContinueWatchingNitroFlagBinding.kt", "SimklLoginFlagBinding.kt"),
+            "Expected exactly 4 generated files, got ${files.keys}",
+            setOf(
+                "ContinueWatchingNitroFlagQualifier.kt",
+                "ContinueWatchingNitroFlagBinding.kt",
+                "SimklLoginFlagQualifier.kt",
+                "SimklLoginFlagBinding.kt",
+            ),
             files.keys,
         )
 
         GoldenFileAssert.assertMatches(
             "featureflag/multi",
+            "ContinueWatchingNitroFlagQualifier.kt",
+            files.getValue("ContinueWatchingNitroFlagQualifier.kt"),
+        )
+        GoldenFileAssert.assertMatches(
+            "featureflag/multi",
             "ContinueWatchingNitroFlagBinding.kt",
             files.getValue("ContinueWatchingNitroFlagBinding.kt"),
+        )
+        GoldenFileAssert.assertMatches(
+            "featureflag/multi",
+            "SimklLoginFlagQualifier.kt",
+            files.getValue("SimklLoginFlagQualifier.kt"),
         )
         GoldenFileAssert.assertMatches(
             "featureflag/multi",
