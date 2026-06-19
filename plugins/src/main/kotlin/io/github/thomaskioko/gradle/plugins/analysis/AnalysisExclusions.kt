@@ -35,6 +35,9 @@ internal object AnalysisExclusions {
         "io.kotest:kotest-assertions-core",
         // Added by setupCodegen()
         "io.github.thomaskioko.gradle.plugins:codegen-annotations",
+        // Added by setupFeatureFlagCodegen(); the @FeatureFlag annotations have source/binary
+        // retention and are consumed by KSP, so DAGP cannot see them in bytecode.
+        "io.github.thomaskioko.gradle.plugins:codegen-featureflag-annotations",
         // setupMetro() / setupCodegen() add metro-runtime
         "dev.zacsweers.metro:runtime",
         // Added by setupResourceGenerator() / Moko Resources plugin.

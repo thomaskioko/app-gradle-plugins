@@ -87,19 +87,23 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      * not apply. Replaces the previous hardcoded `AnalysisExclusions.ignoredModules` list with
      * an explicit per-module opt-in.
      *
+     * Called with no arguments, it silences the project the scaffold is attached to:
+     *
      * ```kotlin
+     * // ios-framework/build.gradle.kts
      * scaffold {
-     *   ignoreAll(":ios-framework")
+     *   ignoreAll()
      * }
      * ```
      *
      * @param projectPaths Gradle project paths (for example `":ios-framework"`) whose DAGP
-     *   analysis output should be silenced.
+     *   analysis output should be silenced. Defaults to the current project when empty.
      */
     public fun ignoreAll(vararg projectPaths: String) {
+        val paths = if (projectPaths.isEmpty()) arrayOf(project.path) else projectPaths
         project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
             analysis.issues { issues ->
-                projectPaths.forEach { projectPath ->
+                paths.forEach { projectPath ->
                     issues.project(projectPath) { perProject ->
                         perProject.onAny { it.severity("ignore") }
                     }
