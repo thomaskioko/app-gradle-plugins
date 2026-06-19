@@ -10,15 +10,13 @@ import org.junit.Test
 class FeatureFlagSimpleTest {
 
     @Test
-    fun `should generate binding interface for one FeatureFlag-decorated qualifier`() {
+    fun `should generate qualifier and binding for one FeatureFlag-decorated anchor`() {
         val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
-            "ContinueWatchingNitroFlagQualifier.kt" to """
+            "ContinueWatchingNitroFlag.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
-                import dev.zacsweers.metro.Qualifier
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "enable_continue_watching_nitro",
                     title = "Progress Endpoint",
@@ -26,7 +24,7 @@ class FeatureFlagSimpleTest {
                     defaultValue = false,
                     dateAdded = "2026-05-20",
                 )
-                public annotation class ContinueWatchingNitroFlagQualifier
+                public object ContinueWatchingNitroFlag
             """.trimIndent(),
         )
 
@@ -39,11 +37,16 @@ class FeatureFlagSimpleTest {
 
         val files = result.generatedFiles
         assertEquals(
-            "Expected exactly 1 generated file, got ${files.keys}",
-            setOf("ContinueWatchingNitroFlagBinding.kt"),
+            "Expected exactly 2 generated files, got ${files.keys}",
+            setOf("ContinueWatchingNitroFlagQualifier.kt", "ContinueWatchingNitroFlagBinding.kt"),
             files.keys,
         )
 
+        GoldenFileAssert.assertMatches(
+            "featureflag/simple",
+            "ContinueWatchingNitroFlagQualifier.kt",
+            files.getValue("ContinueWatchingNitroFlagQualifier.kt"),
+        )
         GoldenFileAssert.assertMatches(
             "featureflag/simple",
             "ContinueWatchingNitroFlagBinding.kt",

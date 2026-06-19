@@ -13,6 +13,8 @@ tasks.register("publishLocal") {
     dependsOn(gradle.includedBuild("plugins").task(":publishToMavenLocal"))
     dependsOn(gradle.includedBuild("codegen").task(":annotations:publishToMavenLocal"))
     dependsOn(gradle.includedBuild("codegen").task(":processor:publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("codegen").task(":featureflag-annotations:publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("codegen").task(":featureflag-processor:publishToMavenLocal"))
     dependsOn(gradle.includedBuild("lint-rules").task(":publishToMavenLocal"))
 }
 

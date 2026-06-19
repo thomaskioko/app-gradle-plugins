@@ -31,6 +31,7 @@ internal val AppScope: ClassName = ClassName(METRO_PACKAGE, "AppScope")
 internal val ContributesTo: ClassName = ClassName(METRO_PACKAGE, "ContributesTo")
 internal val IntoSet: ClassName = ClassName(METRO_PACKAGE, "IntoSet")
 internal val Provides: ClassName = ClassName(METRO_PACKAGE, "Provides")
+internal val Qualifier: ClassName = ClassName(METRO_PACKAGE, "Qualifier")
 internal val SingleIn: ClassName = ClassName(METRO_PACKAGE, "SingleIn")
 
 // kotlinx.datetime: the LocalDate type the generated factory call passes for the `dateAdded`

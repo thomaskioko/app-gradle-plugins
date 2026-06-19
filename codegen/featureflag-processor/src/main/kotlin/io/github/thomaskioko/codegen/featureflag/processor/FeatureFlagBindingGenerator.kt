@@ -18,13 +18,13 @@ import io.github.thomaskioko.codegen.featureflag.processor.util.Provides
 import io.github.thomaskioko.codegen.featureflag.processor.util.SingleIn
 
 /**
- * Emits the per-qualifier binding file for one `@FeatureFlag`-decorated qualifier annotation.
+ * Emits the per-anchor binding file for one `@FeatureFlag`-decorated anchor.
  *
  * The output is one [FileSpec] containing a `@ContributesTo(AppScope::class) public interface
  * <baseName>Binding` with two `@Provides` methods:
  *
  * - `provide<baseName>(factory: FeatureFlagFactory): FeatureFlag<Boolean>` — qualified with the
- *   consumer's qualifier annotation and `@SingleIn(AppScope::class)`. Body calls
+ *   generated `<baseName>Qualifier` annotation and `@SingleIn(AppScope::class)`. Body calls
  *   `factory.boolean(key, title, description, defaultValue, dateAdded)` with the literal arguments
  *   parsed from the source annotation.
  * - `bind<baseName>(flag: FeatureFlag<Boolean>): FeatureFlag<Boolean>` — annotated `@IntoSet`. Body
@@ -69,9 +69,9 @@ internal object FeatureFlagBindingGenerator {
                 data.description,
                 data.defaultValue,
                 LocalDate,
-                data.year,
-                data.month,
-                data.day,
+                data.year.toString(),
+                data.month.toString(),
+                data.day.toString(),
             )
             .build()
 

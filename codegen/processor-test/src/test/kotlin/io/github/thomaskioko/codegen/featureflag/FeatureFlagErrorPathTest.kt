@@ -10,9 +10,9 @@ import org.junit.Test
 class FeatureFlagErrorPathTest {
 
     @Test
-    fun `should report InvalidTarget when FeatureFlag is on a non-annotation class`() {
+    fun `should report InvalidTarget when FeatureFlag is on an annotation class`() {
         val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
-            "NotAnAnnotation.kt" to """
+            "AnnotationAnchor.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
@@ -24,7 +24,7 @@ class FeatureFlagErrorPathTest {
                     defaultValue = false,
                     dateAdded = "2026-05-20",
                 )
-                public class NotAnAnnotation
+                public annotation class SomeFlagQualifier
             """.trimIndent(),
         )
 
@@ -33,38 +33,13 @@ class FeatureFlagErrorPathTest {
     }
 
     @Test
-    fun `should report MissingQualifier when annotation class lacks @Qualifier`() {
-        val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
-            "MissingQualifier.kt" to """
-                package com.thomaskioko.tvmaniac.featureflags.flags
-
-                import io.github.thomaskioko.codegen.annotations.FeatureFlag
-
-                @FeatureFlag(
-                    key = "some_key",
-                    title = "Some Title",
-                    description = "Some description.",
-                    defaultValue = false,
-                    dateAdded = "2026-05-20",
-                )
-                public annotation class MissingQualifierFlagQualifier
-            """.trimIndent(),
-        )
-
-        val result = FeatureFlagTestRunner().run(sources)
-        assertCompilationError(result, "[FeatureFlag/MissingQualifier]")
-    }
-
-    @Test
     fun `should report EmptyKey when key is blank`() {
         val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
             "EmptyKey.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
-                import dev.zacsweers.metro.Qualifier
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "",
                     title = "Some Title",
@@ -72,7 +47,7 @@ class FeatureFlagErrorPathTest {
                     defaultValue = false,
                     dateAdded = "2026-05-20",
                 )
-                public annotation class EmptyKeyFlagQualifier
+                public object EmptyKeyFlag
             """.trimIndent(),
         )
 
@@ -86,10 +61,8 @@ class FeatureFlagErrorPathTest {
             "EmptyTitle.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
-                import dev.zacsweers.metro.Qualifier
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "some_key",
                     title = "",
@@ -97,7 +70,7 @@ class FeatureFlagErrorPathTest {
                     defaultValue = false,
                     dateAdded = "2026-05-20",
                 )
-                public annotation class EmptyTitleFlagQualifier
+                public object EmptyTitleFlag
             """.trimIndent(),
         )
 
@@ -106,15 +79,36 @@ class FeatureFlagErrorPathTest {
     }
 
     @Test
+    fun `should report EmptyDescription when description is blank`() {
+        val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
+            "EmptyDescription.kt" to """
+                package com.thomaskioko.tvmaniac.featureflags.flags
+
+                import io.github.thomaskioko.codegen.annotations.FeatureFlag
+
+                @FeatureFlag(
+                    key = "some_key",
+                    title = "Some Title",
+                    description = "",
+                    defaultValue = false,
+                    dateAdded = "2026-05-20",
+                )
+                public object EmptyDescriptionFlag
+            """.trimIndent(),
+        )
+
+        val result = FeatureFlagTestRunner().run(sources)
+        assertCompilationError(result, "[FeatureFlag/EmptyDescription]")
+    }
+
+    @Test
     fun `should report InvalidDate when dateAdded is malformed`() {
         val sources = FeatureFlagStubs.baseStubs.toMap() + mapOf(
             "InvalidDate.kt" to """
                 package com.thomaskioko.tvmaniac.featureflags.flags
 
-                import dev.zacsweers.metro.Qualifier
                 import io.github.thomaskioko.codegen.annotations.FeatureFlag
 
-                @Qualifier
                 @FeatureFlag(
                     key = "some_key",
                     title = "Some Title",
@@ -122,7 +116,7 @@ class FeatureFlagErrorPathTest {
                     defaultValue = false,
                     dateAdded = "not-a-date",
                 )
-                public annotation class InvalidDateFlagQualifier
+                public object InvalidDateFlag
             """.trimIndent(),
         )
 

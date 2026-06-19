@@ -20,7 +20,7 @@ public interface ContinueWatchingNitroFlagBinding {
       title = "Progress Endpoint",
       description = "Use Trakt's internal /sync/progress/up_next_nitro call instead of the documented multi-step progress fetch.",
       defaultValue = false,
-      dateAdded = LocalDate(2_026, 5, 20),
+      dateAdded = LocalDate(2026, 5, 20),
   )
 
   @Provides

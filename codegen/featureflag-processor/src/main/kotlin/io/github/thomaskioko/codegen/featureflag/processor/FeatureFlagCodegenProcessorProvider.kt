@@ -17,13 +17,15 @@ public class FeatureFlagCodegenProcessorProvider : SymbolProcessorProvider {
     /**
      * Creates the [FeatureFlagCodegenProcessor] KSP will run for the current build.
      *
-     * @param environment KSP's per build environment. Provides the file writer and diagnostic
-     *   logger the processor needs.
+     * @param environment KSP's per build environment. Provides the file writer, diagnostic logger,
+     *   and the target platforms the processor uses to decide whether the current run is the
+     *   metadata run or a single per-target run.
      * @return A new processor instance bound to the supplied environment.
      */
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
         FeatureFlagCodegenProcessor(
             codeGenerator = environment.codeGenerator,
             logger = environment.logger,
+            platforms = environment.platforms,
         )
 }
