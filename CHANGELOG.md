@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## 0.8.1 *(2026-06-20)*
+
+- `ignoreAll()` now defaults to the project it is called from when no path is passed, so a bare `ignoreAll()` inside a module's `scaffold {}` block silences that module's dependency analysis. The empty vararg previously silenced nothing, which left framework umbrella modules such as `ios-framework` flagged for every dependency the iOS application consumes across the Objective-C boundary.
+- Exclude `codegen-featureflag-annotations` from the unused-dependency analysis. The `@FeatureFlag` annotation has source retention and is consumed by KSP, so dependency analysis cannot see it in bytecode and reported it as unused on every module that calls `useFeatureFlagCodegen()`.
+
 ## 0.8.0 *(2026-05-19)*
 
 - Introduce a KSP-based feature-flag codegen that eliminates the per-flag qualifier and DI binding boilerplate in Metro KMP projects. A single `@FeatureFlag` object anchor generates the Metro `@Qualifier` and the `Set<FeatureFlag<Boolean>>` binding, and a `platform` field scopes a flag to one platform at compile time.
