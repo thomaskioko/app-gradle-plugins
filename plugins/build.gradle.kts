@@ -31,14 +31,6 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
         "io.github.thomaskioko.gradle.plugins.fixtures.dir",
         file("src/functionalTest/resources/fixtures").absolutePath,
     )
-    systemProperty(
-        "io.github.thomaskioko.gradle.plugins.codegen.dir",
-        file("../codegen").absolutePath,
-    )
-    systemProperty(
-        "io.github.thomaskioko.gradle.plugins.plugins.dir",
-        projectDir.absolutePath,
-    )
 }
 
 val testPluginExtras: Configuration by configurations.creating {
