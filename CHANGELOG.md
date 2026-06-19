@@ -1,14 +1,10 @@
 Change Log
 ==========
 
-## 0.9.0 *(2026-06-19)*
+## 0.8.0 *(2026-05-19)*
 
 - Introduce a KSP-based feature-flag codegen that eliminates the per-flag qualifier and DI binding boilerplate in Metro KMP projects. A single `@FeatureFlag` object anchor generates the Metro `@Qualifier` and the `Set<FeatureFlag<Boolean>>` binding, and a `platform` field scopes a flag to one platform at compile time.
 - Bump Kotlin to 2.4.0.
-
-
-## 0.8.0 *(2026-05-19)*
-
 - Refactor dependency analysis exclusions to a DSL-based configuration
 - `tvmaniac:no-manual-nav-binding` flags manual bindings  `@Provides @IntoSet` providers returning
   `NavRoot`, `NavRootBinding`, `NavDestination`, or `NavRouteBinding`. The codegen processor owns
