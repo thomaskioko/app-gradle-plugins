@@ -10,6 +10,31 @@ internal class FixtureProject(val rootDir: File) {
             .withPluginClasspath()
             .withArguments(buildList { addAll(args.asList()); add("--stacktrace") })
             .forwardOutput()
+
+    /**
+     * Runner for fixtures that consume the plugin and codegen as a composite build (`includeBuild`)
+     * rather than the injected plugin classpath. Forwards the `plugins` and `codegen` build roots so
+     * the fixture's settings can include them and resolve everything from source, with no published
+     * version. Does not call `withPluginClasspath()`, which would put the Kotlin Gradle Plugin on
+     * the classpath and clash with an included build that applies a versioned Kotlin plugin.
+     */
+    fun compositeRunner(vararg args: String): GradleRunner =
+        GradleRunner.create()
+            .withProjectDir(rootDir)
+            .withArguments(
+                buildList {
+                    addAll(args.asList())
+                    System.getProperty(PLUGINS_DIR_PROPERTY)?.let { add("-PpluginsDir=$it") }
+                    System.getProperty(CODEGEN_DIR_PROPERTY)?.let { add("-PcodegenDir=$it") }
+                    add("--stacktrace")
+                },
+            )
+            .forwardOutput()
+
+    private companion object {
+        const val PLUGINS_DIR_PROPERTY = "io.github.thomaskioko.gradle.plugins.plugins.dir"
+        const val CODEGEN_DIR_PROPERTY = "io.github.thomaskioko.gradle.plugins.codegen.dir"
+    }
 }
 
 internal object Fixtures {

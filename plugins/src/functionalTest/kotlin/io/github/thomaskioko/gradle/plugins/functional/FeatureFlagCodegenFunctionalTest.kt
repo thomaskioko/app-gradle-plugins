@@ -24,7 +24,7 @@ class FeatureFlagCodegenFunctionalTest {
     fun `useFeatureFlagCodegen generates the qualifier and binding for a commonMain anchor`() {
         val project = Fixtures.extract("featureflag-codegen", tempFolder.newFolder("project"))
 
-        val result = project.runner(":feature:kspCommonMainKotlinMetadata").build()
+        val result = project.compositeRunner(":feature:kspCommonMainKotlinMetadata").build()
 
         assertEquals(
             TaskOutcome.SUCCESS,
@@ -49,7 +49,7 @@ class FeatureFlagCodegenFunctionalTest {
     fun `platform IOS anchor generates only under the iOS targets and ALL anchor generates once`() {
         val project = Fixtures.extract("featureflag-codegen", tempFolder.newFolder("project"))
 
-        val result = project.runner(
+        val result = project.compositeRunner(
             ":feature:kspCommonMainKotlinMetadata",
             ":feature:kspKotlinIosSimulatorArm64",
             ":feature:kspKotlinJvm",
