@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## 0.8.2 *(2026-06-20)*
+
+- Clean up experimental Kotlin compiler flags. Remove the `-Xannotation-default-target`, `-Xcontext-parameters`, `-Xannotation-target-all`, `-Xallow-reified-type-in-catch`, and `-Xexplicit-backing-fields` compiler flags now that these features are stable in Kotlin 2.4. Passing them had become redundant and made every consumer module emit a `redundant for the current language version 2.4` warning on each compile task. Projects that pin `kotlin-language` below 2.4 can pass any flag they still need directly.
+- Rename `ignoreUnused()` to `ignoreUnusedDependencies()` (breaking) and scope it to exclude the named project dependencies from the calling module's unused-dependency check, instead of silencing the named modules' own analysis output. This lets `scaffold { ignoreUnusedDependencies(...) }` stand in for a hand-written project-scoped `configure<DependencyAnalysisSubExtension>` block when a module declares a dependency as `api(...)` for downstream consumers (for example integration-test fixtures) that its own sources never reference.
+
 ## 0.8.1 *(2026-06-20)*
 
 - `ignoreAll()` now defaults to the project it is called from when no path is passed, so a bare `ignoreAll()` inside a module's `scaffold {}` block silences that module's dependency analysis. The empty vararg previously silenced nothing, which left framework umbrella modules such as `ios-framework` flagged for every dependency the iOS application consumes across the Objective-C boundary.
