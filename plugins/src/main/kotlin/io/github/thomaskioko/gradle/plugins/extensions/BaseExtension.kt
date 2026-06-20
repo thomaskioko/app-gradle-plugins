@@ -47,30 +47,29 @@ import java.net.URI
 @ScaffoldDsl
 public abstract class BaseExtension(private val project: Project) : ExtensionAware {
     /**
-     * Silences DAGP's "unused dependencies" check for the named Gradle project paths.
+     * Excludes the named project dependencies from this module's "unused dependencies" check.
      *
-     * The call routes to the root project's `DependencyAnalysisExtension`, so each named module's
-     * unused-dependency analysis output is suppressed regardless of which scaffold the call lives
-     * in. Appropriate when a module contributes Metro bindings into a consumer's graph via
-     * `@ContributesBinding` codegen on Kotlin/Native targets, or any other compile-time
-     * contribution mechanism that DAGP cannot trace via JVM/Android bytecode.
+     * The call routes to the root project's `DependencyAnalysisExtension` and scopes the exclusion
+     * to the module the scaffold is attached to, replacing a hand-written project-scoped
+     * `configure<DependencyAnalysisSubExtension> { issues { onUnusedDependencies { exclude(...) } } }`
+     * block. Appropriate when a module declares a dependency as `api(...)` for downstream consumers
+     * (for example integration-test fixtures) that its own sources never reference, so the analysis
+     * reports the dependency as unused.
      *
      * ```kotlin
      * scaffold {
-     *   ignoreUnused(":data:request-manager:testing")
+     *   ignoreUnusedDependencies(":data:request-manager:testing")
      * }
      * ```
      *
-     * @param projectPaths Gradle project paths (for example `":data:request-manager:testing"`)
-     *   whose unused-dependency analysis output should be silenced.
+     * @param dependencyPaths Gradle project dependency paths (for example
+     *   `":data:request-manager:testing"`) to exclude from this module's unused-dependency check.
      */
-    public fun ignoreUnused(vararg projectPaths: String) {
+    public fun ignoreUnusedDependencies(vararg dependencyPaths: String) {
         project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
             analysis.issues { issues ->
-                projectPaths.forEach { projectPath ->
-                    issues.project(projectPath) { perProject ->
-                        perProject.onUnusedDependencies { it.severity("ignore") }
-                    }
+                issues.project(project.path) { perProject ->
+                    perProject.onUnusedDependencies { it.exclude(*dependencyPaths) }
                 }
             }
         }
