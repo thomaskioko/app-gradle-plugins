@@ -17,8 +17,8 @@ import org.jetbrains.kotlin.lexer.KtTokens
  *
  * The rule fires on a top-level class whose simple name ends with `Presenter`, that is annotated
  * with `@Inject` or `@AssistedInject`, and that is missing every accepted codegen annotation
- * (`@NavDestination`, `@AppRoot`). Without one of those annotations the consumer has to write
- * the matching `@GraphExtension` and binding container by hand, defeating the codegen.
+ * (`@NavDestination`, `@AppRoot`, `@ChildPresenter`). Without one of those annotations the consumer
+ * has to write the matching `@GraphExtension` and binding container by hand, defeating the codegen.
  *
  * Classes annotated with `@ContributesBinding` are exempt because Metro wires them through the
  * binding rather than through codegen. Abstract and interface presenters are exempt for the same
@@ -62,7 +62,7 @@ public class PresenterCodegenAnnotationRule :
     private var unroutedPresenters: Set<String> = UNROUTED_PRESENTERS_PROPERTY.defaultValue
 
     override fun beforeFirstNode(editorConfig: EditorConfig) {
-        unroutedPresenters = editorConfig[UNROUTED_PRESENTERS_PROPERTY]
+        unroutedPresenters = editorConfig[UNROUTED_PRESENTERS_PROPERTY].mapTo(mutableSetOf()) { it.lowercase() }
     }
 
     override fun beforeVisitChildNodes(
@@ -76,7 +76,7 @@ public class PresenterCodegenAnnotationRule :
         if (!name.endsWith("Presenter")) return
         if (ktClass.isInterface()) return
         if (ktClass.hasModifier(KtTokens.ABSTRACT_KEYWORD)) return
-        if (name in unroutedPresenters) return
+        if (name.lowercase() in unroutedPresenters) return
 
         val annotationNames = ktClass.annotationEntries
             .mapNotNullTo(mutableSetOf()) { it.shortName?.asString() }
@@ -111,8 +111,9 @@ public class PresenterCodegenAnnotationRule :
         internal fun errorMessage(className: String): String =
             "$className is annotated with @Inject (or @AssistedInject) and ends with `Presenter`, " +
                 "but is missing a codegen annotation. Add @NavDestination(...) for a routed presenter, " +
-                "or @AppRoot(...) for the application's root presenter. If the presenter is exposed " +
-                "through a manual @GraphExtension (a child or pager presenter), add its simple name to " +
-                "`ktlint_tvmaniac_unrouted_presenters` in `.editorconfig`."
+                "@AppRoot(...) for the application's root presenter, or @ChildPresenter(...) for a " +
+                "parent-owned child presenter. If the presenter is instead exposed through a manual " +
+                "@GraphExtension, add its simple name to `ktlint_tvmaniac_unrouted_presenters` in " +
+                "`.editorconfig`."
     }
 }

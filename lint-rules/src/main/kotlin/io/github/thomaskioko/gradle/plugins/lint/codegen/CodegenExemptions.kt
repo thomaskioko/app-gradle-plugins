@@ -22,37 +22,9 @@ import org.ec4j.core.model.PropertyType
  */
 internal val UNROUTED_PRESENTERS_PROPERTY: EditorConfigProperty<Set<String>> =
     EditorConfigProperty(
-        type = PropertyType.LowerCasingPropertyType(
+        type = PropertyType(
             "ktlint_tvmaniac_unrouted_presenters",
             "Comma-separated simple class names for presenters that opt out of the codegen annotation requirement.",
-            CommaSeparatedListValueParser(),
-            emptySet<String>(),
-        ),
-        defaultValue = emptySet(),
-        propertyWriter = { value -> value.joinToString(",") },
-    )
-
-/**
- * `.editorconfig` property identifying Compose screens that intentionally do not carry a
- * navigation codegen UI annotation.
- *
- * Property key: `ktlint_tvmaniac_unrouted_screens`. Default: empty. Comma-separated list of
- * simple function names. Use this list for screens dispatched manually inside a parent host
- * (typically tab-root screens invoked from the home host's `Children` block) rather than
- * resolved through `Set<ScreenContent>`.
- *
- * ## Example
- *
- * ```
- * [*.{kt,kts}]
- * ktlint_tvmaniac_unrouted_screens = DiscoverScreen, LibraryScreen, ProfileScreen, ProgressScreen
- * ```
- */
-internal val UNROUTED_SCREENS_PROPERTY: EditorConfigProperty<Set<String>> =
-    EditorConfigProperty(
-        type = PropertyType.LowerCasingPropertyType(
-            "ktlint_tvmaniac_unrouted_screens",
-            "Comma-separated simple function names for Compose screens that opt out of the codegen UI annotation requirement.",
             CommaSeparatedListValueParser(),
             emptySet<String>(),
         ),
