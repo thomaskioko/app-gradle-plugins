@@ -2,11 +2,11 @@
 
 A small ktlint rule set that enforces project specific conventions for the codebase. This is loaded into
 Spotless through the lint convention plugin in `plugins/`.
-Eight rules cover:
+Seven rules cover:
 - Navigation layering
 - Compose preview styling
 - Metro Dependency injection cleanup
-- Codegen annotation discipline (presenter and Compose screen)
+- Codegen annotation discipline (presenter)
 - Test naming
 
 ## Rules
@@ -125,38 +125,7 @@ class DefaultRootPresenter(...) : RootPresenter
 
 Classes annotated with `@ContributesBinding`, `@ContributesIntoSet`, or `@ContributesIntoMap` are exempt because Metro wires them through the binding rather than through codegen. Abstract and interface presenters are exempt for the same reason. Child presenters that are exposed through a manual `@GraphExtension` opt out by listing their simple class name in `ktlint_tvmaniac_unrouted_presenters`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
 
-### `tvmaniac:compose-screen-needs-codegen-annotation`
-
-Requires every Compose function that takes a presenter parameter to carry a codegen UI annotation that wires it into the navigation host's renderer multibinding. The rule fires on a top level `@Composable` function that declares a parameter named `presenter` or `rootPresenter` and is missing every accepted codegen UI annotation (`@ScreenUi`, `@SheetUi`, `@AppRootUi`).
-
-```kotlin
-// Forbidden:
-@Composable
-fun TrendingShowsScreen(
-    presenter: TrendingShowsPresenter,
-    modifier: Modifier = Modifier,
-) { ... }
-
-// Allowed:
-@ScreenUi(presenter = TrendingShowsPresenter::class, parentScope = ActivityScope::class)
-@Composable
-fun TrendingShowsScreen(
-    presenter: TrendingShowsPresenter,
-    modifier: Modifier = Modifier,
-) { ... }
-
-// Allowed (host composable):
-@AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)
-@Composable
-fun RootScreen(
-    rootPresenter: RootPresenter,
-    screenContents: Set<ScreenContent>,
-    sheetContents: Set<SheetContent>,
-    modifier: Modifier = Modifier,
-) { ... }
-```
-
-Tab root screens dispatched manually inside a parent host opt out by listing their simple function name in `ktlint_tvmaniac_unrouted_screens`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
+Composable functions that render a presenter but are not navigation destinations (for example a host that slots child-component composables directly, or an embedded reusable component) are plain composables and carry no UI annotation. There is intentionally no rule requiring one: a ktlint rule cannot resolve the presenter's type, so it cannot distinguish an embedded child UI from a routed screen. Only routed presenters (`@NavDestination`/`@AppRoot`) and their `@ScreenUi`/`@SheetUi`/`@TabUi`/`@AppRootUi` composables are codegen-wired.
 
 ### `tvmaniac:test-name-format`
 
@@ -176,7 +145,7 @@ The rule covers `@Test`, `@ParameterizedTest`, and `@RepeatedTest`. Lifecycle an
 
 ## Configuring codegen exemptions
 
-The `tvmaniac:presenter-needs-codegen-annotation` and `tvmaniac:compose-screen-needs-codegen-annotation` rules each read one `.editorconfig` property listing the names that opt out of the requirement.
+The `tvmaniac:presenter-needs-codegen-annotation` rule reads one `.editorconfig` property listing the names that opt out of the requirement.
 
 ### `ktlint_tvmaniac_unrouted_presenters`
 
@@ -190,18 +159,6 @@ ktlint_tvmaniac_unrouted_presenters = UpNextPresenter, CalendarPresenter
 - **Default**: empty. Every Metro injected `Presenter` class must carry `@NavDestination` or `@AppRoot`.
 - **Whitespace** around entries is trimmed; **blank entries** are ignored.
 - Setting the property to `unset` (or leaving the value empty) keeps the default empty list.
-
-### `ktlint_tvmaniac_unrouted_screens`
-
-Comma separated simple function names of Compose screens that are dispatched manually inside a parent host (for example tab root screens invoked from the home host's `Children` block).
-
-```
-[*.{kt,kts}]
-ktlint_tvmaniac_unrouted_screens = DiscoverScreen, LibraryScreen, ProfileScreen, ProgressScreen
-```
-
-- **Default**: empty. Every `@Composable` function with a presenter parameter must carry `@ScreenUi`, `@SheetUi`, or `@AppRootUi`.
-- Whitespace and blank entry handling matches `ktlint_tvmaniac_unrouted_presenters`.
 
 ## Configuring the navigation layer
 

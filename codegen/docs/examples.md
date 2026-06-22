@@ -616,6 +616,57 @@ public class ProgressPresenter(
 The factory function name is unique per child (`create<BaseName>Graph`) so two child graphs contributing to the same parent scope (`ProgressRoot::class` here) do not
 collide.
 
+### Reusable variant: embed in any screen
+
+The example above pins the child to one host because `parentScope` is `ProgressRoot::class`. A
+component meant to live in its own module and be reused (for example a featured-shows hero) instead
+sets `parentScope` to a shared ancestor scope, `ActivityScope::class`. The generated factory then
+contributes to a graph every screen descends from, so any host below `ActivityScope` can embed it.
+
+```kotlin
+package com.thomaskioko.tvmaniac.presentation.featured
+
+@Inject
+@ChildPresenter(
+    scope = FeaturedShowsComponentScope::class,
+    parentScope = ActivityScope::class,
+)
+public class FeaturedShowsPresenter(
+    componentContext: ComponentContext,
+    // ... deps available at ActivityScope or AppScope
+) : ComponentContext by componentContext
+```
+
+The only difference in the generated graph is the factory's `@ContributesTo` target:
+
+```kotlin
+package com.thomaskioko.tvmaniac.presentation.featured.di
+
+@GraphExtension(FeaturedShowsComponentScope::class)
+public interface FeaturedShowsChildGraph {
+    public val featuredShowsPresenter: FeaturedShowsPresenter
+
+    @ContributesTo(ActivityScope::class)
+    @GraphExtension.Factory
+    public interface Factory {
+        public fun createFeaturedShowsGraph(@Provides componentContext: ComponentContext): FeaturedShowsChildGraph
+    }
+}
+```
+
+A discover host and a search host both embed it with the same two lines, and an embeddable component
+can nest another embeddable component the same way (the outer graph also descends from
+`ActivityScope`):
+
+```kotlin
+public val featuredPresenter: FeaturedShowsPresenter =
+    featuredGraphFactory.createFeaturedShowsGraph(childContext(key = "Featured")).featuredShowsPresenter
+```
+
+The constraint is that an embeddable component may inject only bindings reachable at `ActivityScope`
+or `AppScope`; depending on a tab-root-scoped binding fails as an ordinary Metro missing-binding
+error at the embedding site.
+
 ## 9. `@AppRoot`
 
 Use `@AppRoot` on the application's `@AssistedInject` root presenter implementation. The annotation generates the activity-scope `@BindingContainer` that wires the
