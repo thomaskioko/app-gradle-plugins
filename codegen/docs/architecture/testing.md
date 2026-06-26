@@ -47,7 +47,8 @@ the stubs and `External.kt` disagree, end to end compilation fails. Updating one
 ## Goldens
 
 Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, actual)`. Goldens live under
-`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. Nine variants:
+`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. Ten navigation-codegen variants
+(the feature-flag processor keeps its own `featureflag/` golden, documented in [featureflag.md](../featureflag.md)):
 
 - `simple/` for `@NavDestination(kind = SCREEN)` with plain `@Inject`.
 - `parameterized/` for `@NavDestination(kind = SCREEN)` with `@AssistedInject`.
@@ -55,12 +56,13 @@ Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, act
 - `screen-ui/` for `@ScreenUi`.
 - `sheet-ui/` for `@SheetUi`.
 - `tab-ui/` for `@TabUi`.
-- `child-presenter/` for `@ChildPresenter`.
+- `child-presenter/` for `@ChildPresenter` pinned to one host (`parentScope` is a tab root).
+- `child-presenter-embeddable/` for `@ChildPresenter` made reusable (`parentScope` is the shared `ActivityScope`).
 - `app-root/` for `@AppRoot`.
 - `app-root-ui/` for `@AppRootUi`.
 
 Test coverage is grouped by annotation, not by variant. `NavDestinationTest` covers all three `@NavDestination` kinds (SCREEN, OVERLAY, TAB_ROOT) plus the parameterized
-SCREEN variant. `ScreenUiTest` covers `@ScreenUi`. `SheetUiTest` covers `@SheetUi`. `TabUiTest` covers `@TabUi`. `ChildPresenterTest` covers `@ChildPresenter`. `AppRootTest`
+SCREEN variant. `ScreenUiTest` covers `@ScreenUi`. `SheetUiTest` covers `@SheetUi`. `TabUiTest` covers `@TabUi`. `ChildPresenterTest` covers `@ChildPresenter` in both the flat (pinned) and embeddable (shared `ActivityScope`) shapes. `AppRootTest`
 covers `@AppRoot` plus three error paths (missing `@AssistedInject`, missing nested factory, missing bound interface). `AppRootUiTest` covers `@AppRootUi` plus two error
 paths (no non-modifier parameter, presenter type mismatch). `ErrorPathTest` exercises the navigation-side parser validation branches and asserts on the compilation
 messages rather than against a golden file.

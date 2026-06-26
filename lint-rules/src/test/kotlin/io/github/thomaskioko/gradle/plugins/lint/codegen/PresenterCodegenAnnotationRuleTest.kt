@@ -1,7 +1,14 @@
 package io.github.thomaskioko.gradle.plugins.lint.codegen
 
+import com.pinterest.ktlint.rule.engine.api.Code
+import com.pinterest.ktlint.rule.engine.api.KtLintRuleEngine
+import com.pinterest.ktlint.rule.engine.api.LintError
+import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
+import java.io.File
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 
 class PresenterCodegenAnnotationRuleTest {
     private val assertThat = assertThatRule { PresenterCodegenAnnotationRule() }
@@ -189,5 +196,75 @@ class PresenterCodegenAnnotationRuleTest {
         )
             .withEditorConfigOverride(UNROUTED_PRESENTERS_PROPERTY to "UpNextPresenter")
             .hasNoLintViolations()
+    }
+
+    @Test
+    fun `does not flag presenter listed in unrouted_presenters parsed from a real editorconfig`(
+        @TempDir tempDir: File,
+    ) {
+        File(tempDir, ".editorconfig").writeText(
+            """
+            root = true
+
+            [*.kt]
+            ktlint_tvmaniac_unrouted_presenters = UpNextPresenter
+            """.trimIndent(),
+        )
+        val ktFile = File(tempDir, "UpNextPresenter.kt")
+        ktFile.writeText(
+            """
+            package test
+
+            @Inject
+            class UpNextPresenter(
+                componentContext: ComponentContext,
+            )
+            """.trimIndent(),
+        )
+
+        val engine = KtLintRuleEngine(
+            ruleProviders = setOf(RuleProvider { PresenterCodegenAnnotationRule() }),
+        )
+        val errors = mutableListOf<LintError>()
+        engine.lint(Code.fromFile(ktFile)) { errors.add(it) }
+
+        assertTrue(errors.isEmpty()) {
+            "PascalCase .editorconfig exemption should suppress the rule via the ec4j parse path, but got: $errors"
+        }
+    }
+
+    @Test
+    fun `does not flag presenter whose unrouted_presenters entry differs in case from the declared name`(
+        @TempDir tempDir: File,
+    ) {
+        File(tempDir, ".editorconfig").writeText(
+            """
+            root = true
+
+            [*.kt]
+            ktlint_tvmaniac_unrouted_presenters = upnextpresenter
+            """.trimIndent(),
+        )
+        val ktFile = File(tempDir, "UpNextPresenter.kt")
+        ktFile.writeText(
+            """
+            package test
+
+            @Inject
+            class UpNextPresenter(
+                componentContext: ComponentContext,
+            )
+            """.trimIndent(),
+        )
+
+        val engine = KtLintRuleEngine(
+            ruleProviders = setOf(RuleProvider { PresenterCodegenAnnotationRule() }),
+        )
+        val errors = mutableListOf<LintError>()
+        engine.lint(Code.fromFile(ktFile)) { errors.add(it) }
+
+        assertTrue(errors.isEmpty()) {
+            "A lowercase exemption entry must still suppress the PascalCase presenter (case-insensitive match), but got: $errors"
+        }
     }
 }

@@ -3,7 +3,6 @@ package io.github.thomaskioko.gradle.plugins.lint
 import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
-import io.github.thomaskioko.gradle.plugins.lint.codegen.ComposeScreenCodegenAnnotationRule
 import io.github.thomaskioko.gradle.plugins.lint.codegen.NoManualNavBindingRule
 import io.github.thomaskioko.gradle.plugins.lint.codegen.PresenterCodegenAnnotationRule
 import io.github.thomaskioko.gradle.plugins.lint.metro.MetroRedundantInjectRule
@@ -35,10 +34,6 @@ import io.github.thomaskioko.gradle.plugins.lint.tests.TestNameFormatRule
  * - [PresenterCodegenAnnotationRule] (`tvmaniac:presenter-needs-codegen-annotation`) requires
  *   every Metro-injected `Presenter` class to carry `@NavDestination` or `@AppRoot` so the
  *   codegen processor wires it into the navigation graph.
- * - [ComposeScreenCodegenAnnotationRule] (`tvmaniac:compose-screen-needs-codegen-annotation`)
- *   requires every `@Composable` function with a presenter parameter to carry `@ScreenUi`,
- *   `@SheetUi`, or `@AppRootUi` so the codegen processor wires it into the renderer
- *   multibinding.
  * - [NoManualNavBindingRule] (`tvmaniac:no-manual-nav-binding`) forbids hand-written
  *   `@Provides @IntoSet` providers for `NavRoot`, `NavRootBinding`, `NavDestination`, or
  *   `NavRouteBinding`. Codegen owns those multibindings whenever a presenter is annotated with
@@ -58,7 +53,6 @@ public class TvManiacRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET_ID))
         RuleProvider { NoStyleWrapperInPreviewRule() },
         RuleProvider { MetroRedundantInjectRule() },
         RuleProvider { PresenterCodegenAnnotationRule() },
-        RuleProvider { ComposeScreenCodegenAnnotationRule() },
         RuleProvider { NoManualNavBindingRule() },
     )
 

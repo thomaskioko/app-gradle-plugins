@@ -367,6 +367,54 @@ public class ProgressPresenter(
 }
 ```
 
+### Embeddable / reusable components
+
+`parentScope` decides which hosts can embed the child. Pointing it at a parent route (the example
+above) ties the child to that one host. Pointing it at a shared ancestor scope makes the child
+embeddable by every host below that scope, which is what lets a component live in its own module and
+be reused.
+
+Metro graph extensions resolve bindings from any ancestor scope. The scope chain runs
+`AppScope -> ActivityScope -> {tab roots} -> {child scopes}`, each level a `@GraphExtension` whose
+factory `@ContributesTo` the level above. A factory contributed to `ActivityScope` is therefore
+visible to every tab root, stack screen, and child below it.
+
+To make a component reusable, give it its own scope and set `parentScope` to `ActivityScope`:
+
+```kotlin
+@Inject
+@ChildPresenter(
+    scope = FeaturedShowsComponentScope::class,
+    parentScope = ActivityScope::class,
+)
+public class FeaturedShowsPresenter(
+    componentContext: ComponentContext,
+    // ... deps available at ActivityScope or AppScope
+) : ComponentContext by componentContext
+```
+
+Any host below `ActivityScope` then embeds it the same way a parent embeds a pager child:
+
+```kotlin
+@Inject
+public class DiscoverPresenter(
+    componentContext: ComponentContext,
+    featuredGraphFactory: FeaturedShowsChildGraph.Factory,
+) : ComponentContext by componentContext {
+    public val featuredPresenter: FeaturedShowsPresenter =
+        featuredGraphFactory.createFeaturedShowsGraph(childContext(key = "Featured")).featuredShowsPresenter
+}
+```
+
+Nesting one embeddable component inside another works for free: the outer component's graph descends
+from `ActivityScope`, so it can inject the inner component's `ActivityScope`-contributed factory.
+
+The one constraint: an embeddable component may inject only bindings reachable at `ActivityScope` or
+`AppScope`. Depending on a binding scoped to a specific tab root would compile in that root but fail
+in any other host, which surfaces as an ordinary Metro missing-binding error at the embedding site,
+not a silent failure. The generator is scope-agnostic, so the embeddable shape needs no annotation or
+generator change: it is purely the `parentScope` you choose.
+
 ### Validation
 
 The processor reports a compile error if the annotated symbol is not a class.
