@@ -23,6 +23,7 @@ internal fun parseChildPresenterData(
 
     val pkg = presenter.packageName.asString()
     val baseName = presenter.simpleName.asString().removeSuffix("Presenter")
+    val factory = presenter.findNestedAssistedFactory()?.toClassName()
 
     return ChildPresenterData(
         presenterClass = presenter.toClassName(),
@@ -30,5 +31,6 @@ internal fun parseChildPresenterData(
         packageName = if (pkg.isEmpty()) "di" else "$pkg.di",
         scope = scope,
         parentScope = parentScope,
+        factory = factory,
     )
 }

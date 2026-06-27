@@ -18,8 +18,9 @@ import io.github.thomaskioko.codegen.processor.util.graphExtensionFactory
  * Generates the graph extension file for a `@ChildPresenter` annotated class.
  *
  * The output is a `@GraphExtension(scope) interface <Presenter>ChildGraph` exposing the
- * presenter as a property and a `@ContributesTo(parentScope) @GraphExtension.Factory` nested
- * interface that takes a `ComponentContext` and returns the graph.
+ * presenter (or its assisted factory for parameterized children) as a property and a
+ * `@ContributesTo(parentScope) @GraphExtension.Factory` nested interface that takes a
+ * `ComponentContext` and returns the graph.
  */
 internal object ChildGraphGenerator {
 
@@ -48,7 +49,7 @@ internal object ChildGraphGenerator {
             .addFunction(factoryFun)
             .build()
 
-        val presenterProperty = PropertySpec.builder(data.graphPropertyName, data.presenterClass)
+        val presenterProperty = PropertySpec.builder(data.graphPropertyName, data.graphPropertyType)
             .addModifiers(KModifier.PUBLIC)
             .build()
 
