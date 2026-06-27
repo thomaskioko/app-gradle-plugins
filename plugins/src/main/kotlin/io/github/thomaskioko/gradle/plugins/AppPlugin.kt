@@ -3,6 +3,7 @@ package io.github.thomaskioko.gradle.plugins
 import io.github.thomaskioko.gradle.plugins.extensions.AppExtension
 import io.github.thomaskioko.gradle.plugins.properties.PropertyKeys
 import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
+import io.github.thomaskioko.gradle.plugins.setup.setupDependencyGuard
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
 import io.github.thomaskioko.gradle.plugins.utils.baseExtension
@@ -46,6 +47,8 @@ public abstract class AppPlugin : Plugin<Project> {
         target.plugins.apply(AndroidPlugin::class.java)
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
+
+        target.setupDependencyGuard("releaseRuntimeClasspath")
 
         val properties = target.scaffoldProperties()
 

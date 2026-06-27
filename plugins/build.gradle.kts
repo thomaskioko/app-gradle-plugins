@@ -87,6 +87,7 @@ dependencies {
 
     implementation(libs.compose.compiler.gradle.plugin)
     implementation(libs.dependency.analysis.gradle.plugin)
+    implementation(libs.dependency.guard.gradle.plugin)
     implementation(libs.ksp.gradle)
     implementation(libs.kotlinpoet)
     implementation(libs.gradle.doctor.gradle.plugin)
