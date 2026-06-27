@@ -6,6 +6,7 @@ import com.autonomousapps.DependencyAnalysisExtension
 import io.github.thomaskioko.gradle.plugins.setup.setupCodegen
 import io.github.thomaskioko.gradle.plugins.setup.setupFeatureFlagCodegen
 import io.github.thomaskioko.gradle.plugins.setup.setupKotlinInject
+import io.github.thomaskioko.gradle.plugins.setup.setupDependencyGuard
 import io.github.thomaskioko.gradle.plugins.setup.setupMetro
 import io.github.thomaskioko.gradle.plugins.setup.setupSerialization
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
@@ -152,6 +153,21 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      */
     public fun useMetro() {
         project.setupMetro()
+    }
+
+    /**
+     * Applies the dependency-guard plugin and guards the given resolvable configurations. Use this on
+     * modules whose shipped dependency set should be baselined, for example a Kotlin Multiplatform
+     * framework umbrella. Android application modules guard `releaseRuntimeClasspath` automatically.
+     *
+     * ```kotlin
+     * scaffold {
+     *   useDependencyGuard("iosArm64CompileKlibraries")
+     * }
+     * ```
+     */
+    public fun useDependencyGuard(vararg configurations: String) {
+        project.setupDependencyGuard(*configurations)
     }
 
     /**
