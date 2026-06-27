@@ -1,5 +1,6 @@
 package io.github.thomaskioko.gradle.plugins.extensions
 
+import io.github.thomaskioko.gradle.plugins.setup.setupFirebase
 import io.github.thomaskioko.gradle.plugins.utils.androidApp
 import org.gradle.api.Project
 import java.io.File
@@ -101,5 +102,27 @@ public abstract class AppExtension(private val project: Project) {
                 it.proguardFiles += files
             }
         }
+    }
+
+    /**
+     * Wires Firebase into the application module when a `google-services.json` is present.
+     *
+     * Applies the Google Services and Firebase Crashlytics Gradle plugins, then turns on mapping
+     * file upload for the `release` build type so deobfuscated crash reports reach the Firebase
+     * console. Wiring is skipped when no `google-services.json` exists at the module root or under
+     * `src/debug` or `src/release`, so contributor checkouts without Firebase credentials still
+     * build.
+     *
+     * ```kotlin
+     * scaffold {
+     *   app {
+     *     applicationId("com.example.app")
+     *     useFirebase()
+     *   }
+     * }
+     * ```
+     */
+    public fun useFirebase() {
+        project.setupFirebase()
     }
 }
