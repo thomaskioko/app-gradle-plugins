@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.8.4 *(2026-06-27)*
+
+- Add a `useFirebase()` toggle to the `app {}` extension that moves the Firebase Gradle wiring out of consumer build files. When a `google-services.json` is present at the module root or under `src/debug` or `src/release`, it applies the Google Services and Firebase Crashlytics Gradle plugins and enables mapping file upload on the `release` build type; checkouts without the config file skip the wiring so they still build. The Crashlytics Gradle plugin is consumed as a `compileOnly` dependency for its `CrashlyticsExtension` type, matching the existing metro and baseline-profile pattern where the consuming project supplies the plugin at runtime via `apply false`.
+
 ## 0.8.3 *(2026-06-21)*
 
 - Remove the `tvmaniac:compose-screen-needs-codegen-annotation` rule. The rule flagged any `@Composable` taking a `presenter` parameter that lacked a UI codegen annotation, but a composable that renders a child presenter and is dispatched directly by its parent host (an embedded section or a reusable component embedded in a screen) is intentionally a plain composable, not a navigation destination. A ktlint rule cannot resolve the presenter's type, so it cannot distinguish such an embedded child UI from a routed screen, which made the requirement (and its `ktlint_tvmaniac_unrouted_screens` exemption list) wrong for the embeddable-component direction. Only routed presenters (`@NavDestination`/`@AppRoot`) and their `@ScreenUi`/`@SheetUi`/`@TabUi`/`@AppRootUi` composables are codegen-wired; everything else is a plain composable. The `ktlint_tvmaniac_unrouted_screens` property is removed with the rule.
