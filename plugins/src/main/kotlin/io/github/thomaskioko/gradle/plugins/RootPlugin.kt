@@ -183,6 +183,14 @@ public abstract class RootPlugin : Plugin<Project> {
                             }
                         }
                     }
+
+                    AnalysisExclusions.ignoredUnusedDependencySourceSets.forEach { sourceSetName ->
+                        project.sourceSet(sourceSetName) { perSourceSet ->
+                            perSourceSet.onUnusedDependencies { issue ->
+                                issue.severity("ignore")
+                            }
+                        }
+                    }
                 }
             }
 
