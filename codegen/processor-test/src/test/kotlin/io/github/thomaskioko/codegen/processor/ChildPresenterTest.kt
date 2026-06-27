@@ -136,4 +136,75 @@ class ChildPresenterTest {
 
         GoldenFileAssert.assertMatches("child-presenter-embeddable", "FeaturedShowsChildGraph.kt", graph)
     }
+
+    @Test
+    fun `should expose the assisted factory for a parameterized ChildPresenter`() {
+        val sources = TestStubs.baseStubs.toMap() + mapOf(
+            "ProgressChildScope.kt" to """
+                package com.thomaskioko.tvmaniac.progress.nav.scope
+
+                public abstract class ProgressChildScope private constructor()
+            """.trimIndent(),
+            "ProgressRoot.kt" to """
+                package com.thomaskioko.tvmaniac.progress.nav
+
+                import com.thomaskioko.tvmaniac.navigation.NavRoot
+                import kotlinx.serialization.KSerializer
+                import kotlinx.serialization.Serializable
+
+                @Serializable
+                public data object ProgressRoot : NavRoot {
+                    public fun serializer(): KSerializer<ProgressRoot> = error("stub")
+                }
+            """.trimIndent(),
+            "SeasonsPresenter.kt" to """
+                package com.thomaskioko.tvmaniac.presentation.seasons
+
+                import com.arkivanov.decompose.ComponentContext
+                import com.thomaskioko.tvmaniac.progress.nav.ProgressRoot
+                import com.thomaskioko.tvmaniac.progress.nav.scope.ProgressChildScope
+                import dev.zacsweers.metro.Assisted
+                import dev.zacsweers.metro.AssistedFactory
+                import dev.zacsweers.metro.AssistedInject
+                import io.github.thomaskioko.codegen.annotations.ChildPresenter
+
+                @AssistedInject
+                @ChildPresenter(
+                    scope = ProgressChildScope::class,
+                    parentScope = ProgressRoot::class,
+                )
+                public class SeasonsPresenter(
+                    componentContext: ComponentContext,
+                    @Assisted showId: Long,
+                ) : ComponentContext by componentContext {
+                    @AssistedFactory
+                    public fun interface Factory {
+                        public fun create(showId: Long): SeasonsPresenter
+                    }
+                }
+            """.trimIndent(),
+        )
+
+        val result = ProcessorTestRunner().run(sources)
+        assertEquals(
+            "Compilation failed:\n${result.messages}",
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+        )
+
+        val files = result.generatedFiles
+        assertEquals(
+            "Expected exactly 1 generated file, got ${files.keys}",
+            setOf("SeasonsChildGraph.kt"),
+            files.keys,
+        )
+
+        val graph = files.getValue("SeasonsChildGraph.kt")
+        assertTrue(
+            "Expected the parameterized child graph to expose the assisted factory, got:\n$graph",
+            graph.contains("public val seasonsFactory: SeasonsPresenter.Factory"),
+        )
+
+        GoldenFileAssert.assertMatches("child-presenter-parameterized", "SeasonsChildGraph.kt", graph)
+    }
 }

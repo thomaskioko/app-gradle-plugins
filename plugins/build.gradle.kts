@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.gradle.doctor.gradle.plugin)
 
     compileOnly(libs.baselineprofile.gradlePlugin)
+    compileOnly(libs.firebase.crashlytics.gradle.plugin)
     compileOnly(libs.metro.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
     implementation(libs.mordant.core)

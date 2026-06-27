@@ -11,6 +11,7 @@ baselineprofile = "1.4.1"
 codegen = "0.8.2"
 dependency-analysis = "3.16.0"
 dependency-guard = "0.5.0"
+firebase-crashlytics-gradle = "3.0.7"
 gradle-doctor = "0.12.1"
 kctfork = "0.13.0"
 kotlin = "2.4.0"
@@ -40,6 +41,7 @@ kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin
 dependency-analysis-gradle-plugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependency-analysis" }
 dependency-guard-gradle-plugin = { module = "com.dropbox.dependency-guard:dependency-guard", version.ref = "dependency-guard" }
 gradle-doctor-gradle-plugin = { group = "com.osacky.doctor", name = "doctor-plugin", version.ref = "gradle-doctor" }
+firebase-crashlytics-gradle-plugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin",  version.ref = "ksp" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }

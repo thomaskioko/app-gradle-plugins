@@ -108,10 +108,24 @@ internal object AnalysisExclusions {
     )
 
     // KMP source sets where DAGP's "used transitively, declare directly" advice fires for
-    // dependencies already declared in commonMain.
+    // dependencies already declared in commonMain. dependency-analysis 3.16.0 extends this to the
+    // android variant, mirroring the commonMain "unused" reports (see below) into androidMain /
+    // androidDeviceTest "declare directly" advice.
     val ignoredUsedTransitiveSourceSets: List<String> = listOf(
         "jvmMain",
         "jvmTest",
         "androidHostTest",
+        "androidMain",
+        "androidDeviceTest",
+    )
+
+    // KMP source sets where dependency-analysis 3.16.0 reports shared project dependencies as
+    // unused: it no longer merges commonMain / intermediate source-set usage into the android
+    // variant analysis, so dependencies used from common code (or shared test fixtures) surface as
+    // unused with mirrored "declare in androidMain" advice. Applying that advice breaks compilation.
+    val ignoredUnusedDependencySourceSets: List<String> = listOf(
+        "commonMain",
+        "commonTest",
+        "jvmAndroidMain",
     )
 }
