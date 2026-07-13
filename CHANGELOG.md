@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.8.5 *(2026-07-01)*
+
+- Apply the unused-return-value checker (`-Xreturn-value-checker=check`) to production compilations only. The flag was set on the shared `compilerOptions`, so it reached every compilation including test source sets, where Kotest matchers (`shouldBe`, `shouldNotBeNull`, and the like) are annotated must-use yet legitimately discard their returned subject in an assertion. That produced an `Unused return value` warning on nearly every matcher call across a consumer's test suite. `BasePlugin` now adds the flag through a task-level configuration that skips Kotlin compile tasks whose name contains `test` (both unit and instrumented), so production code keeps the check while test compilations build cleanly. Consumers need no change; a module that still wants the check in a specific test source set can add `-Xreturn-value-checker=check` back on that compile task.
+
 ## 0.8.4 *(2026-06-27)*
 
 - Add a `useFirebase()` toggle to the `app {}` extension that moves the Firebase Gradle wiring out of consumer build files. When a `google-services.json` is present at the module root or under `src/debug` or `src/release`, it applies the Google Services and Firebase Crashlytics Gradle plugins and enables mapping file upload on the `release` build type; checkouts without the config file skip the wiring so they still build. The Crashlytics Gradle plugin is consumed as a `compileOnly` dependency for its `CrashlyticsExtension` type, matching the existing metro and baseline-profile pattern where the consuming project supplies the plugin at runtime via `apply false`.

@@ -18,6 +18,7 @@ import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 /**
  * Common Kotlin and JVM configuration applied to every subproject in the suite.
@@ -141,10 +142,6 @@ public abstract class BasePlugin : Plugin<Project> {
                     // https://kotlinlang.org/docs/whatsnew2020.html#data-class-copy-function-to-have-the-same-visibility-as-constructor
                     "-Xconsistent-data-class-copy-visibility",
                     "-Xcontext-sensitive-resolution",
-                    // Enable unused return value checks for annotated methods
-                    // TODO: change to full which changes it from opt-out by adding @IgnorableReturnValue instead of opt-in by adding @MustUseReturnValues
-                    // https://kotlinlang.org/docs/whatsnew23.html#unused-return-value-checker
-                    "-Xreturn-value-checker=check",
                     "-opt-in=kotlin.time.ExperimentalTime",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                 )
@@ -161,6 +158,16 @@ public abstract class BasePlugin : Plugin<Project> {
                         freeCompilerArgs.add("-Xjdk-release=${project.javaTarget}")
                     }
                 }
+            }
+        }
+
+        applyReturnValueChecker()
+    }
+
+    private fun Project.applyReturnValueChecker() {
+        tasks.withType(KotlinCompilationTask::class.java).configureEach { task ->
+            if (!task.name.contains("test", ignoreCase = true)) {
+                task.compilerOptions.freeCompilerArgs.add("-Xreturn-value-checker=check")
             }
         }
     }
