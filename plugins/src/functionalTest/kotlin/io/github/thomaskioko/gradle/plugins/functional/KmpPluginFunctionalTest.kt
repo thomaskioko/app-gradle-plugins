@@ -2,6 +2,7 @@ package io.github.thomaskioko.gradle.plugins.functional
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -35,5 +36,29 @@ class KmpPluginFunctionalTest {
         val result = project.runner("help", "--task", "iosTest").build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":help")?.outcome)
+    }
+
+    @Test
+    fun `applying multiplatform plugin wires android host tests into root linuxTest`() {
+        val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
+
+        val result = project.runner("linuxTest", "--dry-run").build()
+
+        assertTrue(
+            "linuxTest should depend on :feature:testAndroidHostTest, got:\n${result.output}",
+            result.output.contains(":feature:testAndroidHostTest"),
+        )
+    }
+
+    @Test
+    fun `applying multiplatform plugin wires jvm tests into root linuxTest`() {
+        val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
+
+        val result = project.runner("linuxTest", "--dry-run").build()
+
+        assertTrue(
+            "linuxTest should depend on :feature:jvmTest, got:\n${result.output}",
+            result.output.contains(":feature:jvmTest"),
+        )
     }
 }
