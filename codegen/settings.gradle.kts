@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:2.4.0")
+        classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:2.4.10")
     }
 }
 
