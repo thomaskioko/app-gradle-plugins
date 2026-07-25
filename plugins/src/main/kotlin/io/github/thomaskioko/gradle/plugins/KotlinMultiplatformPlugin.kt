@@ -111,10 +111,19 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
 
         target.tasks.withType(Test::class.java).configureEach(Test::setupTests)
         target.configureMultiplatformTests()
+        target.configureAndroidHostTests()
         target.configureTestManifestPlaceholders()
         target.disableMultiplatformTasks()
 
         configureMokoResourceBundleCopy(target)
+    }
+
+    private fun Project.configureAndroidHostTests() {
+        if (!file("src/androidHostTest").exists()) return
+
+        rootProject.tasks.named(BasePlugin.LINUX_TEST).configure {
+            it.dependsOn("$path:testAndroidHostTest")
+        }
     }
 
     private fun Project.configureTestManifestPlaceholders() {
