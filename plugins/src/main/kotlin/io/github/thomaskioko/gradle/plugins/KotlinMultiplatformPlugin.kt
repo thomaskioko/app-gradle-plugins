@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Thomas Kioko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.thomaskioko.gradle.plugins
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
@@ -7,6 +22,7 @@ import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.setup.setupTests
 import io.github.thomaskioko.gradle.plugins.utils.addIfNotNull
 import io.github.thomaskioko.gradle.plugins.utils.androidComponents
+import io.github.thomaskioko.gradle.plugins.utils.capitalizeFirst
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.disableMultiplatformTasks
 import io.github.thomaskioko.gradle.plugins.utils.getDependencyOrNull
@@ -17,7 +33,6 @@ import io.github.thomaskioko.gradle.tasks.CopyMokoResourceBundlesTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import io.github.thomaskioko.gradle.plugins.utils.capitalizeFirst
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetWithTests
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
@@ -150,7 +165,7 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
                         }
                         val testTaskName = "${target.name}${compilation.name.capitalizeFirst()}"
                         rootProject.tasks.named(aggregateTaskName).configure {
-                            it.dependsOn("${path}:$testTaskName")
+                            it.dependsOn("$path:$testTaskName")
                         }
                     }
                 }
