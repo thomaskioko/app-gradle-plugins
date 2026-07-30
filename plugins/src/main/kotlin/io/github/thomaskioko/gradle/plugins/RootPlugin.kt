@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Thomas Kioko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.thomaskioko.gradle.plugins
 
 import com.autonomousapps.DependencyAnalysisExtension
@@ -76,36 +91,24 @@ public abstract class RootPlugin : Plugin<Project> {
         pluginManager.withPlugin("com.osacky.doctor") {
             extensions.configure(DoctorExtension::class.java) { doctor ->
                 with(doctor) {
-                    /**
-                     * Do not allow building all apps simultaneously. This is likely not what the user intended.
-                     */
+                    // Do not allow building all apps simultaneously. This is likely not what the user intended.
                     allowBuildingAllAndroidAppsSimultaneously.set(false)
 
-                    /**
-                     * Warn if using Android Jetifier. It slows down builds.
-                     */
+                    // Warn if using Android Jetifier. It slows down builds.
                     warnWhenJetifierEnabled.set(true)
 
-                    /**
-                     * The level at which to warn when a build spends more than this percent garbage collecting.
-                     */
+                    // The level at which to warn when a build spends more than this percent garbage collecting.
                     GCWarningThreshold.set(0.10f)
 
                     javaHome { handler ->
                         with(handler) {
-                            /**
-                             * Ensure that we are using JAVA_HOME to build with this Gradle.
-                             */
+                            // Ensure that we are using JAVA_HOME to build with this Gradle.
                             ensureJavaHomeMatches.set(true)
 
-                            /**
-                             * Ensure we have JAVA_HOME set.
-                             */
+                            // Ensure we have JAVA_HOME set.
                             ensureJavaHomeIsSet.set(true)
 
-                            /**
-                             * Fail on any `JAVA_HOME` issues.
-                             */
+                            // Fail on any `JAVA_HOME` issues.
                             failOnError.set(scaffoldProperties().javaToolchainsStrict)
                         }
                     }

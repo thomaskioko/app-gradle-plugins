@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Thomas Kioko
+ * Copyright $YEAR Thomas Kioko
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-pluginManagement {
-    includeBuild("build-logic")
-}
-
-plugins {
-    id("dependency-config")
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
-
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
-
-rootProject.name = "app-gradle-plugins"
-
-includeBuild("codegen")
-includeBuild("plugins")
-includeBuild("lint-rules")
