@@ -1,4 +1,4 @@
-name: Gradle Setup"
+name: Gradle Setup
 
 runs:
   using: "composite"
