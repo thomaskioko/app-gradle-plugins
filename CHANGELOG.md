@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.8.6
+
+- Add the Apache 2.0 license text at the repository root. Every published POM declared `The Apache Software License, Version 2.0` but the license itself was never committed, so GitHub reported the project as unlicensed.
+
 ## 0.8.5 *(2026-07-24)*
 
 - Attach the Android host-test task to the `linuxTest` aggregate. `KotlinMultiplatformPlugin` wired variant test tasks by iterating `KotlinTargetWithTests`, but the AGP Kotlin Multiplatform android target does not implement that interface, so a module whose suite lived only in `androidHostTest` never reached the aggregate and its tests went unrun on CI while the job still reported green. The plugin now attaches `testAndroidHostTest` for any module that has a `src/androidHostTest` source set. Modules carrying only `commonTest` are deliberately left out: those tests already run on the jvm target, and repeating them on the Android host adds runtime without adding coverage. Consumers need no change, though a module that had dark `androidHostTest` tests will start running them, so expect the aggregate to take longer and to surface failures that were previously hidden. Locked in by a functional test that asserts the dependency edge through `linuxTest --dry-run` rather than only checking that the task resolves.
