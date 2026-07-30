@@ -9,11 +9,14 @@ plugins {
 }
 
 val ktlintVersion = libs.versions.ktlint.get()
+val licenseHeader = rootProject.file("../spotless/spotless.kt")
+val ktsLicenseDelimiter = "(import|plugins|pluginManagement|dependencyResolutionManagement)"
 
 spotless {
     kotlinGradle {
         ktlint(ktlintVersion)
         target("*.kts")
+        licenseHeaderFile(licenseHeader, ktsLicenseDelimiter)
     }
 }
 
@@ -29,10 +32,12 @@ subprojects {
             ktlint(ktlintVersion).editorConfigOverride(mapOf("android" to "true"))
             target("src/**/*.kt")
             targetExclude("**/resources/**", "**/build/**")
+            licenseHeaderFile(licenseHeader)
         }
         kotlinGradle {
             ktlint(ktlintVersion)
             target("*.kts")
+            licenseHeaderFile(licenseHeader, ktsLicenseDelimiter)
         }
     }
 }

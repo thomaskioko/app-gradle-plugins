@@ -13,6 +13,23 @@ plugins {
 group = property("GROUP").toString()
 version = property("VERSION_NAME").toString()
 
+val ktlintVersion = libs.versions.ktlint.get()
+val licenseHeader = rootProject.file("../spotless/spotless.kt")
+
+spotless {
+    kotlin {
+        ktlint(ktlintVersion).editorConfigOverride(mapOf("android" to "true"))
+        target("src/**/*.kt")
+        targetExclude("**/resources/**", "**/build/**")
+        licenseHeaderFile(licenseHeader)
+    }
+    kotlinGradle {
+        ktlint(ktlintVersion)
+        target("*.kts")
+        licenseHeaderFile(licenseHeader, "(import|plugins|pluginManagement|dependencyResolutionManagement)")
+    }
+}
+
 val functionalTest = sourceSets.create("functionalTest")
 
 configurations[functionalTest.implementationConfigurationName]

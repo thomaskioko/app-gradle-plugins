@@ -7,6 +7,16 @@ plugins {
     alias(libs.plugins.app.spotless)
 }
 
+spotless {
+    kotlinGradle {
+        target("*.kts")
+        licenseHeaderFile(
+            rootProject.file("spotless/spotless.kt"),
+            "(import|plugins|pluginManagement|dependencyResolutionManagement)",
+        )
+    }
+}
+
 tasks.register("publishLocal") {
     group = "publishing"
     description = "Publish plugins + codegen artifacts to mavenLocal."
