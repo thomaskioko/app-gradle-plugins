@@ -76,36 +76,24 @@ public abstract class RootPlugin : Plugin<Project> {
         pluginManager.withPlugin("com.osacky.doctor") {
             extensions.configure(DoctorExtension::class.java) { doctor ->
                 with(doctor) {
-                    /**
-                     * Do not allow building all apps simultaneously. This is likely not what the user intended.
-                     */
+                    // Do not allow building all apps simultaneously. This is likely not what the user intended.
                     allowBuildingAllAndroidAppsSimultaneously.set(false)
 
-                    /**
-                     * Warn if using Android Jetifier. It slows down builds.
-                     */
+                    // Warn if using Android Jetifier. It slows down builds.
                     warnWhenJetifierEnabled.set(true)
 
-                    /**
-                     * The level at which to warn when a build spends more than this percent garbage collecting.
-                     */
+                    // The level at which to warn when a build spends more than this percent garbage collecting.
                     GCWarningThreshold.set(0.10f)
 
                     javaHome { handler ->
                         with(handler) {
-                            /**
-                             * Ensure that we are using JAVA_HOME to build with this Gradle.
-                             */
+                            // Ensure that we are using JAVA_HOME to build with this Gradle.
                             ensureJavaHomeMatches.set(true)
 
-                            /**
-                             * Ensure we have JAVA_HOME set.
-                             */
+                            // Ensure we have JAVA_HOME set.
                             ensureJavaHomeIsSet.set(true)
 
-                            /**
-                             * Fail on any `JAVA_HOME` issues.
-                             */
+                            // Fail on any `JAVA_HOME` issues.
                             failOnError.set(scaffoldProperties().javaToolchainsStrict)
                         }
                     }

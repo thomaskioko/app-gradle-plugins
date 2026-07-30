@@ -3,16 +3,6 @@ package io.github.thomaskioko.gradle.plugins.utils
 import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Project
 
-/**
- * Task-disabling primitives shared by `AndroidDisableTasks`, `KmpDisableTasks`, and
- * `JvmDisableTasks`. Compatible with AGP 8.3+.
- *
- * Design principles:
- * - Preserves task graph integrity using `onlyIf { false }`
- * - Tolerates missing tasks via `tasks.configureEach` filtering rather than `tasks.named`
- * - Skips processing during IDE sync to prevent configuration issues
- */
-
 /** Default variant to keep active during debug-only builds. */
 internal const val DEFAULT_ACTIVE_VARIANT: String = "debug"
 
