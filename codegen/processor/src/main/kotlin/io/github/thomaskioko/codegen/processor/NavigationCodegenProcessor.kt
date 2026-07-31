@@ -58,10 +58,15 @@ import io.github.thomaskioko.codegen.processor.parser.parseUiBindingData
  *   incremental compilation.
  * @property logger KSP's diagnostic sink. The processor uses it to report validation errors that
  *   KSP turns into compile errors at the offending symbol.
+ * @property hideFromObjC Whether generated graph and binding types carry `@HiddenFromObjC`. True
+ *   when the compilation has a non-JVM target. The generated dependency injection plumbing is
+ *   never named from Swift, and exported Objective-C classes cannot be dead-stripped, so hiding
+ *   the types keeps them out of the framework header of any module a consumer exports.
  */
 public class NavigationCodegenProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
+    private val hideFromObjC: Boolean,
 ) : SymbolProcessor {
     /**
      * Runs one KSP round. Iterates the seven annotations the processor knows about, hands each
@@ -96,7 +101,7 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parseChildPresenterData(declaration, logger) ?: continue
-            writeFiles(declaration, listOf(ChildGraphGenerator.generate(data)))
+            writeFiles(declaration, listOf(ChildGraphGenerator.generate(data, hideFromObjC)))
         }
     }
 
@@ -115,7 +120,7 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parseAppRootData(declaration, logger) ?: continue
-            writeFiles(declaration, listOf(AppRootBindingGenerator.generate(data)))
+            writeFiles(declaration, listOf(AppRootBindingGenerator.generate(data, hideFromObjC)))
         }
     }
 
@@ -203,7 +208,7 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parse(declaration) ?: continue
-            writeFiles(declaration, FileGenerator.generate(data))
+            writeFiles(declaration, FileGenerator.generate(data, hideFromObjC))
         }
     }
 

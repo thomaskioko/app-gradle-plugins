@@ -36,6 +36,15 @@ import com.squareup.kotlinpoet.ClassName
 internal const val DECOMPOSE_PACKAGE: String = "com.arkivanov.decompose"
 internal val ComponentContext: ClassName = ClassName(DECOMPOSE_PACKAGE, "ComponentContext")
 
+// Kotlin standard library: the Objective-C export refinement annotation and its opt-in marker.
+// Generated dependency injection types are plumbing no Swift code names, so every graph and
+// binding file hides its types from the Objective-C API of any framework that exports the module.
+// HiddenFromObjC is an optional expectation the compiler only accepts in common module sources,
+// so the processor emits it only when the compilation has a non-JVM target.
+internal val OptIn: ClassName = ClassName("kotlin", "OptIn")
+internal val HiddenFromObjC: ClassName = ClassName("kotlin.native", "HiddenFromObjC")
+internal val ExperimentalObjCRefinement: ClassName = ClassName("kotlin.experimental", "ExperimentalObjCRefinement")
+
 // Metro: the dependency injection framework the codegen targets. Every generated annotation
 // references one of these. BindingContainer is used only by UiBindingGenerator; see the rationale
 // on that generator for why.

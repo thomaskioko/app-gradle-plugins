@@ -27,6 +27,8 @@ import io.github.thomaskioko.codegen.processor.util.FOUR_SPACE_INDENT
 import io.github.thomaskioko.codegen.processor.util.Provides
 import io.github.thomaskioko.codegen.processor.util.bindingContainer
 import io.github.thomaskioko.codegen.processor.util.contributesTo
+import io.github.thomaskioko.codegen.processor.util.hideFromObjC
+import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
 import io.github.thomaskioko.codegen.processor.util.singleIn
 
 /**
@@ -47,9 +49,11 @@ internal object AppRootBindingGenerator {
      *
      * @param data The parsed annotation, which carries the implementation, the bound interface,
      *   the factory class and function names, and the parent scope.
+     * @param hideFromObjC Whether to hide the generated binding from the Objective-C API. True
+     *   when the compilation has a non-JVM target.
      * @return The generated binding file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: AppRootData): FileSpec {
+    fun generate(data: AppRootData, hideFromObjC: Boolean): FileSpec {
         val factoryParam = ParameterSpec.builder("factory", data.factoryClassName).build()
         val componentContextParam = ParameterSpec.builder("componentContext", ComponentContext).build()
 
@@ -65,6 +69,7 @@ internal object AppRootBindingGenerator {
 
         val bindingObject = TypeSpec.objectBuilder(data.bindingClassName)
             .addModifiers(KModifier.PUBLIC)
+            .hideFromObjC(hideFromObjC)
             .addAnnotation(bindingContainer())
             .addAnnotation(contributesTo(data.parentScope))
             .addFunction(provideFun)
@@ -72,6 +77,7 @@ internal object AppRootBindingGenerator {
 
         return FileSpec.builder(data.bindingClassName)
             .indent(FOUR_SPACE_INDENT)
+            .optInObjCRefinement(hideFromObjC)
             .addType(bindingObject)
             .build()
     }

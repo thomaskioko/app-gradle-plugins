@@ -15,6 +15,7 @@
  */
 package io.github.thomaskioko.codegen.processor
 
+import com.google.devtools.ksp.processing.JvmPlatformInfo
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
@@ -32,13 +33,20 @@ public class NavigationCodegenProcessorProvider : SymbolProcessorProvider {
     /**
      * Creates the [NavigationCodegenProcessor] KSP will run for the current build.
      *
-     * @param environment KSP's per build environment. Provides the file writer and diagnostic
-     *   logger the processor needs.
+     * Generated types carry `@HiddenFromObjC` unless every target platform is JVM. The annotation
+     * is an optional expectation the compiler only accepts in common module sources, so a
+     * JVM-only compilation (a plain JVM consumer, or the compile testing harness) must not emit
+     * it, while a multiplatform compilation with a native target wants the generated dependency
+     * injection types kept out of the Objective-C framework header.
+     *
+     * @param environment KSP's per build environment. Provides the file writer, the diagnostic
+     *   logger, and the target platforms the processor needs.
      * @return A new processor instance bound to the supplied environment.
      */
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
         NavigationCodegenProcessor(
             codeGenerator = environment.codeGenerator,
             logger = environment.logger,
+            hideFromObjC = environment.platforms.any { it !is JvmPlatformInfo },
         )
 }

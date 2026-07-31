@@ -28,6 +28,8 @@ import io.github.thomaskioko.codegen.processor.util.Provides
 import io.github.thomaskioko.codegen.processor.util.contributesTo
 import io.github.thomaskioko.codegen.processor.util.graphExtension
 import io.github.thomaskioko.codegen.processor.util.graphExtensionFactory
+import io.github.thomaskioko.codegen.processor.util.hideFromObjC
+import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
 
 /**
  * Generates the graph extension file for a `@ChildPresenter` annotated class.
@@ -44,9 +46,11 @@ internal object ChildGraphGenerator {
      *
      * @param data The parsed annotation, which carries the presenter class, the graph scope, and
      *   the parent scope.
+     * @param hideFromObjC Whether to hide the generated types from the Objective-C API. True when
+     *   the compilation has a non-JVM target.
      * @return The generated graph file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: ChildPresenterData): FileSpec {
+    fun generate(data: ChildPresenterData, hideFromObjC: Boolean): FileSpec {
         val factoryFun = FunSpec.builder(data.graphFactoryFunName)
             .addModifiers(KModifier.PUBLIC, KModifier.ABSTRACT)
             .addParameter(
@@ -59,6 +63,7 @@ internal object ChildGraphGenerator {
 
         val factoryInterface = TypeSpec.interfaceBuilder(data.graphClassName.nestedClass("Factory"))
             .addModifiers(KModifier.PUBLIC)
+            .hideFromObjC(hideFromObjC)
             .addAnnotation(contributesTo(data.parentScope))
             .addAnnotation(graphExtensionFactory())
             .addFunction(factoryFun)
@@ -70,6 +75,7 @@ internal object ChildGraphGenerator {
 
         val graphInterface = TypeSpec.interfaceBuilder(data.graphClassName)
             .addModifiers(KModifier.PUBLIC)
+            .hideFromObjC(hideFromObjC)
             .addAnnotation(graphExtension(data.scope))
             .addProperty(presenterProperty)
             .addType(factoryInterface)
@@ -77,6 +83,7 @@ internal object ChildGraphGenerator {
 
         return FileSpec.builder(data.graphClassName)
             .indent(FOUR_SPACE_INDENT)
+            .optInObjCRefinement(hideFromObjC)
             .addType(graphInterface)
             .build()
     }
