@@ -22,7 +22,7 @@ import com.squareup.kotlinpoet.ClassName
  * consumer project. Used by every generator so the names live in one place.
  *
  * These are constants rather than configurable processor options. The full rationale is in
- * `codegen/docs/architecture/consumer-contract.md`. The short version: a fork that changes the
+ * [the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/consumer-contract/). The short version: a fork that changes the
  * consumer's navigation primitives edits this file and the matching test stubs in
  * `processor-test/`. The constants are deliberately `internal` and impossible to override without
  * a fork, which keeps the upstream processor opinionated and small.

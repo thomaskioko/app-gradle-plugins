@@ -52,7 +52,7 @@ import io.github.thomaskioko.codegen.processor.util.contributesTo
  * Multiplatform presenter modules do. Emitting that structure would silently produce an empty
  * multibinding at build time. Targeting `@BindingContainer object` is what makes the
  * contributions discoverable. The full reasoning lives in
- * [codegen/docs/architecture/generators.md](../../../../../../../../../docs/architecture/generators.md).
+ * [the generator notes](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/generators/).
  */
 internal object UiBindingGenerator {
 
