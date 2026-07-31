@@ -39,7 +39,7 @@ import javax.inject.Inject
  *
  */
 @CacheableTask
-public abstract class BuildConfigGeneratorTask
+internal abstract class BuildConfigGeneratorTask
 @Inject constructor(
     objectFactory: ObjectFactory,
     layout: ProjectLayout,
@@ -54,36 +54,36 @@ public abstract class BuildConfigGeneratorTask
      * The package name for the generated BuildConfig class.
      */
     @get:Input
-    public abstract val packageName: Property<String>
+    internal abstract val packageName: Property<String>
 
     /**
      * Custom string fields to add to BuildConfig.
      */
     @get:Input
-    public abstract val stringFields: MapProperty<String, String>
+    internal abstract val stringFields: MapProperty<String, String>
 
     /**
      * Custom boolean fields to add to BuildConfig.
      */
     @get:Input
-    public abstract val booleanFields: MapProperty<String, Boolean>
+    internal abstract val booleanFields: MapProperty<String, Boolean>
 
     /**
      * Custom int fields to add to BuildConfig.
      */
     @get:Input
-    public abstract val intFields: MapProperty<String, Int>
+    internal abstract val intFields: MapProperty<String, Int>
 
     /**
      * Output directory for the generated BuildConfig.kt file.
      * Defaults to build/generated/buildconfig/commonMain/kotlin
      */
     @get:OutputDirectory
-    public val outputDirectory: DirectoryProperty = objectFactory.directoryProperty()
+    internal val outputDirectory: DirectoryProperty = objectFactory.directoryProperty()
         .convention(layout.buildDirectory.dir("generated/buildconfig/commonMain/kotlin"))
 
     @TaskAction
-    public fun generate() {
+    internal fun generate() {
         val outputDir = outputDirectory.get().asFile
         val pkg = packageName.get()
 

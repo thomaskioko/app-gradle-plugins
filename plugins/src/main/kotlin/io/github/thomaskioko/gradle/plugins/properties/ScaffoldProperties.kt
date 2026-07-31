@@ -20,53 +20,53 @@ import io.github.thomaskioko.gradle.plugins.utils.stringProperty
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 
-public class ScaffoldProperties internal constructor(project: Project) {
-    public val composeMetrics: Provider<Boolean> =
+internal class ScaffoldProperties(project: Project) {
+    internal val composeMetrics: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.COMPOSE_METRICS, false)
 
-    public val composeReports: Provider<Boolean> =
+    internal val composeReports: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.COMPOSE_REPORTS, false)
 
-    public val composeCompilerReports: Provider<String> =
+    internal val composeCompilerReports: Provider<String> =
         project.stringProperty(PropertyKeys.COMPOSE_COMPILER_REPORTS)
 
-    public val debugOnly: Provider<Boolean> =
+    internal val debugOnly: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.APP_DEBUG_ONLY, false)
 
-    public val enableIos: Provider<Boolean> =
+    internal val enableIos: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.APP_ENABLE_IOS, false)
 
-    public val javaToolchainsStrict: Provider<Boolean> =
+    internal val javaToolchainsStrict: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.JAVA_TOOLCHAINS_STRICT, false)
 
-    public val appVersionSuffix: Provider<String> =
+    internal val appVersionSuffix: Provider<String> =
         project.stringProperty(PropertyKeys.APP_VERSION_SUFFIX).orElse("-beta")
 
-    public val packageName: Provider<String> =
+    internal val packageName: Provider<String> =
         project.stringProperty(PropertyKeys.PACKAGE_NAME)
 
-    public val releaseType: Provider<String> =
+    internal val releaseType: Provider<String> =
         project.stringProperty(PropertyKeys.RELEASE_TYPE).orElse("minor")
 
-    public val releaseBeta: Provider<Boolean> =
+    internal val releaseBeta: Provider<Boolean> =
         project.stringProperty(PropertyKeys.RELEASE_BETA).map { true }.orElse(false)
 
-    public val releaseInteractive: Provider<Boolean> =
+    internal val releaseInteractive: Provider<Boolean> =
         project.stringProperty(PropertyKeys.RELEASE_INTERACTIVE).map { true }.orElse(false)
 
-    public val releaseDryRun: Provider<Boolean> =
+    internal val releaseDryRun: Provider<Boolean> =
         project.stringProperty(PropertyKeys.RELEASE_DRY_RUN).map { true }.orElse(false)
 
-    public val releaseStoreFile: Provider<String> =
+    internal val releaseStoreFile: Provider<String> =
         project.stringProperty(PropertyKeys.RELEASE_STORE_FILE)
 
-    public val releaseStorePassword: Provider<String> =
+    internal val releaseStorePassword: Provider<String> =
         project.stringProperty(PropertyKeys.RELEASE_STORE_PASSWORD)
 
-    public val releaseKeyAlias: Provider<String> =
+    internal val releaseKeyAlias: Provider<String> =
         project.stringProperty(PropertyKeys.RELEASE_KEY_ALIAS)
 
-    public val releaseKeyPassword: Provider<String> =
+    internal val releaseKeyPassword: Provider<String> =
         project.stringProperty(PropertyKeys.RELEASE_KEY_PASSWORD)
 }
 

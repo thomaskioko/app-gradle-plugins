@@ -39,7 +39,7 @@ import java.io.File
 import javax.inject.Inject
 
 @CacheableTask
-public abstract class MokoResourceGeneratorTask
+internal abstract class MokoResourceGeneratorTask
 @Inject constructor(
     objectFactory: ObjectFactory,
     layout: ProjectLayout,
@@ -51,12 +51,12 @@ public abstract class MokoResourceGeneratorTask
     }
 
     @get:Input
-    public val resourcePackage: Property<String> = objectFactory.property(String::class.java)
+    internal val resourcePackage: Property<String> = objectFactory.property(String::class.java)
         .convention("com.thomaskioko.tvmaniac.i18n")
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
+    internal val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
         .convention(
             resourcePackage.flatMap { pkg ->
                 val packagePath = pkg.replace('.', '/')
@@ -65,11 +65,11 @@ public abstract class MokoResourceGeneratorTask
         )
 
     @get:OutputDirectory
-    public val commonMainOutput: DirectoryProperty = objectFactory.directoryProperty()
+    internal val commonMainOutput: DirectoryProperty = objectFactory.directoryProperty()
         .convention(layout.buildDirectory.dir("generated/resources"))
 
     @TaskAction
-    public fun generate() {
+    internal fun generate() {
         val outputDir = commonMainOutput.get().asFile
         val mrFile = mokoGeneratedFile.get().asFile
         val packageName = resourcePackage.get()

@@ -130,7 +130,7 @@ public class NoStyleWrapperInPreviewRule :
             entry.shortName?.asString()?.contains(PREVIEW_MARKER) == true
         }
 
-    public companion object {
+    internal companion object {
         internal const val PREVIEW_MARKER: String = "Preview"
 
         /**
@@ -141,7 +141,7 @@ public class NoStyleWrapperInPreviewRule :
          * @param functionName The name of the enclosing preview function the wrapper was found
          *   in.
          */
-        public fun errorMessage(wrapper: String, functionName: String): String =
+        internal fun errorMessage(wrapper: String, functionName: String): String =
             "Preview '$functionName' wraps its body in '$wrapper { ... }', but the styling is " +
                 "applied automatically by TvManiacPreviewWrapperProvider. " +
                 "Remove the wrapper and add @PreviewWrapper(TvManiacPreviewWrapperProvider::class) to the preview."

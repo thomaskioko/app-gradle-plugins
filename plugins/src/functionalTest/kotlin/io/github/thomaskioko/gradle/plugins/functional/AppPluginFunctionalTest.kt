@@ -17,6 +17,7 @@ package io.github.thomaskioko.gradle.plugins.functional
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -41,6 +42,18 @@ class AppPluginFunctionalTest {
         val result = project.runner(":app:help", "--task", ":app:release").build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":app:help")?.outcome)
+    }
+
+    @Test
+    fun `running bumpVersion rewrites the version file`() {
+        val project = Fixtures.extract("app-only", tempFolder.newFolder("project"))
+
+        val result = project.runner(":app:bumpVersion").build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":app:bumpVersion")?.outcome)
+        val versionFile = project.rootDir.resolve("version.txt").readText()
+        assertTrue(versionFile, versionFile.contains("VERSION_NUMBER = 1.1.0"))
+        assertTrue(versionFile, versionFile.contains("BUILD_NUMBER = 10100000"))
     }
 
     @Test

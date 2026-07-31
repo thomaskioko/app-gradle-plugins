@@ -110,7 +110,7 @@ public class MetroRedundantInjectRule :
     private fun ASTNode.isWhiteSpaceWithNewline(): Boolean =
         elementType == WHITE_SPACE && textContains('\n')
 
-    public companion object {
+    internal companion object {
         internal const val INJECT_ANNOTATION: String = "Inject"
 
         internal val CONTRIBUTES_ANNOTATIONS: Set<String> = setOf(
@@ -120,7 +120,7 @@ public class MetroRedundantInjectRule :
             "ContributesTo",
         )
 
-        public const val ERROR_MESSAGE: String =
+        internal const val ERROR_MESSAGE: String =
             "@Inject is redundant when a @Contributes... annotation is present. " +
                 "Metro applies @Inject implicitly. Remove the @Inject annotation."
     }

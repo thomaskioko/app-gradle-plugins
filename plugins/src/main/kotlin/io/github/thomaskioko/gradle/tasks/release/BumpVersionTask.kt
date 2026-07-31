@@ -25,7 +25,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
 @UntrackedTask(because = "Modifies version.txt in place")
-public abstract class BumpVersionTask : DefaultTask() {
+internal abstract class BumpVersionTask : DefaultTask() {
 
     init {
         description = "Bumps VERSION_NUMBER (major/minor/patch/beta) and updates BUILD_NUMBER in version.txt"
@@ -33,13 +33,13 @@ public abstract class BumpVersionTask : DefaultTask() {
     }
 
     @get:Internal
-    public abstract val versionFile: RegularFileProperty
+    internal abstract val versionFile: RegularFileProperty
 
     @get:Input
-    public abstract val bumpType: Property<String>
+    internal abstract val bumpType: Property<String>
 
     @TaskAction
-    public fun bump() {
+    internal fun bump() {
         val file = versionFile.get().asFile
         require(file.exists()) { "version.txt not found at ${file.path}" }
 

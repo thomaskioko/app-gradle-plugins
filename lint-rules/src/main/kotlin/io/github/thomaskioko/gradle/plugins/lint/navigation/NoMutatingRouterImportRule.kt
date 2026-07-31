@@ -96,7 +96,7 @@ public class NoMutatingRouterImportRule :
         emit(node.startOffset, errorMessage(fqn), false)
     }
 
-    public companion object {
+    internal companion object {
         internal val FORBIDDEN_PREFIXES: Set<String> = setOf(
             "com.arkivanov.decompose.router.stack",
             "com.arkivanov.decompose.router.slot",
@@ -112,7 +112,7 @@ public class NoMutatingRouterImportRule :
          *
          * @param fqn The fully qualified name of the offending import (or the wildcard form).
          */
-        public fun errorMessage(fqn: String): String =
+        internal fun errorMessage(fqn: String): String =
             "Import '$fqn' is forbidden outside navigation modules. " +
                 "Use Navigator or SheetNavigator from navigation/api for navigation operations. " +
                 "Only ChildStack and ChildSlot may be imported elsewhere (read-only types for render sites)."

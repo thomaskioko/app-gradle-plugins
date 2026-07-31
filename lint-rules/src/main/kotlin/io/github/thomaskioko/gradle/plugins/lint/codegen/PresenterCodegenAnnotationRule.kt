@@ -104,7 +104,7 @@ public class PresenterCodegenAnnotationRule :
         emit(node.startOffset, errorMessage(name), false)
     }
 
-    public companion object {
+    internal companion object {
         internal val INJECTION_ANNOTATIONS: Set<String> = setOf(
             "Inject",
             "AssistedInject",
