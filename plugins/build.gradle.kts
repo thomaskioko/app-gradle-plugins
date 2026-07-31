@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-gradle-plugin")
     alias(libs.plugins.dependency.analysis)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.publish)
     alias(libs.plugins.spotless)
@@ -42,6 +43,38 @@ spotless {
         ktlint(ktlintVersion)
         target("*.kts")
         licenseHeaderFile(licenseHeader, "(import|plugins|pluginManagement|dependencyResolutionManagement)")
+    }
+}
+
+val agpDocsVersion = libs.versions.agp.get().split(".").take(2).joinToString(".")
+
+dokka {
+    dokkaSourceSets.configureEach {
+        includes.from("MODULE.md")
+        jdkVersion.set(libs.versions.java.target.get().toInt())
+        skipDeprecated.set(true)
+        reportUndocumented.set(true)
+
+        sourceLink {
+            localDirectory.set(projectDir)
+            remoteUrl("${property("POM_SCM_URL")}/blob/main/plugins")
+            remoteLineSuffix.set("#L")
+        }
+
+        externalDocumentationLinks.register("gradle") {
+            url("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/")
+            packageListUrl("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/element-list")
+        }
+
+        externalDocumentationLinks.register("agp") {
+            url("https://developer.android.com/reference/tools/gradle-api/$agpDocsVersion/")
+        }
+    }
+
+    dokkaPublications.html {
+        outputDirectory.set(rootProject.file("../docs/api/plugins"))
+        suppressInheritedMembers.set(true)
+        failOnWarning.set(false)
     }
 }
 
