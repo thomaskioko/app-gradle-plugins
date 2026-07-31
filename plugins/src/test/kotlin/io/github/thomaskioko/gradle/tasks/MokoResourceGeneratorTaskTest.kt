@@ -91,4 +91,24 @@ class MokoResourceGeneratorTaskTest {
         val expected = loadResource("moko-generator/expected/PluralsResourceKey.kt")
         assertEquals(expected, fileSpec.toString())
     }
+
+    @Test
+    fun `generate writes both resource key files`() {
+        val task = createTask()
+        val outputDir = File(task.project.layout.buildDirectory.get().asFile, "resource-keys")
+        task.mokoGeneratedFile.set(loadResourceFile("moko-generator/MR.kt"))
+        task.commonMainOutput.set(outputDir)
+
+        task.generate()
+
+        val packagePath = File(outputDir, "com/thomaskioko/tvmaniac/i18n")
+        assertEquals(
+            loadResource("moko-generator/expected/StringResourceKey.kt"),
+            File(packagePath, "StringResourceKey.kt").readText(),
+        )
+        assertEquals(
+            loadResource("moko-generator/expected/PluralsResourceKey.kt"),
+            File(packagePath, "PluralsResourceKey.kt").readText(),
+        )
+    }
 }
