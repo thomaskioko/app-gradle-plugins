@@ -15,12 +15,12 @@
  */
 package io.github.thomaskioko.gradle.plugins.utils
 
-public object Versioning {
+internal object Versioning {
 
-    public val VERSION_REGEX: Regex = Regex("""VERSION_NUMBER\s*=\s*(\S+)""")
-    public val BUILD_REGEX: Regex = Regex("""BUILD_NUMBER\s*=\s*(\S+)""")
+    internal val VERSION_REGEX: Regex = Regex("""VERSION_NUMBER\s*=\s*(\S+)""")
+    internal val BUILD_REGEX: Regex = Regex("""BUILD_NUMBER\s*=\s*(\S+)""")
 
-    public fun compute(versionName: String): Int {
+    internal fun compute(versionName: String): Int {
         val (major, minor, patch) = parseSemver(versionName)
         require(major in 0..209) { "Major version must be 0-209, got: $major" }
         require(minor in 0..99) { "Minor version must be 0-99, got: $minor" }
@@ -30,7 +30,7 @@ public object Versioning {
         return result
     }
 
-    public fun bump(versionName: String, bumpType: String): String {
+    internal fun bump(versionName: String, bumpType: String): String {
         val (major, minor, patch) = parseSemver(versionName)
         val (newMajor, newMinor, newPatch) = when (bumpType) {
             "major" -> Triple(major + 1, 0, 0)
