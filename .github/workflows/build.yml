@@ -75,6 +75,29 @@ jobs:
             **/build/reports/
             **/build/test-results/
 
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    needs: static-analysis
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install site dependencies
+        run: python3 -m pip install -r mkdocs-requirements.txt
+
+      - name: Build site
+        run: ./deploy_website.sh --ci
+
   tests:
     name: Tests
     runs-on: ubuntu-latest

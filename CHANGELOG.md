@@ -5,6 +5,7 @@ Change Log
 
 - Add the Apache 2.0 license text at the repository root. Every artifact says it is licensed under Apache 2.0, but the license itself was never committed, so GitHub read the project as having no license.
 - Add the Apache license header to every Kotlin file, so the published sources carry it too. The formatter was switched on for `plugins` and `lint-rules` but never told which files to read, so most of the project had never been formatted or checked.
+- Publish a documentation site at <https://thomaskioko.github.io/app-gradle-plugins/>, carrying the API reference, the change log and the release guide. It is rebuilt and published each time a release is tagged, and every pull request rebuilds it and fails if a link or a menu entry points at a page that is not there.
 - Ship real API documentation with every artifact. The documentation file attached to each release has been empty every time, because nothing ever generated one. All six artifacts now carry the full reference built from the comments in the source.
 - Update the API visibility and make internal calls internal: `ScaffoldProperties`, `Versioning`, the classes behind the `bumpVersion`, `release`, `generateMokoStrings` and `generateBuildConfig` tasks, and the companion objects on the ktlint rules. You configure the plugins through `scaffold {}`, so nothing a build script is meant to use has changed. If yours did call one of these, please open an issue.
 
@@ -61,7 +62,7 @@ Three additions extend the codegen surface so consumers no longer hand-write tab
 - `@ChildPresenter` targets a presenter constructed by another presenter rather than navigated to through a route. The processor emits a `<Presenter>ChildGraph` graph extension exposing the presenter as a property plus a `@ContributesTo(parentScope) @GraphExtension.Factory` whose `create<BaseName>Graph` function takes a `ComponentContext` and returns the graph. Multiple children may share a `scope`; each gets its own graph extension and its own factory function (the unique name avoids return-type collisions when both factories contribute to the same parent scope).
 - `@NavDestination(kind = TAB_ROOT)` now also contributes the route singleton itself into `Set<NavRoot>`. Consumers no longer need to keep a hand-written `<Feature>RootBinding` next to each tab to populate that set. The new contribution lives inside the existing `<Presenter>TabDestinationBinding` file alongside the `NavDestination<*>` and `NavRootBinding<*>` entries.
 
-See [annotations.md](codegen/docs/annotations.md), [examples.md](codegen/docs/examples.md) sections 4, 7, and 8, and [architecture/consumer-contract.md](codegen/docs/architecture/consumer-contract.md) for the full surface.
+See [annotations.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/annotations.md), [examples.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/examples.md) sections 4, 7, and 8, and [architecture/consumer-contract.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/architecture/consumer-contract.md) for the full surface.
 
 ### Lint rules
 
@@ -80,7 +81,7 @@ Two new annotations cover the application's root host. The pair eliminates the m
 - `@AppRoot` targets an `@AssistedInject` presenter implementation. The processor reads the nested `@AssistedFactory`, infers the bound interface from the implementation's supertypes, and emits a `<InterfaceName>BindingContainer` that contributes `@Provides @SingleIn(parentScope)` for the bound interface. Consumers replace their hand-written root binding container with one annotation.
 - `@AppRootUi` targets the host `@Composable` function. The processor reads the function's non-modifier parameters and emits an `AppRootProvider` interface plus a `@Composable AppRootProvider.AppRootContent(modifier)` extension. Consumers make their activity-scope `@DependencyGraph` extend the generated `AppRootProvider`, and the activity invokes `graph.AppRootContent()` instead of forwarding each dependency by hand.
 
-The codegen now publishes `@SingleIn`, `@Composable`, and `Modifier` in addition to the previously-published Metro and Decompose constants. See [annotations.md](codegen/docs/annotations.md), [examples.md](codegen/docs/examples.md) sections 7 and 8, and [architecture/consumer-contract.md](codegen/docs/architecture/consumer-contract.md) for the full surface.
+The codegen now publishes `@SingleIn`, `@Composable`, and `Modifier` in addition to the previously-published Metro and Decompose constants. See [annotations.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/annotations.md), [examples.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/examples.md) sections 7 and 8, and [architecture/consumer-contract.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/codegen/docs/architecture/consumer-contract.md) for the full surface.
 
 ### Lint rules
 
@@ -122,7 +123,7 @@ A new published `lint-rules` artifact ships six ktlint rules that enforce the pr
     - `tvmaniac:no-style-wrapper-in-preview` prevents redundant styling wrappers (`TvManiacTheme`, `TvManiacBackground`, `Surface`, `MaterialTheme` by default) inside `@Preview` composables. The wrapper provider applies the project styling once.
     - `tvmaniac:metro-redundant-inject` removes redundant `@Inject` from classes that already declare a Metro `@Contributes...` annotation. Autocorrect-able.
     - `tvmaniac:test-name-format` enforces the `should X given Y` test naming convention. Backticked and camelCase forms are both accepted.
-- The navigation and preview rules read `.editorconfig` properties (`ktlint_tvmaniac_navigation_module_paths`, `ktlint_tvmaniac_preview_wrappers`, `ktlint_tvmaniac_preview_wrapper_packages`) so consumer projects can adjust the navigation layer location and the set of forbidden wrappers without forking. See [lint-rules/README.md](lint-rules/README.md).
+- The navigation and preview rules read `.editorconfig` properties (`ktlint_tvmaniac_navigation_module_paths`, `ktlint_tvmaniac_preview_wrappers`, `ktlint_tvmaniac_preview_wrapper_packages`) so consumer projects can adjust the navigation layer location and the set of forbidden wrappers without forking. See [lint-rules/README.md](https://github.com/thomaskioko/app-gradle-plugins/blob/main/lint-rules/README.md).
 
 ### Misc
 

@@ -30,6 +30,11 @@ gradle.properties.local
 # Generated API reference
 /docs/api/
 
+# Documentation site build output and the pages copied in from the root
+/site/
+/docs/changelog.md
+/docs/releasing.md
+
 # Claude skills — untracked while iterating; remove once stable
 .claude/skills/
 CLAUDE.md
