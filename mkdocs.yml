@@ -56,6 +56,19 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Installing: install.md
+  - Plugins:
+      - Overview: plugins/index.md
+      - Root: plugins/root.md
+      - App: plugins/app.md
+      - Android: plugins/android.md
+      - JVM: plugins/jvm.md
+      - Multiplatform: plugins/multiplatform.md
+      - Base: plugins/base.md
+      - Spotless: plugins/spotless.md
+      - Lint: plugins/lint.md
+      - Baseline profile: plugins/baseline-profile.md
+      - Resource generator: plugins/resource-generator.md
+      - Build config: plugins/buildconfig.md
   - API reference:
       - Plugins: api/plugins/index.html
       - Codegen: api/codegen/index.html
