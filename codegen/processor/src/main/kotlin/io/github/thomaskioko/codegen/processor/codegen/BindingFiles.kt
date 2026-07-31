@@ -22,6 +22,8 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import io.github.thomaskioko.codegen.processor.util.FOUR_SPACE_INDENT
 import io.github.thomaskioko.codegen.processor.util.contributesTo
+import io.github.thomaskioko.codegen.processor.util.hideFromObjC
+import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
 
 /**
  * Builds a binding file structured as
@@ -37,27 +39,33 @@ import io.github.thomaskioko.codegen.processor.util.contributesTo
  *
  * @param bindingName The class name of the generated binding interface.
  * @param parentScope The parent dependency injection scope the binding contributes to.
+ * @param hideFromObjC Whether to hide the generated types from the Objective-C API. True when
+ *   the compilation has a non-JVM target.
  * @param providers The `@Provides @IntoSet` functions to declare inside the companion object.
  * @return A KotlinPoet [FileSpec] containing the binding interface and its companion.
  */
 internal fun contributingBindingFile(
     bindingName: ClassName,
     parentScope: ClassName,
+    hideFromObjC: Boolean,
     vararg providers: FunSpec,
 ): FileSpec {
     val companion = TypeSpec.companionObjectBuilder()
         .addModifiers(KModifier.PUBLIC)
+        .hideFromObjC(hideFromObjC)
         .also { builder -> providers.forEach { builder.addFunction(it) } }
         .build()
 
     val bindingInterface = TypeSpec.interfaceBuilder(bindingName)
         .addModifiers(KModifier.PUBLIC)
+        .hideFromObjC(hideFromObjC)
         .addAnnotation(contributesTo(parentScope))
         .addType(companion)
         .build()
 
     return FileSpec.builder(bindingName)
         .indent(FOUR_SPACE_INDENT)
+        .optInObjCRefinement(hideFromObjC)
         .addType(bindingInterface)
         .build()
 }

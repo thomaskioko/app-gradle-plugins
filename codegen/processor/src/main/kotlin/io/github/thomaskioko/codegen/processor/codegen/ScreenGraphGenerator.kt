@@ -28,6 +28,8 @@ import io.github.thomaskioko.codegen.processor.util.Provides
 import io.github.thomaskioko.codegen.processor.util.contributesTo
 import io.github.thomaskioko.codegen.processor.util.graphExtension
 import io.github.thomaskioko.codegen.processor.util.graphExtensionFactory
+import io.github.thomaskioko.codegen.processor.util.hideFromObjC
+import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
 
 /**
  * Generates the Metro `@GraphExtension` interface plus its nested `Factory` for one annotated
@@ -64,11 +66,14 @@ internal object ScreenGraphGenerator {
      * Generates the graph file for one parsed presenter annotation.
      *
      * @param data The parsed annotation, which carries every name and scope the generator needs.
+     * @param hideFromObjC Whether to hide the generated types from the Objective-C API. True when
+     *   the compilation has a non-JVM target.
      * @return The generated graph file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: NavData): FileSpec {
+    fun generate(data: NavData, hideFromObjC: Boolean): FileSpec {
         val factoryInterface = TypeSpec.interfaceBuilder("Factory")
             .addModifiers(KModifier.PUBLIC)
+            .hideFromObjC(hideFromObjC)
             .addAnnotation(contributesTo(data.parentScope))
             .addAnnotation(graphExtensionFactory())
             .addFunction(
@@ -86,6 +91,7 @@ internal object ScreenGraphGenerator {
 
         val graphInterface = TypeSpec.interfaceBuilder(data.graphClassName)
             .addModifiers(KModifier.PUBLIC)
+            .hideFromObjC(hideFromObjC)
             .addAnnotation(graphExtension(data.scope))
             .addProperty(
                 PropertySpec.builder(data.graphPropertyName, data.graphPropertyType)
@@ -97,6 +103,7 @@ internal object ScreenGraphGenerator {
 
         return FileSpec.builder(data.graphClassName)
             .indent(FOUR_SPACE_INDENT)
+            .optInObjCRefinement(hideFromObjC)
             .addType(graphInterface)
             .build()
     }

@@ -17,9 +17,11 @@ package io.github.thomaskioko.codegen.processor.util
 
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.STAR
+import com.squareup.kotlinpoet.TypeSpec
 
 /** Indent string used by every emitted [com.squareup.kotlinpoet.FileSpec]. KSP convention is four spaces. */
 internal const val FOUR_SPACE_INDENT: String = "    "
@@ -73,6 +75,30 @@ internal fun graphExtension(scope: ClassName): AnnotationSpec =
  */
 internal fun graphExtensionFactory(): AnnotationSpec =
     AnnotationSpec.builder(GraphExtension.nestedClass("Factory")).build()
+
+/**
+ * Adds the `@HiddenFromObjC` annotation when [hide] is true. Exported Objective-C classes cannot
+ * be dead-stripped, and no Swift code names the generated dependency injection types, so hiding
+ * them keeps the plumbing out of any framework header. The flag is false for JVM-only
+ * compilations, where the annotation's `@OptionalExpectation` declaration does not resolve.
+ */
+internal fun TypeSpec.Builder.hideFromObjC(hide: Boolean): TypeSpec.Builder =
+    if (hide) addAnnotation(AnnotationSpec.builder(HiddenFromObjC).build()) else this
+
+/**
+ * Adds the `@file:OptIn(ExperimentalObjCRefinement::class)` annotation when [hide] is true, which
+ * [hideFromObjC] requires on Kotlin 2.4.
+ */
+internal fun FileSpec.Builder.optInObjCRefinement(hide: Boolean): FileSpec.Builder =
+    if (hide) {
+        addAnnotation(
+            AnnotationSpec.builder(OptIn)
+                .addMember("%T::class", ExperimentalObjCRefinement)
+                .build(),
+        )
+    } else {
+        this
+    }
 
 /**
  * Returns this class name parameterized by `*`, for example `NavDestination<*>`. Used when the

@@ -95,11 +95,14 @@ internal object NavDestinationBindingGenerator {
      *
      * @param data The parsed annotation, which carries every name, scope, and parameterization
      *   detail the generator needs.
+     * @param hideFromObjC Whether to hide the generated binding from the Objective-C API. True
+     *   when the compilation has a non-JVM target.
      * @return The generated binding file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: ScreenData): FileSpec = contributingBindingFile(
+    fun generate(data: ScreenData, hideFromObjC: Boolean): FileSpec = contributingBindingFile(
         bindingName = data.bindingClassName,
         parentScope = data.parentScope,
+        hideFromObjC = hideFromObjC,
         destinationFun(data),
         routeBindingFun(data.baseName, data.route),
     )

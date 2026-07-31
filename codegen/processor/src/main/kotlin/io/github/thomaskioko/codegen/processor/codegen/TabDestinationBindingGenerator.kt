@@ -77,11 +77,14 @@ internal object TabDestinationBindingGenerator {
      * Generates the binding file for one tab root presenter annotation.
      *
      * @param data The parsed annotation, which carries every name and scope the generator needs.
+     * @param hideFromObjC Whether to hide the generated binding from the Objective-C API. True
+     *   when the compilation has a non-JVM target.
      * @return The generated binding file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: TabData): FileSpec = contributingBindingFile(
+    fun generate(data: TabData, hideFromObjC: Boolean): FileSpec = contributingBindingFile(
         bindingName = data.bindingClassName,
         parentScope = data.parentScope,
+        hideFromObjC = hideFromObjC,
         destinationFun(data),
         navRootFun(data),
         rootBindingFun(data),

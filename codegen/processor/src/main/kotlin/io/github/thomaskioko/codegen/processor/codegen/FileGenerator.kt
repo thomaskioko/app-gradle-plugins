@@ -38,17 +38,19 @@ internal object FileGenerator {
      *
      * @param data The parsed annotation. [ScreenData] for screens and overlays, [TabData] for tab
      *   roots.
+     * @param hideFromObjC Whether to hide the generated types from the Objective-C API. True when
+     *   the compilation has a non-JVM target.
      * @return A pair of [FileSpec] outputs: the graph file and the binding file.
      */
-    fun generate(data: NavData): List<FileSpec> = when (data) {
+    fun generate(data: NavData, hideFromObjC: Boolean): List<FileSpec> = when (data) {
         is ScreenData -> listOf(
-            ScreenGraphGenerator.generate(data),
-            NavDestinationBindingGenerator.generate(data),
+            ScreenGraphGenerator.generate(data, hideFromObjC),
+            NavDestinationBindingGenerator.generate(data, hideFromObjC),
         )
 
         is TabData -> listOf(
-            ScreenGraphGenerator.generate(data),
-            TabDestinationBindingGenerator.generate(data),
+            ScreenGraphGenerator.generate(data, hideFromObjC),
+            TabDestinationBindingGenerator.generate(data, hideFromObjC),
         )
     }
 }

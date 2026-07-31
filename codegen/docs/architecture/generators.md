@@ -26,18 +26,38 @@ The router is a single `when` expression over the sealed `NavData`:
 
 ```kotlin
 internal object FileGenerator {
-    fun generate(data: NavData): List<FileSpec> = when (data) {
+    fun generate(data: NavData, hideFromObjC: Boolean): List<FileSpec> = when (data) {
         is ScreenData -> listOf(
-            ScreenGraphGenerator.generate(data),
-            NavDestinationBindingGenerator.generate(data),
+            ScreenGraphGenerator.generate(data, hideFromObjC),
+            NavDestinationBindingGenerator.generate(data, hideFromObjC),
         )
         is TabData -> listOf(
-            ScreenGraphGenerator.generate(data),
-            TabDestinationBindingGenerator.generate(data),
+            ScreenGraphGenerator.generate(data, hideFromObjC),
+            TabDestinationBindingGenerator.generate(data, hideFromObjC),
         )
     }
 }
 ```
+
+## Hiding from Objective-C
+
+Every graph and destination binding generator takes a `hideFromObjC` flag. When it is true, the
+emitted types (outer interface, nested `Factory`, companion object, `@AppRoot` binding object)
+carry `@HiddenFromObjC` and the file carries `@file:OptIn(ExperimentalObjCRefinement::class)`.
+The generated types are dependency injection plumbing no Swift code names, and exported
+Objective-C classes cannot be dead-stripped, so hiding them keeps the whole layer out of the
+framework header of any module a consumer exports.
+
+The flag is computed once in `NavigationCodegenProcessorProvider`: true when
+`environment.platforms` contains a non-JVM platform. `HiddenFromObjC` is an
+`@OptionalExpectation` the compiler only accepts in common module sources, so a JVM-only
+compilation (a plain JVM consumer, or the compile testing harness in `processor-test`) emits no
+refinement annotations and produces the same output as before the flag existed. The golden files
+cover the JVM path; `HideFromObjCTest` in the processor module asserts both paths on the
+rendered `FileSpec` text. The examples in this document show the JVM shape.
+
+The UI binding generators never take the flag. Their output lands in Android-only modules that no
+framework exports.
 
 Both branches reuse `ScreenGraphGenerator` because the `@GraphExtension` interface looks the same for screens, overlays, and tab roots. The route class doubles as the
 scope marker either way. The two branches diverge only in which destination binding generator runs alongside.
