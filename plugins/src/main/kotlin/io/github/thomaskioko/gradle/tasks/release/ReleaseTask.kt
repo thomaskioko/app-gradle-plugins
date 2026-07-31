@@ -34,7 +34,7 @@ import java.io.File
 import javax.inject.Inject
 
 @UntrackedTask(because = "Modifies version.txt, CHANGELOG.md and creates git commit + tag")
-public abstract class ReleaseTask @Inject constructor(
+internal abstract class ReleaseTask @Inject constructor(
     private val execOperations: ExecOperations,
 ) : DefaultTask() {
 
@@ -44,31 +44,31 @@ public abstract class ReleaseTask @Inject constructor(
     }
 
     @get:Internal
-    public abstract val versionFile: RegularFileProperty
+    internal abstract val versionFile: RegularFileProperty
 
     @get:Internal
-    public abstract val changelogFile: RegularFileProperty
+    internal abstract val changelogFile: RegularFileProperty
 
     @get:Internal
-    public abstract val cliffConfigFile: RegularFileProperty
+    internal abstract val cliffConfigFile: RegularFileProperty
 
     @get:Internal
-    public abstract val projectDir: DirectoryProperty
+    internal abstract val projectDir: DirectoryProperty
 
     @get:Input
-    public abstract val bumpType: Property<String>
+    internal abstract val bumpType: Property<String>
 
     @get:Input
-    public abstract val beta: Property<Boolean>
+    internal abstract val beta: Property<Boolean>
 
     @get:Input
-    public abstract val interactive: Property<Boolean>
+    internal abstract val interactive: Property<Boolean>
 
     @get:Input
-    public abstract val dryRun: Property<Boolean>
+    internal abstract val dryRun: Property<Boolean>
 
     @TaskAction
-    public fun release() {
+    internal fun release() {
         requireGitCliff()
 
         if (interactive.get()) {
