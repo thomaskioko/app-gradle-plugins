@@ -89,7 +89,7 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
 
                 val desugarLibrary = target.getDependencyOrNull("android-desugarJdkLibs")
                 target.dependencies.addIfNotNull("coreLibraryDesugaring", desugarLibrary)
-                enableCoreLibraryDesugaring = true
+                enableCoreLibraryDesugaring = desugarLibrary != null
             }
 
             jvm()
