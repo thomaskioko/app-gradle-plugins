@@ -1,60 +1,13 @@
 # App Gradle Plugins
 
-A collection of opinionated Gradle plugins for building Kotlin Multiplatform and Android projects with sensible defaults and minimal configuration. Compatible with AGP 9.0+.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.thomaskioko.gradle.plugins/plugins)](https://central.sonatype.com/artifact/io.github.thomaskioko.gradle.plugins/plugins)
+[![Build](https://github.com/thomaskioko/app-gradle-plugins/actions/workflows/build.yml/badge.svg)](https://github.com/thomaskioko/app-gradle-plugins/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-## Installation
-
-### Using Version Catalogs (Recommended)
-
-Add to your `gradle/libs.versions.toml`:
-
-```toml
-[versions]
-app-gradle-plugins = "0.1.1"
-
-[plugins]
-app-android = { id = "io.github.thomaskioko.gradle.plugins.android", version.ref = "app-gradle-plugins" }
-app-app = { id = "io.github.thomaskioko.gradle.plugins.app", version.ref = "app-gradle-plugins" }
-app-jvm = { id = "io.github.thomaskioko.gradle.plugins.jvm", version.ref = "app-gradle-plugins" }
-app-multiplatform = { id = "io.github.thomaskioko.gradle.plugins.multiplatform", version.ref = "app-gradle-plugins" }
-app-root = { id = "io.github.thomaskioko.gradle.plugins.root", version.ref = "app-gradle-plugins" }
-app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless", version.ref = "app-gradle-plugins" }
-```
-
-Then use in your `build.gradle.kts`:
-
-```kotlin
-plugins {
-    alias(libs.plugins.app.multiplatform)
-}
-```
-
-### Direct Usage
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.multiplatform") version "0.1.1"
-}
-```
-
-## Required Setup
-
-Apply `io.github.thomaskioko.gradle.plugins.root` to the **root project's** `build.gradle.kts`. This is required. Applying any other plugin in this suite (`app`, `android`, `jvm`, `multiplatform`, `base`) without `root` on the root project throws a `GradleException` at apply-time.
-
-```kotlin
-// Root build.gradle.kts
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.root")
-}
-```
-
-## Plugin Types
-
-### Kotlin Multiplatform Plugin
-
-Configures a Kotlin Multiplatform module with default targets (Android, JVM, iOS) and sensible defaults. Uses `com.android.kotlin.multiplatform.library` for the Android target (AGP 9.0+).
-
-**Default targets provided:** Android (via KMP Android library), JVM, iosArm64, iosSimulatorArm64.
+A module in a large project spends most of its build file repeating the same setup: the same
+target platforms, the same compiler flags, the same test dependencies. These plugins move that
+setup out of the build file and leave behind a `scaffold {}` block where a module declares only
+the choices it actually has to make.
 
 ```kotlin
 plugins {
@@ -62,293 +15,58 @@ plugins {
 }
 
 scaffold {
-    // Enable explicit API mode
-    explicitApi()
+    addJvmTarget()
+    addIosTargets()
+    addAndroidTarget()
 
-    // Opt-in to experimental APIs
-    optIn("kotlin.ExperimentalStdlibApi", "kotlinx.coroutines.ExperimentalCoroutinesApi")
-
-    // Configure the Android target
-    addAndroidTarget(
-        enableAndroidResources = true,
-        withHostTestBuilder = true,
-        includeAndroidResources = true,
-        configure = {
-            useCompose()
-            minSdkVersion(24)
-        },
-        lintConfiguration = {
-            baseline = file("lint-baseline.xml")
-            disable += "UnusedResources"
-        },
-    )
-
-    // Add iOS targets with XCFramework
-    addIosTargetsWithXcFramework("SharedKit")
-
-    // Configure native target options
-    configureNativeTargets(bundleId = "com.example.app")
-
-    // Enable serialization support
-    useSerialization()
-
-    // Enable Metro for DI
     useMetro()
 }
 ```
 
-#### `addAndroidTarget` Parameters
+Alongside the plugins are a KSP code generator that writes the navigation graph for an annotated
+presenter, and a ktlint rule set for the conventions a type cannot enforce.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `enableAndroidResources` | `Boolean` | `false` | Enable Android resources for the KMP Android target |
-| `withHostTestBuilder` | `Boolean` | `false` | Enable host-side (JVM) unit tests for Android. Not compatible with some plugins (e.g., moko-resources) |
-| `includeAndroidResources` | `Boolean` | `false` | Include Android resources in unit tests (`isIncludeAndroidResources`) |
-| `withDeviceTestBuilder` | `Boolean` | `false` | Enable on-device instrumented tests |
-| `withJava` | `Boolean` | `false` | Enable Java interop for the Android target |
-| `configure` | `AndroidExtension.() -> Unit` | `{}` | Configure Android-specific options (Compose, minSdk, etc.) |
-| `lintConfiguration` | `Lint.() -> Unit` | `{}` | Configure lint rules for the Android target |
+## Documentation
 
-### Android Library Plugin
+**<https://thomaskioko.github.io/app-gradle-plugins/>**
 
-For Android library modules with automatic namespace configuration and optimized defaults. Applies `com.android.library` and configures build features, compile options, and test setup.
+- [Installing](https://thomaskioko.github.io/app-gradle-plugins/install/) covers what a project
+  needs before the first module builds. Each step was checked against an empty project.
+- [Plugins](https://thomaskioko.github.io/app-gradle-plugins/plugins/) has a page for each of the
+  eleven plugins and every option in `scaffold {}`.
+- [Code generation](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/) covers
+  the navigation and feature flag annotations.
+- [Lint rules](https://thomaskioko.github.io/app-gradle-plugins/lint-rules/) lists every rule and
+  how to exempt a module from one.
+- [API reference](https://thomaskioko.github.io/app-gradle-plugins/api/plugins/) is generated from
+  the source.
 
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.android")
-}
+## Building
 
-scaffold {
-    android {
-        // Enable Compose support
-        useCompose()
-
-        // Enable build config generation
-        enableBuildConfig()
-
-        // Configure ProGuard consumer rules
-        consumerProguardFiles("consumer-rules.pro")
-
-        // Override minimum SDK version
-        minSdkVersion(26)
-
-        // Enable baseline profiles for performance optimization
-        useBaselineProfile()
-
-        // Configure screenshot testing with Roborazzi
-        useRoborazzi()
-
-        // Configure managed virtual devices for testing
-        useManagedDevices(
-            deviceName = "pixel6Api34",
-            device = "Pixel 6",
-            apiLevel = 34
-        )
-
-        // Custom library extension configuration
-        libraryConfiguration {
-            // Access LibraryExtension directly
-        }
-    }
-}
+```bash
+./gradlew build            # the root build
+./gradlew spotlessApplyAll # format everything
+./gradlew buildHealthAll   # check dependencies
+./gradlew dokkaAll         # build the API reference
+./deploy_website.sh --local # read the site while editing it
 ```
 
-### Android Application Plugin
-
-For Android application modules with signing configuration and optimization. Automatically enables `buildConfig`.
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.app")
-}
-
-scaffold {
-    app {
-        // Set the application ID
-        applicationId("com.example.app")
-
-        // Configure build type suffixes
-        applicationIdSuffix("debug", ".debug")
-
-        // Enable minification for release builds
-        minify(
-            file("proguard-rules.pro"),
-            file("proguard-android-optimize.txt")
-        )
-    }
-
-    android {
-        // Enable Compose support
-        useCompose()
-
-        // Managed devices work for app projects too
-        useManagedDevices()
-    }
-}
-```
-
-### Baseline Profile Plugin
-
-For benchmark modules that generate baseline profiles. Uses `com.android.test` plugin.
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.baseline-profile")
-}
-
-scaffold {
-    benchmark {
-        // Configure managed devices for baseline profile generation
-        useManagedDevices(
-            deviceName = "pixel6Api34",
-            device = "Pixel 6",
-            apiLevel = 34
-        )
-    }
-}
-```
-
-### JVM Library Plugin
-
-For pure Kotlin/JVM modules.
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.jvm")
-}
-
-scaffold {
-    jvm {
-        // Enable Android Lint for JVM modules
-        useAndroidLint()
-    }
-
-    // Common configurations work here too
-    explicitApi()
-    useSerialization()
-}
-```
-
-### Root Project Plugin
-
-Configures the root project with dependency analysis, the aggregate test tasks (`linuxTest`, `iosTest`, `ciTest`), version checks, and common tooling. **Required**: must be applied on the root project before any other plugin in this suite. See [Required Setup](#required-setup).
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.root")
-}
-```
-
-### Spotless Plugin
-
-Automatic code formatting with Spotless using Kotlin and KTX configurations.
-
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.spotless")
-}
-```
-
-### Lint Plugin
-
-Layers a custom ktlint rule set on top of Spotless's standard checks. Apply once to the **root project**; the plugin propagates configuration to every subproject and applies Spotless transitively.
-
-```kotlin
-// Root build.gradle.kts
-plugins {
-    alias(libs.plugins.app.root)
-    alias(libs.plugins.app.lint)
-}
-```
-
-The plugin reads its own version from the JAR manifest's `Implementation-Version` attribute and resolves `io.github.thomaskioko.gradle.plugins:lint-rules:<own-version>` automatically. There is no version literal to maintain in consumer projects. Bumping `app-gradle-plugins` in `libs.versions.toml` automatically pulls the matching `lint-rules` artifact.
-
-#### Rules shipped in `lint-rules`
-
-| Rule ID                                        | Enforces                                                                                                                                                                                   |
-|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `tvmaniac:no-mutating-router-import`           | No `com.arkivanov.decompose.router.{stack,slot}.*` imports outside `/navigation/` modules, except read-only `ChildStack` and `ChildSlot` types that render-site presenters and UIs need.   |
-| `tvmaniac:no-navigation-construct-outside-nav` | No `StackNavigation<>()` / `SlotNavigation<>()` constructor calls outside `/navigation/` modules.                                                                                          |
-| `tvmaniac:no-custom-navigator-interface`       | No custom `XxxNavigator` interfaces. Only the canonical `Navigator` and `SheetNavigator` are allowed.                                                                                      |
-| `tvmaniac:no-style-wrapper-in-preview`         | No `TvManiacTheme { ... }` or `TvManiacBackground { ... }` wrappers inside `@Preview`-family functions; the styling is applied automatically by `TvManiacPreviewWrapperProvider`.          |
-| `tvmaniac:test-name-format`                    | `@Test` (and `@ParameterizedTest`, `@RepeatedTest`) functions must be named `should X given Y` or `should X when Y` (backticked) / `shouldXGivenY` (camelCase, used in `src/androidTest`). |
-
-The rules are TvManiac-specific. Other consumers of `app-gradle-plugins` are not forced into them: only projects that explicitly apply `app.lint` get the rules.
-
-`SpotlessPlugin` reads the property via `Project.findProperty(...)`, so values set programmatically (extras) and via `-P` flags also work.
-
-## Configuration Requirements
-
-### Required Gradle Properties
-
-Add to `gradle.properties`:
-
-```properties
-# Used to generate Android namespace based on module path
-package.name=com.example
-
-# Build Flags
-app.debugOnly=true
-app.enableIos=false
-```
-
-### Version Catalog Setup
-
-Required entries in `libs.versions.toml`:
-
-```toml
-[versions]
-# Compilation targets
-java-target = "17"
-java-toolchain = "17"
-android-compile = "35"
-android-min = "24"
-android-target = "35"
-
-[libraries]
-# For Compose support
-androidx-compose-compiler = { module = "androidx.compose.compiler:compiler", version = "..." }
-
-# For serialization
-kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version = "..." }
-
-# For baseline profiles
-androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "..." }
-
-# For desugaring (optional)
-android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "..." }
-```
-
-## Features
-
-### Automatic Configuration
-
-- **Namespace Generation**: Android namespace is automatically set based on module path (e.g., `:data:api` becomes `com.example.data.api`)
-- **Kotlin Options**: Configures optimal Kotlin compiler settings and JVM target
-- **Test Configuration**: Unit tests are configured with proper reporting paths. Release unit tests are disabled by default
-- **Lint Setup**: Android lint is configured with strict rules and centralized reporting
-- **Build Optimization**: Release builds are optimized, debug builds prioritize build speed
-- **Desugaring**: Core library desugaring is automatically enabled when `android-desugarJdkLibs` is in the version catalog
-
-### Compose Support
-
-The `useCompose()` configuration:
-- Enables Compose build feature
-- Configures Compose compiler with appropriate version
-- Supports both Android and Multiplatform Compose
-- Available via `scaffold { android { useCompose() } }` for Android/App plugins
-- Available via `addAndroidTarget(configure = { useCompose() })` for KMP plugin
-
-### Dependency Injection
-
-Built-in support for Kotlin Inject and Metro:
-- `useMetro()` - Applies Metro plugin and adds runtime dependency
-
+Releasing is documented in [RELEASING.md](RELEASING.md).
 
 ## License
 
 ```
 Copyright 2025 Thomas Kioko
 
-Licensed under the Apache License, Version 2.0
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
