@@ -84,7 +84,7 @@ public class NoNavigationConstructOutsideNavRule :
         emit(node.startOffset, errorMessage(name), false)
     }
 
-    public companion object {
+    internal companion object {
         internal const val STACK_NAVIGATION: String = "StackNavigation"
         internal const val SLOT_NAVIGATION: String = "SlotNavigation"
 
@@ -94,7 +94,7 @@ public class NoNavigationConstructOutsideNavRule :
          * @param name Either `"StackNavigation"` or `"SlotNavigation"`, whichever was
          *   constructed.
          */
-        public fun errorMessage(name: String): String =
+        internal fun errorMessage(name: String): String =
             "$name<T>() may only be constructed inside a navigation/* module. " +
                 "Inject Navigator from navigation/api instead."
     }

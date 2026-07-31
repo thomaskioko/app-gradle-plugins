@@ -87,7 +87,7 @@ public class TestNameFormatRule :
             (contains("Given") || contains("When"))
     }
 
-    public companion object {
+    internal companion object {
         internal val TEST_ANNOTATIONS: Set<String> = setOf(
             "Test",
             "ParameterizedTest",
@@ -99,7 +99,7 @@ public class TestNameFormatRule :
          *
          * @param name The function name that violated the convention.
          */
-        public fun errorMessage(name: String): String =
+        internal fun errorMessage(name: String): String =
             "Test name '$name' does not follow the project convention. " +
                 "Use 'should X given Y' (backticked) or 'shouldXGivenY' / 'shouldXWhenY' (camelCase). " +
                 "The name must start with 'should' and contain 'given' or 'when'."

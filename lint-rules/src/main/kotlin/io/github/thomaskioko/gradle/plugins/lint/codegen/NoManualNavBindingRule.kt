@@ -102,7 +102,7 @@ public class NoManualNavBindingRule :
         return userType.referencedName
     }
 
-    public companion object {
+    internal companion object {
         internal const val PROVIDES_ANNOTATION: String = "Provides"
         internal const val INTO_SET_ANNOTATION: String = "IntoSet"
 

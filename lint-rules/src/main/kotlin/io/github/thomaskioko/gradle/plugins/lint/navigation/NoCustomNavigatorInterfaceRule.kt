@@ -73,7 +73,7 @@ public class NoCustomNavigatorInterfaceRule :
         emit(node.startOffset, errorMessage(name), false)
     }
 
-    public companion object {
+    internal companion object {
         internal const val NAVIGATOR_SUFFIX: String = "Navigator"
         internal val CANONICAL_NAVIGATORS: Set<String> = setOf(
             "Navigator",
@@ -85,7 +85,7 @@ public class NoCustomNavigatorInterfaceRule :
          *
          * @param name The simple name of the offending interface.
          */
-        public fun errorMessage(name: String): String =
+        internal fun errorMessage(name: String): String =
             "Custom Navigator interface '$name' is forbidden. " +
                 "Use canonical Navigator or SheetNavigator from navigation/api. " +
                 "New navigators require an architecture review."
