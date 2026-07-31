@@ -34,6 +34,7 @@ gradle.properties.local
 /site/
 /docs/changelog.md
 /docs/releasing.md
+/snippets/
 
 # Claude skills — untracked while iterating; remove once stable
 .claude/skills/
