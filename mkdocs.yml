@@ -1,0 +1,61 @@
+site_name: App Gradle Plugins
+site_description: Gradle plugins for building Kotlin Multiplatform and Android projects
+site_author: Thomas Kioko
+site_url: https://thomaskioko.github.io/app-gradle-plugins/
+
+repo_name: thomaskioko/app-gradle-plugins
+repo_url: https://github.com/thomaskioko/app-gradle-plugins
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2026 Thomas Kioko
+
+theme:
+  name: material
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.suggest
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: white
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Overview: index.md
+  - API reference:
+      - Plugins: api/plugins/index.html
+      - Codegen: api/codegen/index.html
+      - Lint rules: api/lint-rules/index.html
+  - Change log: changelog.md
+  - Releasing: releasing.md
