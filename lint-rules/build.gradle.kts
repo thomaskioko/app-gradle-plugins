@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.dependency.analysis)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.publish)
     alias(libs.plugins.spotless)
 }
@@ -43,6 +44,27 @@ spotless {
         ktlint(ktlintVersion)
         target("*.kts")
         licenseHeaderFile(licenseHeader, "(import|plugins|pluginManagement|dependencyResolutionManagement)")
+    }
+}
+
+dokka {
+    dokkaSourceSets.configureEach {
+        includes.from("MODULE.md")
+        jdkVersion.set(17)
+        skipDeprecated.set(true)
+        reportUndocumented.set(true)
+
+        sourceLink {
+            localDirectory.set(projectDir)
+            remoteUrl("${property("POM_SCM_URL")}/blob/main/lint-rules")
+            remoteLineSuffix.set("#L")
+        }
+    }
+
+    dokkaPublications.html {
+        outputDirectory.set(rootProject.file("../docs/api/lint-rules"))
+        suppressInheritedMembers.set(true)
+        failOnWarning.set(false)
     }
 }
 
