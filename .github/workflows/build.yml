@@ -7,6 +7,13 @@ on:
   pull_request:
   workflow_call:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   static-analysis:
     name: Static Analysis
@@ -84,7 +91,13 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Run tests
-        run: ./gradlew :plugins:functionalTest --stacktrace
+        run: |
+          ./gradlew \
+            :plugins:test \
+            :plugins:functionalTest \
+            :lint-rules:test \
+            :codegen:processor-test:test \
+            --stacktrace
 
       - name: Upload test reports
         if: failure()
@@ -92,5 +105,5 @@ jobs:
         with:
           name: test-reports
           path: |
-            plugins/build/reports/tests/functionalTest/
-            plugins/build/test-results/functionalTest/
+            **/build/reports/tests/
+            **/build/test-results/
