@@ -69,6 +69,20 @@ nav:
       - Baseline profile: plugins/baseline-profile.md
       - Resource generator: plugins/resource-generator.md
       - Build config: plugins/buildconfig.md
+  - Code generation:
+      - Get started: codegen/get-started.md
+      - Annotations: codegen/annotations.md
+      - Examples: codegen/examples.md
+      - Feature flags: codegen/featureflag.md
+      - Architecture:
+          - Overview: codegen/architecture/index.md
+          - Pipeline: codegen/architecture/pipeline.md
+          - Parsers: codegen/architecture/parsers.md
+          - Generators: codegen/architecture/generators.md
+          - Data model: codegen/architecture/data-model.md
+          - Consumer contract: codegen/architecture/consumer-contract.md
+          - Testing: codegen/architecture/testing.md
+  - Lint rules: lint-rules.md
   - API reference:
       - Plugins: api/plugins/index.html
       - Codegen: api/codegen/index.html
