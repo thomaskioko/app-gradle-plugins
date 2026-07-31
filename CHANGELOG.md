@@ -5,6 +5,7 @@ Change Log
 
 - Add the Apache 2.0 license text at the repository root. Every artifact says it is licensed under Apache 2.0, but the license itself was never committed, so GitHub read the project as having no license.
 - Add the Apache license header to every Kotlin file, so the published sources carry it too. The formatter was switched on for `plugins` and `lint-rules` but never told which files to read, so most of the project had never been formatted or checked.
+- Publish a documentation site at <https://thomaskioko.github.io/app-gradle-plugins/>, carrying the API reference, the change log and the release guide. It is rebuilt and published each time a release is tagged, and every pull request rebuilds it and fails if a link or a menu entry points at a page that is not there.
 - Ship real API documentation with every artifact. The documentation file attached to each release has been empty every time, because nothing ever generated one. All six artifacts now carry the full reference built from the comments in the source.
 - Update the API visibility and make internal calls internal: `ScaffoldProperties`, `Versioning`, the classes behind the `bumpVersion`, `release`, `generateMokoStrings` and `generateBuildConfig` tasks, and the companion objects on the ktlint rules. You configure the plugins through `scaffold {}`, so nothing a build script is meant to use has changed. If yours did call one of these, please open an issue.
 
