@@ -3,8 +3,9 @@ Change Log
 
 ## 0.8.6
 
-- Add the Apache 2.0 license text at the repository root. Every published POM declared `The Apache Software License, Version 2.0` but the license itself was never committed, so GitHub reported the project as unlicensed.
-- Add the Apache license header to every Kotlin source file, so the published sources carry it too. `plugins` and `lint-rules` applied the Spotless plugin without declaring a format block, and the aggregate check reached codegen's build scripts but none of its modules, so most of the repository was never formatted or checked.
+- Add the Apache 2.0 license text at the repository root. Every artifact says it is licensed under Apache 2.0, but the license itself was never committed, so GitHub read the project as having no license.
+- Add the Apache license header to every Kotlin file, so the published sources carry it too. The formatter was switched on for `plugins` and `lint-rules` but never told which files to read, so most of the project had never been formatted or checked.
+- Update the API visibility and make internal calls internal: `ScaffoldProperties`, `Versioning`, the classes behind the `bumpVersion`, `release`, `generateMokoStrings` and `generateBuildConfig` tasks, and the companion objects on the ktlint rules. You configure the plugins through `scaffold {}`, so nothing a build script is meant to use has changed. If yours did call one of these, please open an issue.
 
 ## 0.8.5 *(2026-07-24)*
 
