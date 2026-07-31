@@ -7,11 +7,11 @@ the choices it actually has to make.
 
 ```kotlin
 plugins {
-  id("io.github.thomaskioko.gradle.plugins.multiplatform")
+    id("io.github.thomaskioko.gradle.plugins.multiplatform")
 }
 
 scaffold {
-  useMetro()
+    useMetro()
 }
 ```
 
@@ -33,6 +33,9 @@ than a binding written by hand.
 
 The [API reference](api/plugins/index.html) covers every plugin, every option in `scaffold {}`, and every
 annotation, generated from the source itself so it cannot drift away from the code.
+
+[Installing](install.md) walks through the settings a project needs before the first module
+builds, each step checked against an empty project.
 
 The [change log](changelog.md) records what changed in each release and what a consumer has to do
 about it, if anything.

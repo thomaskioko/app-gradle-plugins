@@ -46,13 +46,16 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.inlinehilite
   - pymdownx.magiclink
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: [snippets]
+      check_paths: true
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
 
 nav:
   - Overview: index.md
+  - Installing: install.md
   - API reference:
       - Plugins: api/plugins/index.html
       - Codegen: api/codegen/index.html

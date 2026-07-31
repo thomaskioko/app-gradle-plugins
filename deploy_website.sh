@@ -34,6 +34,14 @@ cd "$(dirname "$0")"
 cp CHANGELOG.md docs/changelog.md
 cp RELEASING.md docs/releasing.md
 
+mkdir -p snippets
+if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+  VERSION="${GITHUB_REF_NAME#v}"
+else
+  VERSION="$(grep '^VERSION_NAME=' gradle/publishing.properties | cut -d= -f2)"
+fi
+printf 'app-gradle-plugins = "%s"' "${VERSION}" > snippets/catalog-version.md
+
 if [[ "${MODE}" == "--local" ]]; then
   mkdocs serve
 else
