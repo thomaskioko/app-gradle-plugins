@@ -25,7 +25,7 @@ local.properties
 gradle.properties.local
 
 /.kotlin
-tasks
+/tasks
 
 # Claude skills — untracked while iterating; remove once stable
 .claude/skills/
