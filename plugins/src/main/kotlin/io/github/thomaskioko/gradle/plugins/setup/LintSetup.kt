@@ -67,6 +67,7 @@ internal fun Lint.configure(project: Project) {
         listOf(
             "FlowOperatorInvokedInComposition",
             "StateFlowValueCalledInComposition",
+            "UnknownIssueId",
         ),
     )
 
