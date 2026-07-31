@@ -27,6 +27,9 @@ gradle.properties.local
 /.kotlin
 /tasks
 
+# Generated API reference
+/docs/api/
+
 # Claude skills — untracked while iterating; remove once stable
 .claude/skills/
 CLAUDE.md

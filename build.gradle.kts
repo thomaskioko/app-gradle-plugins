@@ -43,6 +43,14 @@ tasks.register("publishLocal") {
     dependsOn(gradle.includedBuild("lint-rules").task(":publishToMavenLocal"))
 }
 
+tasks.register("dokkaAll") {
+    group = "documentation"
+    description = "Generate the API reference across plugins + lint-rules + codegen composite builds."
+    dependsOn(gradle.includedBuild("plugins").task(":dokkaGenerate"))
+    dependsOn(gradle.includedBuild("lint-rules").task(":dokkaGenerate"))
+    dependsOn(gradle.includedBuild("codegen").task(":dokkaGenerate"))
+}
+
 tasks.register("buildHealthAll") {
     group = "verification"
     description = "Run buildHealth across plugins + lint-rules + codegen composite builds."

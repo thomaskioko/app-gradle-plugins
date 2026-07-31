@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.dokka.gradle.DokkaExtension
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.publish) apply false
+    alias(libs.plugins.dokka)
     alias(libs.plugins.spotless)
     alias(libs.plugins.dependency.analysis)
 }
@@ -49,12 +51,53 @@ tasks.register("spotlessCheckAll") {
     dependsOn(subprojects.map { "${it.path}:spotlessCheck" })
 }
 
+dependencies {
+    dokka(project(":annotations"))
+    dokka(project(":featureflag-annotations"))
+    dokka(project(":processor"))
+    dokka(project(":featureflag-processor"))
+}
+
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(rootProject.file("../docs/api/codegen"))
+        suppressInheritedMembers.set(true)
+        failOnWarning.set(false)
+    }
+}
+
 subprojects {
     group = property("GROUP").toString()
     version = property("VERSION_NAME").toString()
 
     pluginManager.apply("com.autonomousapps.dependency-analysis")
     pluginManager.apply("com.diffplug.spotless")
+
+    val moduleDir = projectDir
+    val moduleName = name
+
+    pluginManager.withPlugin("com.vanniktech.maven.publish") {
+        pluginManager.apply("org.jetbrains.dokka")
+
+        configure<DokkaExtension> {
+            dokkaSourceSets.configureEach {
+                if (name.startsWith("ios")) {
+                    suppress.set(true)
+                }
+
+                includes.from("MODULE.md")
+                jdkVersion.set(libs.versions.java.target.get().toInt())
+                skipDeprecated.set(true)
+                reportUndocumented.set(true)
+
+                sourceLink {
+                    localDirectory.set(moduleDir)
+                    remoteUrl("${property("POM_SCM_URL")}/blob/main/codegen/$moduleName")
+                    remoteLineSuffix.set("#L")
+                }
+            }
+        }
+    }
 
     configure<SpotlessExtension> {
         kotlin {

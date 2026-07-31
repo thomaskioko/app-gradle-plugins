@@ -5,6 +5,7 @@ Change Log
 
 - Add the Apache 2.0 license text at the repository root. Every artifact says it is licensed under Apache 2.0, but the license itself was never committed, so GitHub read the project as having no license.
 - Add the Apache license header to every Kotlin file, so the published sources carry it too. The formatter was switched on for `plugins` and `lint-rules` but never told which files to read, so most of the project had never been formatted or checked.
+- Ship real API documentation with every artifact. The documentation file attached to each release has been empty every time, because nothing ever generated one. All six artifacts now carry the full reference built from the comments in the source.
 - Update the API visibility and make internal calls internal: `ScaffoldProperties`, `Versioning`, the classes behind the `bumpVersion`, `release`, `generateMokoStrings` and `generateBuildConfig` tasks, and the companion objects on the ktlint rules. You configure the plugins through `scaffold {}`, so nothing a build script is meant to use has changed. If yours did call one of these, please open an issue.
 
 ## 0.8.5 *(2026-07-24)*
