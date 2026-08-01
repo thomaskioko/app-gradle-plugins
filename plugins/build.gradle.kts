@@ -50,7 +50,9 @@ spotless {
 }
 
 lint {
-    baseline = file("lint-baseline.xml")
+    // A root plugin configures the root project by definition: cross-project task, extension, and
+    // plugin lookups are the job, not a defect. Project isolation is not reachable here.
+    disable += "GradleProjectIsolation"
 }
 
 val agpDocsVersion = libs.versions.agp.get().split(".").take(2).joinToString(".")
