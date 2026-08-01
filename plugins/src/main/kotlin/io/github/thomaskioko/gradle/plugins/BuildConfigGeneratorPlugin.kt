@@ -45,6 +45,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  */
 public class BuildConfigGeneratorPlugin : Plugin<Project> {
 
+    /**
+     * Creates `buildConfig {}`, registers `generateBuildConfig` and makes every Kotlin
+     * compilation wait for it.
+     */
     override fun apply(target: Project) {
         val extension = target.extensions.create(
             "buildConfig",

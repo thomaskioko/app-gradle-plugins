@@ -67,6 +67,9 @@ import org.gradle.api.tasks.testing.Test
  * ```
  */
 public abstract class AndroidPlugin : Plugin<Project> {
+    /**
+     * Applies the Android library plugin and adds the `android {}` block.
+     */
     override fun apply(target: Project) {
         val isApplication = target.plugins.hasPlugin("com.android.application")
         if (!isApplication) {

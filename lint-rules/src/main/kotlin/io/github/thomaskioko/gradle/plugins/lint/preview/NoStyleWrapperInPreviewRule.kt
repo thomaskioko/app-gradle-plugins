@@ -87,11 +87,17 @@ public class NoStyleWrapperInPreviewRule :
     private var wrappers: Set<String> = PREVIEW_WRAPPERS_PROPERTY.defaultValue
     private var wrapperPackages: Set<String> = PREVIEW_WRAPPER_PACKAGES_PROPERTY.defaultValue
 
+    /**
+     * Reads this rule's settings from `.editorconfig` before the first file is visited.
+     */
     override fun beforeFirstNode(editorConfig: EditorConfig) {
         wrappers = editorConfig[PREVIEW_WRAPPERS_PROPERTY]
         wrapperPackages = editorConfig[PREVIEW_WRAPPER_PACKAGES_PROPERTY]
     }
 
+    /**
+     * Reports every violation of this rule found under the given node.
+     */
     override fun beforeVisitChildNodes(
         node: ASTNode,
         emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision,

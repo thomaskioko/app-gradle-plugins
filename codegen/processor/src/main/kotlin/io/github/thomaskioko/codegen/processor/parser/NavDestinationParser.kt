@@ -37,10 +37,10 @@ import io.github.thomaskioko.codegen.processor.data.TabData
  *
  * Returns `null` and logs a compile error pinned to the presenter when:
  *
- * - [kind] is not one of `SCREEN`, `OVERLAY`, or `TAB_ROOT`;
+ * - `kind` is not one of `SCREEN`, `OVERLAY`, or `TAB_ROOT`;
  * - the presenter is parameterized but does not have exactly one `@Assisted` parameter (see
  *   [inferSingleRoutePropertyForNavDestination]);
- * - [kind] is `TAB_ROOT` and the presenter declares a nested `@AssistedFactory`.
+ * - `kind` is `TAB_ROOT` and the presenter declares a nested `@AssistedFactory`.
  *
  * @param presenter The class declaration the annotation is attached to.
  * @param logger KSP's diagnostic sink. Used to report validation errors.

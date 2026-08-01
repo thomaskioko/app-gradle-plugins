@@ -76,10 +76,16 @@ public class PresenterCodegenAnnotationRule :
     RuleAutocorrectApproveHandler {
     private var unroutedPresenters: Set<String> = UNROUTED_PRESENTERS_PROPERTY.defaultValue
 
+    /**
+     * Reads this rule's settings from `.editorconfig` before the first file is visited.
+     */
     override fun beforeFirstNode(editorConfig: EditorConfig) {
         unroutedPresenters = editorConfig[UNROUTED_PRESENTERS_PROPERTY].mapTo(mutableSetOf()) { it.lowercase() }
     }
 
+    /**
+     * Reports every violation of this rule found under the given node.
+     */
     override fun beforeVisitChildNodes(
         node: ASTNode,
         emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision,

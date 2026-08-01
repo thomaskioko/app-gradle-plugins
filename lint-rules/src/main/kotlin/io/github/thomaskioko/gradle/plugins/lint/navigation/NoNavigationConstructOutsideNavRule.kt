@@ -64,10 +64,16 @@ public class NoNavigationConstructOutsideNavRule :
     RuleAutocorrectApproveHandler {
     private var navigationModulePaths: Set<String> = NAVIGATION_MODULE_PATHS_PROPERTY.defaultValue
 
+    /**
+     * Reads this rule's settings from `.editorconfig` before the first file is visited.
+     */
     override fun beforeFirstNode(editorConfig: EditorConfig) {
         navigationModulePaths = editorConfig[NAVIGATION_MODULE_PATHS_PROPERTY]
     }
 
+    /**
+     * Reports every violation of this rule found under the given node.
+     */
     override fun beforeVisitChildNodes(
         node: ASTNode,
         emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision,

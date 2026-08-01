@@ -40,7 +40,7 @@ internal fun contributesTo(scope: ClassName): AnnotationSpec =
 
 /**
  * Builds the `@BindingContainer` marker annotation that the UI binding objects carry. Used only
- * by [UiBindingGenerator]; the destination binding generators use `interface + companion` and do
+ * by [io.github.thomaskioko.codegen.processor.codegen.UiBindingGenerator]; the destination binding generators use `interface + companion` and do
  * not need this annotation.
  */
 internal fun bindingContainer(): AnnotationSpec =

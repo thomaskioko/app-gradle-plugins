@@ -23,7 +23,7 @@ import org.gradle.api.Project
 /**
  * Applies Spotless with the project's ktlint configuration.
  *
- * Applied automatically by [BasePlugin], so consumers do not apply this plugin directly. The
+ * Applied automatically by [io.github.thomaskioko.gradle.plugins.BasePlugin], so consumers do not apply this plugin directly. The
  * plugin applies `com.diffplug.spotless`, configures Kotlin (`src/**/*.kt`), Kotlin Gradle
  * scripts (`*.kts`), and XML targets, and reads any custom ktlint rule sets from the
  * [CUSTOM_RULE_SETS_KEY] extra (typically populated by [LintPlugin]). The DSL configuration is
@@ -34,6 +34,10 @@ import org.gradle.api.Project
  * and adds noise to the build graph.
  */
 public class SpotlessPlugin : Plugin<Project> {
+    /**
+     * Applies Spotless and configures its formats once the project is evaluated, so a plugin
+     * applied later can still register its rule sets first.
+     */
     override fun apply(project: Project): Unit = with(project) {
         pluginManager.apply("com.diffplug.spotless")
 
@@ -102,6 +106,9 @@ public class SpotlessPlugin : Plugin<Project> {
         }
     }
 
+    /**
+     * Keys this plugin reads from the project's extra properties.
+     */
     public companion object {
         /**
          * Key under `extra` where consumers register Maven coordinates of custom ktlint rule
