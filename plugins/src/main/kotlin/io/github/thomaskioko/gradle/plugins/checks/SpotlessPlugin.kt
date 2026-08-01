@@ -43,8 +43,8 @@ public class SpotlessPlugin : Plugin<Project> {
 
         // Skip Spotless entirely for modules that don't need it
         if (shouldSkipSpotlessForProject(project)) {
-            afterEvaluate {
-                tasks.matching { it.name.startsWith("spotless") }.configureEach {
+            tasks.configureEach {
+                if (it.name.startsWith("spotless")) {
                     it.enabled = false
                 }
             }
