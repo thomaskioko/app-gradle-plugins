@@ -47,7 +47,7 @@ import io.github.thomaskioko.codegen.processor.parser.parseUiBindingData
  * composable functions in Android UI modules: `@ScreenUi`, `@SheetUi`, `@TabUi`, and `@AppRootUi`.
  * Each match goes through a parser to produce a typed intermediate representation, then through a
  * generator to produce one or more [FileSpec] outputs that KSP writes to disk. Full pipeline and
- * rationale behind each step live in `codegen/docs/architecture/pipeline.md`.
+ * rationale behind each step live in [the pipeline notes](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/pipeline/).
  *
  * The processor never throws on bad input. Every validation failure is reported through
  * [KSPLogger.error] pinned to the offending symbol, and KSP turns that into a compile error at

@@ -653,4 +653,4 @@ Earlier releases of this module shipped `@NavScreen`, `@TabScreen`, and `@NavShe
 - `@TabScreen` becomes `@NavDestination(kind = DestinationKind.TAB_ROOT)`.
 - `@NavSheet` becomes `@NavDestination(kind = DestinationKind.OVERLAY)`.
 
-See the [CHANGELOG](../../CHANGELOG.md) for the version that introduced the change.
+See the [CHANGELOG](../changelog.md) for the version that introduced the change.

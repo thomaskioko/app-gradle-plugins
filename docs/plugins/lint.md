@@ -26,5 +26,6 @@ hand, and naming a test after the behaviour it checks. Each one reads its exempt
 `.editorconfig` where it has any, so a module that legitimately breaks a rule says so in the file
 it applies to.
 
-Every rule is listed in the
-[lint rules API reference](../api/lint-rules/index.html).
+Every rule, and the `.editorconfig` property that exempts a module from it, is on the
+[lint rules](../lint-rules.md) page. The classes themselves are in the
+[API reference](../api/lint-rules/index.html).

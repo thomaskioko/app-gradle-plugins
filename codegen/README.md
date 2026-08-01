@@ -45,18 +45,18 @@ The consumer project must already use Metro. Each tier adds its own requirements
 
 The Tv Maniac project is the reference implementation for both tiers. The full runtime contract,
 including the exact consumer types the generated code references, lives in
-[architecture/consumer-contract.md](docs/architecture/consumer-contract.md).
+[the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/consumer-contract/).
 
 ## Docs
 
-- [Get started (navigation)](docs/get-started.md): what the navigation codegen does and how to wire
+- [Get started (navigation)](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/): what the navigation codegen does and how to wire
   it into a consumer project.
-- [Feature flag codegen](docs/featureflag.md): the `@FeatureFlag` annotation, generated output, DSL
+- [Feature flag codegen](https://thomaskioko.github.io/app-gradle-plugins/codegen/featureflag/): the `@FeatureFlag` annotation, generated output, DSL
   call, and validation rules.
-- [Annotation reference](docs/annotations.md): every navigation annotation parameter and the
+- [Annotation reference](https://thomaskioko.github.io/app-gradle-plugins/codegen/annotations/): every navigation annotation parameter and the
   validation rules the processor enforces.
-- [Examples](docs/examples.md): input and generated output for every navigation variant.
-- [Architecture](docs/architecture/index.md): how the processors are built, for contributors.
+- [Examples](https://thomaskioko.github.io/app-gradle-plugins/codegen/examples/): input and generated output for every navigation variant.
+- [Architecture](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/): how the processors are built, for contributors.
 
 ## References
 

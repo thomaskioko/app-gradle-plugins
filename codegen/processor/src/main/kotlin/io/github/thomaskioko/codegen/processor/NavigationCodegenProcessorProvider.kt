@@ -27,7 +27,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
  * build.
  *
  * Consumer wiring lives in the `useCodegen()` extension on the `scaffold {}` Gradle DSL. See
- * `codegen/docs/get-started.md`. Consumers do not reference this class directly.
+ * [the code generation guide](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/). Consumers do not reference this class directly.
  */
 public class NavigationCodegenProcessorProvider : SymbolProcessorProvider {
     /**
