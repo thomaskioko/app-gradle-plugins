@@ -15,6 +15,7 @@
  */
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
@@ -72,6 +73,12 @@ subprojects {
 
     pluginManager.apply("com.autonomousapps.dependency-analysis")
     pluginManager.apply("com.diffplug.spotless")
+
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+            allWarningsAsErrors.set(true)
+        }
+    }
 
     val moduleDir = projectDir
     val moduleName = name
