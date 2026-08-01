@@ -149,7 +149,8 @@ public abstract class BuildConfigExtension(private val project: Project) {
      *   set as an environment variable.
      */
     public fun buildConfigField(name: String) {
-        val value = localProperties.getProperty(name) ?: System.getenv(name)
+        val value = localProperties.getProperty(name)
+            ?: project.providers.environmentVariable(name).orNull
         requireNotNull(value) { "$name not found in local.properties or environment variables" }
         stringFields.put(name, value)
     }
