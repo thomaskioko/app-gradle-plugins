@@ -44,29 +44,21 @@ internal fun Project.disableAndroidTasks(names: List<String>, variantToKeep: Str
 }
 
 /**
- * Core task-disabling mechanism that safely disables tasks by name.
+ * Disables tasks by name, prefixing each disabled task's description with `DISABLED:` so the reason
+ * is visible in `./gradlew tasks`.
+ *
+ * Tolerates names that match no task, since it filters inside `tasks.configureEach` rather than
+ * resolving through `tasks.named`.
  *
  * @param names List of exact task names to disable
- *
- * Safety features:
- * - Skips during IDE sync to prevent build tool conflicts (AGP 8.3+ requirement)
- * - Preserves task graph integrity using `onlyIf` predicate
- * - Tolerates missing tasks via `tasks.configureEach` filtering rather than `tasks.named`
  */
 internal fun Project.disableTasks(names: List<String>) {
     if (names.isEmpty()) return
-
-    // Skip during IDE sync to prevent configuration issues with AGP 8.3+
-    val isIdeSyncing = providers.systemProperty("idea.sync.active")
-        .map { it.equals("true", ignoreCase = true) }
-        .orElse(false)
 
     val taskNamesToDisable = names.toSet()
 
     tasks.configureEach { task ->
         if (task.name in taskNamesToDisable) {
-            // Defer IDE sync check to execution time for configuration cache compatibility
-            task.onlyIf { !isIdeSyncing.get() }
             task.enabled = false
             task.description = "DISABLED: ${task.description ?: "No description"}"
         }

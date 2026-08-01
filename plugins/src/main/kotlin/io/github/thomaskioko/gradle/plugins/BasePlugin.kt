@@ -20,7 +20,7 @@ import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.getVersionOrNull
 import io.github.thomaskioko.gradle.plugins.utils.java
-import io.github.thomaskioko.gradle.plugins.utils.javaTarget
+import io.github.thomaskioko.gradle.plugins.utils.javaTargetVersion
 import io.github.thomaskioko.gradle.plugins.utils.javaToolchainVersion
 import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
@@ -178,7 +178,7 @@ public abstract class BasePlugin : Plugin<Project> {
                     )
 
                     if (!isAndroid) {
-                        freeCompilerArgs.add("-Xjdk-release=${project.javaTarget}")
+                        freeCompilerArgs.add(project.javaTargetVersion.map { "-Xjdk-release=${it.majorVersion}" })
                     }
                 }
             }
