@@ -72,6 +72,9 @@ public class NoManualNavBindingRule :
         about = RULE_ABOUT,
     ),
     RuleAutocorrectApproveHandler {
+    /**
+     * Reports every violation of this rule found under the given node.
+     */
     override fun beforeVisitChildNodes(
         node: ASTNode,
         emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision,

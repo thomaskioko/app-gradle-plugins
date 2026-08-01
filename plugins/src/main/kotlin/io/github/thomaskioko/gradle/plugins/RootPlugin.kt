@@ -55,6 +55,11 @@ public abstract class RootPlugin : Plugin<Project> {
     @Suppress("UnstableApiUsage")
     internal abstract val buildFeatures: BuildFeatures
 
+    /**
+     * Configures the root project and registers the aggregate tasks the module plugins attach to.
+     *
+     * @throws IllegalArgumentException if applied to anything other than the root project.
+     */
     override fun apply(target: Project): Unit = with(target) {
         require(project == project.rootProject) {
             "Root plugin should only be applied on the root project!"

@@ -39,6 +39,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * ```
  */
 public class ResourceGeneratorPlugin : Plugin<Project> {
+    /**
+     * Registers `generateMokoStrings` and adds its output to `commonMain`.
+     */
     override fun apply(target: Project) {
         val generateStringsTask = target.tasks.register("generateMokoStrings", MokoResourceGeneratorTask::class.java) { task ->
             task.group = "build"

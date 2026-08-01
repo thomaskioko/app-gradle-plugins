@@ -68,6 +68,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
  * ```
  */
 public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
+    /**
+     * Applies the Kotlin Multiplatform plugin and leaves the target list to the module, which
+     * declares it through `scaffold {}`.
+     */
     override fun apply(target: Project) {
         target.plugins.apply("org.jetbrains.kotlin.multiplatform")
         target.plugins.apply("com.android.kotlin.multiplatform.library")

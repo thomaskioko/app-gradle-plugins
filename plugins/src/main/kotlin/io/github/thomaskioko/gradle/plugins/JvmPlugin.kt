@@ -48,6 +48,9 @@ import org.gradle.api.tasks.testing.Test
  * ```
  */
 public abstract class JvmPlugin : Plugin<Project> {
+    /**
+     * Applies the Kotlin JVM plugin and adds the `jvm {}` block.
+     */
     override fun apply(target: Project) {
         target.plugins.apply("org.jetbrains.kotlin.jvm")
         target.plugins.apply(BasePlugin::class.java)

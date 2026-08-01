@@ -66,6 +66,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * ```
  */
 public abstract class BasePlugin : Plugin<Project> {
+    /**
+     * Names of the aggregate test tasks the root project registers and the module plugins
+     * attach their own test tasks to.
+     */
     public companion object {
         /**
          * Name of the aggregate task that runs every JVM and Linux-runnable test on the host.
@@ -88,6 +92,10 @@ public abstract class BasePlugin : Plugin<Project> {
         internal const val ROOT_PLUGIN_ID: String = "io.github.thomaskioko.gradle.plugins.root"
     }
 
+    /**
+     * Creates `scaffold {}` and applies the formatting, dependency analysis and compiler settings
+     * every module in the suite shares.
+     */
     override fun apply(target: Project) {
         requireRootPluginApplied(target)
 

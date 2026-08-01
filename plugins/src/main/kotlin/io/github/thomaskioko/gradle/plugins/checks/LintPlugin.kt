@@ -41,6 +41,12 @@ import org.gradle.api.Project
  * ```
  */
 public class LintPlugin : Plugin<Project> {
+    /**
+     * Works out the matching `lint-rules` coordinate from this plugin's own version and hands it
+     * to Spotless as a custom rule set.
+     *
+     * @throws org.gradle.api.GradleException if the plugin jar carries no `Implementation-Version`.
+     */
     override fun apply(target: Project) {
         val pluginVersion = readPluginVersion()
             ?: throw GradleException(

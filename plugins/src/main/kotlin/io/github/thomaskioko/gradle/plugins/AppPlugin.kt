@@ -57,6 +57,10 @@ import org.gradle.api.Project
  * ```
  */
 public abstract class AppPlugin : Plugin<Project> {
+    /**
+     * Applies the Android application plugin, adds the `app {}` block and registers the
+     * `bumpVersion` and `release` tasks.
+     */
     override fun apply(target: Project) {
         target.plugins.apply("com.android.application")
         target.plugins.apply(AndroidPlugin::class.java)

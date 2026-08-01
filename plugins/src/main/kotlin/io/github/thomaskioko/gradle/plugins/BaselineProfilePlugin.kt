@@ -47,6 +47,10 @@ import org.gradle.api.Project
  * ```
  */
 public class BaselineProfilePlugin : Plugin<Project> {
+    /**
+     * Applies the Android test plugin, points the module at the application it profiles and adds
+     * the `benchmark {}` block.
+     */
     override fun apply(target: Project) {
         target.plugins.apply("com.android.test")
         target.plugins.apply(BasePlugin::class.java)

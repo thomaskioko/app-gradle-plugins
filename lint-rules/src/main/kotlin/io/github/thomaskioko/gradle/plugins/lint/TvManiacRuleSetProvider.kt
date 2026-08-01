@@ -61,6 +61,9 @@ import io.github.thomaskioko.gradle.plugins.lint.tests.TestNameFormatRule
  */
 @Suppress("unused")
 public class TvManiacRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET_ID)) {
+    /**
+     * Returns every rule in this set. ktlint calls this once when it loads the provider.
+     */
     override fun getRuleProviders(): Set<RuleProvider> = setOf(
         RuleProvider { NoMutatingRouterImportRule() },
         RuleProvider { NoNavigationConstructOutsideNavRule() },
