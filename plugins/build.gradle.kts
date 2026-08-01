@@ -74,7 +74,7 @@ dokka {
     dokkaPublications.html {
         outputDirectory.set(rootProject.file("../docs/api/plugins"))
         suppressInheritedMembers.set(true)
-        failOnWarning.set(false)
+        failOnWarning.set(true)
     }
 }
 

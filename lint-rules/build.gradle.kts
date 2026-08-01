@@ -64,7 +64,7 @@ dokka {
     dokkaPublications.html {
         outputDirectory.set(rootProject.file("../docs/api/lint-rules"))
         suppressInheritedMembers.set(true)
-        failOnWarning.set(false)
+        failOnWarning.set(true)
     }
 }
 

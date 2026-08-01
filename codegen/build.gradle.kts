@@ -62,7 +62,7 @@ dokka {
     dokkaPublications.html {
         outputDirectory.set(rootProject.file("../docs/api/codegen"))
         suppressInheritedMembers.set(true)
-        failOnWarning.set(false)
+        failOnWarning.set(true)
     }
 }
 
@@ -95,6 +95,10 @@ subprojects {
                     remoteUrl("${property("POM_SCM_URL")}/blob/main/codegen/$moduleName")
                     remoteLineSuffix.set("#L")
                 }
+            }
+
+            dokkaPublications.configureEach {
+                failOnWarning.set(true)
             }
         }
     }
