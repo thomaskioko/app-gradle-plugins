@@ -1,0 +1,57 @@
+public final class io/github/thomaskioko/gradle/plugins/lint/TvManiacRuleSetProvider : com/pinterest/ktlint/cli/ruleset/core/api/RuleSetProviderV3 {
+	public fun <init> ()V
+	public fun getRuleProviders ()Ljava/util/Set;
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/codegen/NoManualNavBindingRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/codegen/PresenterCodegenAnnotationRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeFirstNode (Lcom/pinterest/ktlint/rule/engine/core/api/editorconfig/EditorConfig;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/metro/MetroRedundantInjectRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/navigation/NoCustomNavigatorInterfaceRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/navigation/NoMutatingRouterImportRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeFirstNode (Lcom/pinterest/ktlint/rule/engine/core/api/editorconfig/EditorConfig;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/navigation/NoNavigationConstructOutsideNavRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeFirstNode (Lcom/pinterest/ktlint/rule/engine/core/api/editorconfig/EditorConfig;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/preview/NoStyleWrapperInPreviewRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeFirstNode (Lcom/pinterest/ktlint/rule/engine/core/api/editorconfig/EditorConfig;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/lint/tests/TestNameFormatRule : com/pinterest/ktlint/rule/engine/core/api/Rule, com/pinterest/ktlint/rule/engine/core/api/RuleAutocorrectApproveHandler {
+	public fun <init> ()V
+	public fun afterVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+	public fun beforeVisitChildNodes (Lorg/jetbrains/kotlin/com/intellij/lang/ASTNode;Lkotlin/jvm/functions/Function3;)V
+}
+

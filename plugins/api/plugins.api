@@ -1,0 +1,167 @@
+public abstract class io/github/thomaskioko/gradle/plugins/AndroidPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/AppPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/BasePlugin : org/gradle/api/Plugin {
+	public static final field ALL_TEST Ljava/lang/String;
+	public static final field Companion Lio/github/thomaskioko/gradle/plugins/BasePlugin$Companion;
+	public static final field IOS_TEST Ljava/lang/String;
+	public static final field LINUX_TEST Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/BasePlugin$Companion {
+}
+
+public final class io/github/thomaskioko/gradle/plugins/BaselineProfilePlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/BuildConfigGeneratorPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/JvmPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/KotlinMultiplatformPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/ResourceGeneratorPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/RootPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/checks/LintPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/checks/SpotlessPlugin : org/gradle/api/Plugin {
+	public static final field CUSTOM_RULE_SETS_KEY Ljava/lang/String;
+	public static final field Companion Lio/github/thomaskioko/gradle/plugins/checks/SpotlessPlugin$Companion;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class io/github/thomaskioko/gradle/plugins/checks/SpotlessPlugin$Companion {
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/AndroidExtension {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun consumerProguardFiles ([Ljava/lang/String;)V
+	public final fun enableAndroidResources ()V
+	public final fun enableAndroidTests (Ljava/lang/String;Z)V
+	public static synthetic fun enableAndroidTests$default (Lio/github/thomaskioko/gradle/plugins/extensions/AndroidExtension;Ljava/lang/String;ZILjava/lang/Object;)V
+	public final fun enableBuildConfig ()V
+	protected final fun getProject ()Lorg/gradle/api/Project;
+	public final fun libraryConfiguration (Lkotlin/jvm/functions/Function1;)V
+	public final fun manifestPlaceholders (Ljava/util/Map;)V
+	public final fun minSdkVersion (Ljava/lang/Integer;)V
+	public final fun useBaselineProfile (Ljava/lang/Object;)V
+	public static synthetic fun useBaselineProfile$default (Lio/github/thomaskioko/gradle/plugins/extensions/AndroidExtension;Ljava/lang/Object;ILjava/lang/Object;)V
+	public final fun useCompose ()V
+	public final fun useComposeTests ()V
+	public final fun useManagedDevices (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
+	public static synthetic fun useManagedDevices$default (Lio/github/thomaskioko/gradle/plugins/extensions/AndroidExtension;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)V
+	public final fun useRoborazzi ()V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/AppExtension {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun applicationId (Ljava/lang/String;)V
+	public final fun applicationIdSuffix (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun minify ([Ljava/io/File;)V
+	public final fun useFirebase ()V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/BaseExtension : org/gradle/api/plugins/ExtensionAware {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun addAndroidTarget ()V
+	public final fun addAndroidTarget (Z)V
+	public final fun addAndroidTarget (ZZ)V
+	public final fun addAndroidTarget (ZZZ)V
+	public final fun addAndroidTarget (ZZZLkotlin/jvm/functions/Function1;)V
+	public final fun addAndroidTarget (ZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun addAndroidTarget$default (Lio/github/thomaskioko/gradle/plugins/extensions/BaseExtension;ZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun addIosTargets ()V
+	public final fun addIosTargets (Z)V
+	public static synthetic fun addIosTargets$default (Lio/github/thomaskioko/gradle/plugins/extensions/BaseExtension;ZILjava/lang/Object;)V
+	public final fun addIosTargetsWithXcFramework (Ljava/lang/String;)V
+	public final fun addIosTargetsWithXcFramework (Ljava/lang/String;Z)V
+	public final fun addIosTargetsWithXcFramework (Ljava/lang/String;ZLkotlin/jvm/functions/Function2;)V
+	public static synthetic fun addIosTargetsWithXcFramework$default (Lio/github/thomaskioko/gradle/plugins/extensions/BaseExtension;Ljava/lang/String;ZLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public final fun addJvmTarget ()V
+	public final fun android (Lkotlin/jvm/functions/Function1;)V
+	public final fun configureNativeTargets ()V
+	public final fun configureNativeTargets (Ljava/lang/String;)V
+	public final fun configureNativeTargets (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun configureNativeTargets$default (Lio/github/thomaskioko/gradle/plugins/extensions/BaseExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ignoreAll ([Ljava/lang/String;)V
+	public final fun ignoreUnusedDependencies ([Ljava/lang/String;)V
+	public final fun optIn ([Ljava/lang/String;)V
+	public final fun useCodegen ()V
+	public final fun useDependencyGuard ([Ljava/lang/String;)V
+	public final fun useFeatureFlagCodegen ()V
+	public final fun useKotlinInject ()V
+	public final fun useMetro ()V
+	public final fun useSerialization ()V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/BuildConfigExtension {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun booleanField (Ljava/lang/String;Z)V
+	public final fun buildConfigField (Ljava/lang/String;)V
+	public abstract fun getBooleanFields ()Lorg/gradle/api/provider/MapProperty;
+	public abstract fun getIntFields ()Lorg/gradle/api/provider/MapProperty;
+	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getStringFields ()Lorg/gradle/api/provider/MapProperty;
+	public final fun intField (Ljava/lang/String;I)V
+	public final fun stringField (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/JvmExtension {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun useAndroidLint ()V
+}
+
+public abstract class io/github/thomaskioko/gradle/plugins/extensions/ModuleGraphExtension {
+	public fun <init> ()V
+	public abstract fun getIgnoredProjects ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getIgnoredProjectsRegex ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSupportedConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun ignore ([Ljava/lang/String;)V
+}
+
+public abstract interface annotation class io/github/thomaskioko/gradle/plugins/extensions/ScaffoldDsl : java/lang/annotation/Annotation {
+}
+
