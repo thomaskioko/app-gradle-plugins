@@ -34,8 +34,10 @@ presenter, and a ktlint rule set for the conventions a type cannot enforce.
   needs before the first module builds. Each step was checked against an empty project.
 - [Plugins](https://thomaskioko.github.io/app-gradle-plugins/plugins/) has a page for each of the
   eleven plugins and every option in `scaffold {}`.
-- [Code generation](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/) covers
-  the navigation and feature flag annotations.
+- [Navigation](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/) covers the
+  annotations that generate a screen's graph and bindings.
+- [Feature flags](https://thomaskioko.github.io/app-gradle-plugins/feature-flags/) covers declaring
+  a flag once and having its qualifier and bindings written for you.
 - [Lint rules](https://thomaskioko.github.io/app-gradle-plugins/lint-rules/) lists every rule and
   how to exempt a module from one.
 - [API reference](https://thomaskioko.github.io/app-gradle-plugins/api/plugins/) is generated from

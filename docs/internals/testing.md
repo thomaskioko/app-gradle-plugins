@@ -48,7 +48,7 @@ the stubs and `External.kt` disagree, end to end compilation fails. Updating one
 
 Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, actual)`. Goldens live under
 `codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. Ten navigation-codegen variants
-(the feature-flag processor keeps its own `featureflag/` golden, documented in [featureflag.md](../featureflag.md)):
+(the feature-flag processor keeps its own `featureflag/` golden, documented in [featureflag.md](../feature-flags.md)):
 
 - `simple/` for `@NavDestination(kind = SCREEN)` with plain `@Inject`.
 - `parameterized/` for `@NavDestination(kind = SCREEN)` with `@AssistedInject`.

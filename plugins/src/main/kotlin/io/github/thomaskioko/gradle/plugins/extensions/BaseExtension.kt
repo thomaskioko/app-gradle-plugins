@@ -223,7 +223,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      *
      * The codegen reads `@NavDestination`, `@ScreenUi`, and `@SheetUi` annotations and produces
      * Metro `@GraphExtension` graphs plus binding files. See
-     * [the code generation guide](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/) for
+     * [the code generation guide](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/) for
      * the full feature list.
      *
      * ```kotlin
@@ -244,7 +244,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      * `<QualifierBaseName>Binding.kt` per qualifier into the qualifier's package. Each generated
      * file contains a `@ContributesTo(AppScope::class)` interface with two `@Provides` methods that
      * wire the flag through the consumer's `FeatureFlagFactory` and into the
-     * `Set<FeatureFlag<Boolean>>` multibinding. See [the feature flag guide](https://thomaskioko.github.io/app-gradle-plugins/codegen/featureflag/) for the full
+     * `Set<FeatureFlag<Boolean>>` multibinding. See [the feature flag guide](https://thomaskioko.github.io/app-gradle-plugins/feature-flags/) for the full
      * contract.
      *
      * Independent from [useCodegen]; modules that consume both navigation and feature flag codegen

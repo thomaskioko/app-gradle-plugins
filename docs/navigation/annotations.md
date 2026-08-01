@@ -17,7 +17,7 @@ Seven annotations:
   activity invokes the host with one call (`graph.AppRootContent()`) instead of forwarding each dependency by hand.
 
 This reference walks through each annotation: what it marks, what the processor emits, the validation rules, and the common pitfalls. For the vocabulary used throughout
-(graph extension, multibinding, binding, slot, scope), see the glossary in [architecture/index.md](architecture/index.md#glossary).
+(graph extension, multibinding, binding, slot, scope), see the glossary in [architecture/index.md](../internals/index.md#glossary).
 
 
 ## `@NavDestination`
@@ -77,7 +77,7 @@ public class ShowsPresenter(
 For a presenter `com.example.feature.presenter.FooPresenter` annotated `@NavDestination(route = FooRoute::class, parentScope = ActivityScope::class, kind = SCREEN)`:
 
 - `FooScreenGraph.kt` is a Metro `@GraphExtension(FooRoute::class)` interface scoped to the route. The route class itself is the scope marker, so no separate scope class
-  is generated. The reasoning lives in [architecture/generators.md](architecture/generators.md#route-class-as-graph-scope).
+  is generated. The reasoning lives in [architecture/generators.md](../internals/generators.md#route-class-as-graph-scope).
 - `FooNavDestinationBinding.kt` is a Metro `@ContributesTo(parentScope)` interface with a companion that contributes:
     - `@IntoSet NavDestination<*>`: the matching `NavDestination.Screen` (or `Overlay`, or `TabRoot`) instance.
     - `@IntoSet NavRouteBinding<*>` for `SCREEN` or `OVERLAY`, or `@IntoSet NavRootBinding<*>` for `TAB_ROOT`.
@@ -168,7 +168,7 @@ file into `com.example.feature.ui.di`:
   tests `(it as? ScreenDestination<*>)?.presenter is FooPresenter`. The `content` lambda casts the child and invokes `FooScreen(presenter = ..., modifier = modifier)`.
 
 The `@BindingContainer object` structure is deliberate. The detailed reasoning lives in
-[architecture/generators.md](architecture/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings); the short version is that
+[architecture/generators.md](../internals/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings); the short version is that
 an `interface + companion object` form would silently produce an empty multibinding inside an Android only `ui` module without the right Metro flag.
 
 ### Composable signature requirement
@@ -641,7 +641,7 @@ top-level `@Composable` extension and so references `androidx.compose.runtime.Co
 hardcoded constants in `util/External.kt` and have matching test stubs.
 
 The processor is opinionated about these names. Consumers other than Tv Maniac would need to adjust `util/External.kt` to match their navigation primitives. See
-[architecture/consumer-contract.md](architecture/consumer-contract.md) for why these are constants and what a fork would change.
+[architecture/consumer-contract.md](../internals/consumer-contract.md) for why these are constants and what a fork would change.
 
 
 ## Migration from earlier versions

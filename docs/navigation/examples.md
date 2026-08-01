@@ -7,8 +7,8 @@ produces in a real build.
 Each section shows the annotated declaration the consumer writes, then every Kotlin file the
 processor writes to disk for that input. Generated files land in a `<package>.di` sub-package
 next to the annotated symbol. For how each file is built from the input, see
-[architecture/generators.md](architecture/generators.md) and
-[architecture/parsers.md](architecture/parsers.md).
+[architecture/generators.md](../internals/generators.md) and
+[architecture/parsers.md](../internals/parsers.md).
 
 ## Contents
 
@@ -185,7 +185,7 @@ consumer's navigator to route the destination into the overlay slot instead of p
 `NavDestination.Overlay` instead of a `NavDestination.Screen`.
 
 `@NavDestination(kind = OVERLAY)` works with both plain `@Inject` and `@AssistedInject` presenters; the example below uses the parameterized form. The full runtime flow
-lives in [architecture/consumer-contract.md](architecture/consumer-contract.md#runtime-flow).
+lives in [architecture/consumer-contract.md](../internals/consumer-contract.md#runtime-flow).
 
 ### Input
 
@@ -407,7 +407,7 @@ public object DebugMenuScreenUiBinding {
 The `@BindingContainer object` structure rather than `interface + companion object` is deliberate. The Android only `ui` source set does not pick up `@Provides @IntoSet`
 declarations from a companion object the way the shared Kotlin Multiplatform source set does, so emitting the interface form would silently produce an empty multibinding
 at runtime. The full reasoning lives in
-[architecture/generators.md](architecture/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
+[architecture/generators.md](../internals/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
 ### Function signature requirement
 
