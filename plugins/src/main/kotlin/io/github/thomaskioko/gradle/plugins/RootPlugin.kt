@@ -153,7 +153,6 @@ public abstract class RootPlugin : Plugin<Project> {
 
                     project.onUsedTransitiveDependencies {
                         it.severity("warn")
-                        it.exclude(*AnalysisExclusions.usedTransitive.toTypedArray())
                     }
 
                     project.onCompileOnly {
