@@ -44,43 +44,20 @@ internal abstract class BumpVersionTask : DefaultTask() {
         require(file.exists()) { "version.txt not found at ${file.path}" }
 
         val content = file.readText()
-        val versionMatch = Versioning.VERSION_REGEX.find(content)
-            ?: error("VERSION_NUMBER not found in ${file.path}")
-        val currentVersion = versionMatch.groupValues[1]
-
-        val buildMatch = Versioning.BUILD_REGEX.find(content)
-            ?: error("BUILD_NUMBER not found in ${file.path}")
-        val currentBuild = buildMatch.groupValues[1].toIntOrNull()
-            ?: error("BUILD_NUMBER is not a valid integer in ${file.path}")
-
+        val currentVersion = Versioning.parseVersion(content, file.path)
+        val currentBuild = Versioning.parseBuildNumber(content, file.path)
         val type = bumpType.get()
 
         if (type == "beta") {
-            val baseBuild = Versioning.compute(currentVersion)
-            require(currentBuild >= baseBuild) {
-                "BUILD_NUMBER ($currentBuild) is less than the base for version $currentVersion ($baseBuild). " +
-                    "Run 'bumpVersion -Ptype=patch' to reset, or fix version.txt manually."
-            }
-            val newBuild = currentBuild + 1
-            val maxBuild = baseBuild + 999
-            require(newBuild <= maxBuild) {
-                "Beta number exceeded 999 for version $currentVersion. Bump patch/minor/major to continue."
-            }
+            val newBuild = Versioning.nextBeta(currentVersion, currentBuild)
+            Versioning.writeVersionFile(file, content, currentVersion, newBuild)
 
-            val updated = content
-                .replace(Versioning.BUILD_REGEX, "BUILD_NUMBER = $newBuild")
-            file.writeText(updated)
-
-            val betaIteration = newBuild - baseBuild
+            val betaIteration = newBuild - Versioning.compute(currentVersion)
             logger.lifecycle("$currentVersion beta $betaIteration (BUILD_NUMBER = $currentBuild -> $newBuild)")
         } else {
             val newVersion = Versioning.bump(currentVersion, type)
             val newBuild = Versioning.compute(newVersion)
-
-            val updated = content
-                .replace(Versioning.VERSION_REGEX, "VERSION_NUMBER = $newVersion")
-                .replace(Versioning.BUILD_REGEX, "BUILD_NUMBER = $newBuild")
-            file.writeText(updated)
+            Versioning.writeVersionFile(file, content, newVersion, newBuild)
 
             logger.lifecycle("$currentVersion -> $newVersion (BUILD_NUMBER = $newBuild)")
         }

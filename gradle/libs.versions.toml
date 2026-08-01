@@ -1,5 +1,4 @@
 [versions]
-mordant = "3.0.2"
 java-target = "21"
 java-toolchain = "25"
 junit = "4.13.2"
@@ -23,7 +22,6 @@ publish = "0.37.0"
 spotless = "8.9.0"
 
 [libraries]
-mordant-core = { module = "com.github.ajalt.mordant:mordant-core", version.ref = "mordant" }
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
 spotless-gradle-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }

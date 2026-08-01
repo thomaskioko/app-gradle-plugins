@@ -32,7 +32,9 @@ import io.github.thomaskioko.gradle.plugins.utils.kotlin
 import io.github.thomaskioko.gradle.plugins.utils.kotlinMultiplatform
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 import java.net.URI
@@ -478,6 +480,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      *   target's [Framework] so additional `export(...)` or compiler options can be added.
      */
     @JvmOverloads
+    @OptIn(KotlinNativeCacheApi::class)
     public fun addIosTargetsWithXcFramework(
         frameworkName: String,
         includeX64: Boolean = false,
@@ -493,7 +496,8 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
                     baseName = frameworkName
                     isStatic = true
 
-                    disableNativeCacheForCurrentKotlin(
+                    disableNativeCache(
+                        version = DisableCacheInKotlinVersion.`2_4_10`,
                         reason = "Kotlin/Native cache bug causes double runtime injection when linking multiple frameworks. See KT-42254.",
                         issueUrl = URI("https://youtrack.jetbrains.com/issue/KT-42254"),
                     )

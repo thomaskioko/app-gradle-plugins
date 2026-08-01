@@ -35,7 +35,7 @@ import com.squareup.kotlinpoet.ClassName
  * @see ScreenData for stack screens and modal overlays.
  * @see TabData for top level tab roots.
  */
-internal sealed interface NavData {
+internal sealed interface NavData : GraphData {
     /** The presenter class the annotation was attached to. */
     val presenterClass: ClassName
 
@@ -45,30 +45,40 @@ internal sealed interface NavData {
     /** Package the generated files land in: the presenter's package plus a `.di` suffix. */
     val packageName: String
 
-    /** Parent dependency injection scope the binding contributes to (typically `ActivityScope`). */
+    /** Class name of the generated binding (`<BaseName>NavDestinationBinding` or `<BaseName>TabDestinationBinding`). */
+    val bindingClassName: ClassName
+
+    /** Convenience: the nested `Factory` interface on the generated graph. */
+    val graphFactoryClassName: ClassName
+        get() = graphClassName.nestedClass("Factory")
+}
+
+/**
+ * Everything [io.github.thomaskioko.codegen.processor.codegen.ScreenGraphGenerator] needs to emit a
+ * `@GraphExtension` interface and its nested `Factory`.
+ *
+ * Screens, tab roots, and child presenters all produce the same graph structure, so they share one
+ * generator. [NavData] adds the names the binding generators need on top; [ChildPresenterData]
+ * carries nothing further, because a child presenter has no binding.
+ */
+internal interface GraphData {
+    /** Parent dependency injection scope the generated factory contributes to (typically `ActivityScope`). */
     val parentScope: ClassName
 
-    /** Scope of the generated `@GraphExtension`. Always the route class. */
+    /** Scope of the generated `@GraphExtension`. The route class for a destination, a marker class for a child. */
     val scope: ClassName
 
-    /** Class name of the generated graph interface (`<BaseName>ScreenGraph` or `<BaseName>TabGraph`). */
+    /** Class name of the generated graph interface (`<BaseName>ScreenGraph`, `<BaseName>TabGraph`, or `<BaseName>ChildGraph`). */
     val graphClassName: ClassName
 
     /** Function name on the generated graph factory (`create<BaseName>Graph` or `create<BaseName>TabGraph`). */
     val graphFactoryFunName: String
 
-    /** Class name of the generated binding (`<BaseName>NavDestinationBinding` or `<BaseName>TabDestinationBinding`). */
-    val bindingClassName: ClassName
-
-    /** Type of the property exposed on the graph: the assisted factory for parameterized screens, the presenter otherwise. */
+    /** Type of the property exposed on the graph: the assisted factory when parameterized, the presenter otherwise. */
     val graphPropertyType: ClassName
 
     /** Camel cased property name the graph exposes (`showDetailsFactory` or `showsPresenter`). */
     val graphPropertyName: String
-
-    /** Convenience: the nested `Factory` interface on the generated graph. */
-    val graphFactoryClassName: ClassName
-        get() = graphClassName.nestedClass("Factory")
 }
 
 /**

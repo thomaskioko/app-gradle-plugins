@@ -197,12 +197,9 @@ internal abstract class GraphDumpTask : DefaultTask() {
 
     private fun legend(): String = buildString {
         appendLine("graph TB")
-        listOf(
-            "application" to PluginType.Application,
-            "multiplatform" to PluginType.Multiplatform,
-            "android-library" to PluginType.AndroidLibrary,
-            "jvm-library" to PluginType.Jvm,
-        ).forEach { (name, type) -> appendLine("  $name[$name]:::${type.ref}") }
+        PluginType.entries
+            .filterNot { it == PluginType.Unknown }
+            .forEach { appendLine("  ${it.ref}[${it.ref}]:::${it.ref}") }
         appendLine()
         appendLine("  api[\"api dependency\"] --> implementation[\"implementation dependency\"]")
         appendLine()

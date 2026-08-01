@@ -84,9 +84,6 @@ internal fun Project.parseKeyValueFile(fileName: String): Map<String, String> {
         }
 }
 
-internal val Project.javaTarget: String
-    get() = getVersion("java-target")
-
 internal val Project.javaTargetProvider: Provider<String>
     get() = provider { getVersion("java-target") }
 

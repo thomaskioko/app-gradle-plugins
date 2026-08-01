@@ -30,7 +30,7 @@ Every architecture page draws from this single vocabulary. New terms introduced 
   route doubles as the graph extension's scope marker.
 - **slot**. A Decompose primitive that hosts a single child at a time, used for modal overlays. The host filters the active overlay destinations and renders one of them
   in the slot.
-- **router**. The internal `when` expression in the processor that picks the right code generator for each parsed annotation. Lives in `FileGenerator`.
+- **router**. The `when` expression in `processNavDestination` that picks the screen or the tab binding generator for a parsed `@NavDestination`.
 - **aggregating**. A KSP incremental compilation flag. `aggregating = false` tells KSP that the generated file depends only on its own source file, so editing one feature
   does not force reprocessing of siblings.
 - **Metro**. A compile time dependency injection framework by Zac Sweers. The processor emits Metro annotations (`@GraphExtension`, `@ContributesTo`, `@Provides`,
