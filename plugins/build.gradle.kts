@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-gradle-plugin")
     alias(libs.plugins.android.lint)
-    alias(libs.plugins.best.practices)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.jvm)
