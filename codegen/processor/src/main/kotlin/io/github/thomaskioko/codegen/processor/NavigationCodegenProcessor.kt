@@ -22,15 +22,18 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.github.thomaskioko.codegen.processor.codegen.AppRootBindingGenerator
 import io.github.thomaskioko.codegen.processor.codegen.AppRootUiBindingGenerator
-import io.github.thomaskioko.codegen.processor.codegen.ChildGraphGenerator
-import io.github.thomaskioko.codegen.processor.codegen.FileGenerator
+import io.github.thomaskioko.codegen.processor.codegen.NavDestinationBindingGenerator
+import io.github.thomaskioko.codegen.processor.codegen.ScreenGraphGenerator
+import io.github.thomaskioko.codegen.processor.codegen.TabDestinationBindingGenerator
 import io.github.thomaskioko.codegen.processor.codegen.UiBindingGenerator
-import io.github.thomaskioko.codegen.processor.data.NavData
+import io.github.thomaskioko.codegen.processor.data.ScreenData
+import io.github.thomaskioko.codegen.processor.data.TabData
 import io.github.thomaskioko.codegen.processor.data.UiBindingKind
 import io.github.thomaskioko.codegen.processor.parser.parseAppRootData
 import io.github.thomaskioko.codegen.processor.parser.parseAppRootUiData
@@ -78,9 +81,7 @@ public class NavigationCodegenProcessor(
      * @return An empty list. The processor does not defer work to later rounds.
      */
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        processAnnotation(resolver, Constants.NAV_DESTINATION_FQN, Constants.NAV_DESTINATION) { presenter ->
-            parseNavDestinationData(presenter, logger)
-        }
+        processNavDestination(resolver)
         processUiBinding(resolver, Constants.SCREEN_UI_FQN, Constants.SCREEN_UI, UiBindingKind.Screen)
         processUiBinding(resolver, Constants.SHEET_UI_FQN, Constants.SHEET_UI, UiBindingKind.Sheet)
         processUiBinding(resolver, Constants.TAB_UI_FQN, Constants.TAB_UI, UiBindingKind.Tab)
@@ -101,7 +102,7 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parseChildPresenterData(declaration, logger) ?: continue
-            writeFiles(declaration, listOf(ChildGraphGenerator.generate(data, hideFromObjC)))
+            writeFiles(declaration, listOf(ScreenGraphGenerator.generate(data, hideFromObjC)))
         }
     }
 
@@ -150,7 +151,7 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parseAppRootUiData(function, logger) ?: continue
-            writeFunctionFiles(function, listOf(AppRootUiBindingGenerator.generate(data)))
+            writeFiles(function, listOf(AppRootUiBindingGenerator.generate(data)))
             seen = true
         }
     }
@@ -180,40 +181,35 @@ public class NavigationCodegenProcessor(
                 continue
             }
             val data = parseUiBindingData(function, kind, logger) ?: continue
-            writeFunctionFiles(function, listOf(UiBindingGenerator.generate(data)))
+            writeFiles(function, listOf(UiBindingGenerator.generate(data)))
         }
     }
 
     /**
-     * Processes one class target annotation (currently just `@NavDestination`). For each matching
-     * class declaration, the supplied [parse] function produces a [NavData] and [FileGenerator]
-     * produces one or more files that KSP writes to disk. A symbol that is not a class is
+     * Processes the `@NavDestination` annotation. Each annotated class produces a
+     * `<Presenter>ScreenGraph` graph extension plus the binding that registers it, picking the
+     * tab binding for a destination parsed as a [TabData]. A symbol that is not a class is
      * reported as a compile error at its declaration site.
      *
      * @param resolver KSP's lookup interface for the current round.
-     * @param fqn Fully qualified name of the annotation to process.
-     * @param shortName Short name of the annotation, used in error messages.
-     * @param parse Function that turns a class declaration into a [NavData], or returns `null`
-     *   after logging a validation error to skip the symbol.
      */
-    private fun processAnnotation(
-        resolver: Resolver,
-        fqn: String,
-        shortName: String,
-        parse: (KSClassDeclaration) -> NavData?,
-    ) {
-        for (symbol in resolver.getSymbolsWithAnnotation(fqn)) {
+    private fun processNavDestination(resolver: Resolver) {
+        for (symbol in resolver.getSymbolsWithAnnotation(Constants.NAV_DESTINATION_FQN)) {
             val declaration = symbol as? KSClassDeclaration ?: run {
-                logger.error("@$shortName can only be applied to classes", symbol)
+                logger.error("@${Constants.NAV_DESTINATION} can only be applied to classes", symbol)
                 continue
             }
-            val data = parse(declaration) ?: continue
-            writeFiles(declaration, FileGenerator.generate(data, hideFromObjC))
+            val data = parseNavDestinationData(declaration, logger) ?: continue
+            val binding = when (data) {
+                is ScreenData -> NavDestinationBindingGenerator.generate(data, hideFromObjC)
+                is TabData -> TabDestinationBindingGenerator.generate(data, hideFromObjC)
+            }
+            writeFiles(declaration, listOf(ScreenGraphGenerator.generate(data, hideFromObjC), binding))
         }
     }
 
     /**
-     * Writes the generated files for a class target annotation. Uses KSP's incremental flag
+     * Writes the generated files for one annotated declaration. Uses KSP's incremental flag
      * `aggregating = false` so the output depends only on the source file the annotation lives
      * in. Editing one feature does not invalidate sibling features.
      *
@@ -221,29 +217,11 @@ public class NavigationCodegenProcessor(
      * another processor in the same round), the symbol is skipped with a warning rather than
      * raising an error.
      *
-     * @param source The presenter class the annotation was attached to. Used to look up the
-     *   containing source file for the incremental dependency hint.
-     * @param files The generated files to write. Typically two: a graph and a binding.
+     * @param source The presenter class or composable function the annotation was attached to.
+     *   Used to look up the containing source file for the incremental dependency hint.
+     * @param files The generated files to write.
      */
-    private fun writeFiles(source: KSClassDeclaration, files: List<FileSpec>) {
-        val containingFile = source.containingFile ?: run {
-            logger.warn("Cannot determine containing file for ${source.qualifiedName?.asString()}", source)
-            return
-        }
-        val deps = Dependencies(aggregating = false, containingFile)
-        for (file in files) {
-            file.writeTo(codeGenerator, deps)
-        }
-    }
-
-    /**
-     * Function target equivalent of [writeFiles]. Same KSP incremental semantics.
-     *
-     * @param source The composable function the annotation was attached to. Used to look up the
-     *   containing source file for the incremental dependency hint.
-     * @param files The generated files to write. Always one for `@ScreenUi` and `@SheetUi`.
-     */
-    private fun writeFunctionFiles(source: KSFunctionDeclaration, files: List<FileSpec>) {
+    private fun writeFiles(source: KSDeclaration, files: List<FileSpec>) {
         val containingFile = source.containingFile ?: run {
             logger.warn("Cannot determine containing file for ${source.qualifiedName?.asString()}", source)
             return

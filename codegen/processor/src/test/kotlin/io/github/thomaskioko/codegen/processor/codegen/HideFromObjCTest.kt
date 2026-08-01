@@ -34,7 +34,7 @@ class HideFromObjCTest {
 
     @Test
     fun `should hide the child graph and its factory given a non jvm target`() {
-        val file = ChildGraphGenerator.generate(childPresenterData(), hideFromObjC = true).toString()
+        val file = ScreenGraphGenerator.generate(childPresenterData(), hideFromObjC = true).toString()
 
         assertEquals(2, file.occurrencesOf("@HiddenFromObjC"))
         assertTrue(file.contains("@file:OptIn(ExperimentalObjCRefinement::class)"))
@@ -70,7 +70,7 @@ class HideFromObjCTest {
     @Test
     fun `should emit no refinement annotations given a jvm only target`() {
         val files = listOf(
-            ChildGraphGenerator.generate(childPresenterData(), hideFromObjC = false),
+            ScreenGraphGenerator.generate(childPresenterData(), hideFromObjC = false),
             ScreenGraphGenerator.generate(screenData(), hideFromObjC = false),
             NavDestinationBindingGenerator.generate(screenData(), hideFromObjC = false),
             TabDestinationBindingGenerator.generate(tabData(), hideFromObjC = false),

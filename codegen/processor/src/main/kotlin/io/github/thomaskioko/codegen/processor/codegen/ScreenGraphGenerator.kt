@@ -21,7 +21,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import io.github.thomaskioko.codegen.processor.data.NavData
+import io.github.thomaskioko.codegen.processor.data.GraphData
 import io.github.thomaskioko.codegen.processor.util.ComponentContext
 import io.github.thomaskioko.codegen.processor.util.FOUR_SPACE_INDENT
 import io.github.thomaskioko.codegen.processor.util.Provides
@@ -35,8 +35,9 @@ import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
  * Generates the Metro `@GraphExtension` interface plus its nested `Factory` for one annotated
  * presenter.
  *
- * Screens and tab roots produce the same graph structure, because the route always doubles as
- * the scope marker. One generator therefore covers both `ScreenData` and `TabData`.
+ * Screens, tab roots, and child presenters produce the same graph structure, because the route
+ * always doubles as the scope marker. One generator therefore covers `ScreenData`, `TabData`, and
+ * `ChildPresenterData`, which all supply the names through [GraphData].
  *
  * ## Output structure
  *
@@ -58,8 +59,8 @@ import io.github.thomaskioko.codegen.processor.util.optInObjCRefinement
  *
  * The exposed property is the presenter for plain `@Inject` presenters and tabs, or the assisted
  * factory for parameterized presenters. All names (interface, property, factory function) are
- * read off the [NavData] rather than re derived here. See
- * [io.github.thomaskioko.codegen.processor.data.NavData].
+ * read off the [GraphData] rather than re derived here. See
+ * [io.github.thomaskioko.codegen.processor.data.GraphData].
  */
 internal object ScreenGraphGenerator {
     /**
@@ -70,7 +71,7 @@ internal object ScreenGraphGenerator {
      *   the compilation has a non-JVM target.
      * @return The generated graph file as a KotlinPoet [FileSpec].
      */
-    fun generate(data: NavData, hideFromObjC: Boolean): FileSpec {
+    fun generate(data: GraphData, hideFromObjC: Boolean): FileSpec {
         val factoryInterface = TypeSpec.interfaceBuilder("Factory")
             .addModifiers(KModifier.PUBLIC)
             .hideFromObjC(hideFromObjC)

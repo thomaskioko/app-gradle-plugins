@@ -20,7 +20,7 @@ import com.squareup.kotlinpoet.ClassName
 /**
  * Structured representation of a `@ChildPresenter` annotated presenter class. Produced by
  * [io.github.thomaskioko.codegen.processor.parser.parseChildPresenterData] and consumed by
- * [io.github.thomaskioko.codegen.processor.codegen.ChildGraphGenerator].
+ * [io.github.thomaskioko.codegen.processor.codegen.ScreenGraphGenerator].
  *
  * The generator emits a `@GraphExtension(scope) interface <Presenter>ChildGraph` exposing the
  * presenter (or its assisted factory for parameterized children) as a property and a
@@ -46,16 +46,16 @@ internal data class ChildPresenterData(
     val presenterClass: ClassName,
     val baseName: String,
     val packageName: String,
-    val scope: ClassName,
-    val parentScope: ClassName,
+    override val scope: ClassName,
+    override val parentScope: ClassName,
     val factory: ClassName? = null,
-) {
+) : GraphData {
     val isParameterized: Boolean
         get() = factory != null
-    val graphClassName: ClassName = ClassName(packageName, "${baseName}ChildGraph")
-    val graphFactoryFunName: String = "create${baseName}Graph"
-    val graphPropertyType: ClassName = factory ?: presenterClass
-    val graphPropertyName: String =
+    override val graphClassName: ClassName = ClassName(packageName, "${baseName}ChildGraph")
+    override val graphFactoryFunName: String = "create${baseName}Graph"
+    override val graphPropertyType: ClassName = factory ?: presenterClass
+    override val graphPropertyName: String =
         if (factory != null) {
             baseName.replaceFirstChar { it.lowercaseChar() } + "Factory"
         } else {

@@ -33,10 +33,10 @@ data type they produce.
 
 ## Five paths
 
-`processAnnotation` is the path for class targets that produce a `NavData`. Currently only `@NavDestination` uses it. KSP returns every class declaration carrying the
-annotation; the helper hands each to the parser, which returns a `NavData?`. A null return means the parser already logged a compile error and the helper skips the
-symbol. A non null return goes to `FileGenerator.generate(data)`, which produces the graph file and the binding file. `writeFiles` writes them through KSP's
-`CodeGenerator`.
+`processNavDestination` is the path for `@NavDestination`. KSP returns every class declaration carrying the annotation; the helper hands each to
+`parseNavDestinationData`, which returns a `NavData?`. A null return means the parser already logged a compile error and the helper skips the symbol. A non null return
+produces two files: the graph from `ScreenGraphGenerator`, and the binding from either `NavDestinationBindingGenerator` or `TabDestinationBindingGenerator` depending on
+whether the parse produced a `ScreenData` or a `TabData`. `writeFiles` writes them through KSP's `CodeGenerator`.
 
 `processUiBinding` is the path for function targets that produce a `UiBindingData`. `@ScreenUi`, `@SheetUi`, and `@TabUi` all use it, distinguished by a `UiBindingKind`
 enum value the caller passes in. KSP returns every function declaration carrying the annotation; the helper hands each to `parseUiBindingData`, which returns a
@@ -53,8 +53,9 @@ directly to `AppRootUiBindingGenerator.generate(data)`. The data type is indepen
 extension, not a `ScreenContent` or `SheetContent` multibinding entry.
 
 `processChildPresenter` is the path for `@ChildPresenter`. KSP returns every class declaration carrying the annotation; the helper hands each to
-`parseChildPresenterData`, which returns a `ChildPresenterData?`. A non null result goes directly to `ChildGraphGenerator.generate(data)`. The data type is independent of
-`NavData` because the generated artifact is a graph extension exposing a single presenter, with no destination binding entry alongside it.
+`parseChildPresenterData`, which returns a `ChildPresenterData?`. A non null result goes to `ScreenGraphGenerator.generate(data)`, the same generator the destination path
+uses, because a child graph has the same shape as a screen graph. `ChildPresenterData` implements `GraphData` rather than `NavData`, because the generated artifact is a
+graph extension exposing a single presenter, with no destination binding entry alongside it.
 
 ## File writing
 

@@ -1,42 +1,30 @@
 # Generators
 
-The generator layer turns the typed intermediate values from [data-model.md](data-model.md) into KotlinPoet `FileSpec` outputs. Eight generator files live under
+The generator layer turns the typed intermediate values from [data-model.md](data-model.md) into KotlinPoet `FileSpec` outputs. Six generator files live under
 `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/codegen/`:
 
-- `FileGenerator.kt` is the router that picks which generators run for each `NavData`.
-- `ScreenGraphGenerator.kt` emits the `@GraphExtension` interface plus its nested factory.
+- `ScreenGraphGenerator.kt` emits the `@GraphExtension` interface plus its nested factory. It covers screens, tab roots, and child presenters, which all supply their
+  names through the `GraphData` interface.
 - `NavDestinationBindingGenerator.kt` emits the `NavDestination` and `NavRouteBinding` companion object bindings for screens and overlays.
 - `TabDestinationBindingGenerator.kt` emits the `NavDestination.TabRoot`, the `NavRootBinding`, and the `NavRoot` singleton bindings for tab roots.
 - `UiBindingGenerator.kt` emits the `@BindingContainer` object that contributes `ScreenContent` or `SheetContent` for composables annotated with `@ScreenUi`, `@SheetUi`,
   or `@TabUi`. The `kind` field on `UiBindingData` selects the variant.
-- `ChildGraphGenerator.kt` emits the `<Presenter>ChildGraph` graph extension plus its nested factory for classes annotated with `@ChildPresenter`.
 - `AppRootBindingGenerator.kt` emits the `@BindingContainer` object that wires the nested `@AssistedFactory` to the bound interface for classes annotated with `@AppRoot`.
 - `AppRootUiBindingGenerator.kt` emits the `AppRootProvider` interface plus the `@Composable AppRootProvider.AppRootContent(modifier)` extension for composables
   annotated with `@AppRootUi`.
 
 `BindingFiles.kt` holds a shared scaffold that both destination binding generators reuse.
 
-The five paths (presenter `@NavDestination`, composable `@ScreenUi`/`@SheetUi`/`@TabUi`, presenter `@AppRoot`, composable `@AppRootUi`, presenter `@ChildPresenter`)
-converge on KotlinPoet types but never share a generator entry point. Presenter classes for `@NavDestination` route through `FileGenerator`; everything else is dispatched
-directly from the processor entry to its dedicated generator.
-
-## FileGenerator routing
-
-The router is a single `when` expression over the sealed `NavData`:
+Each of the five paths (presenter `@NavDestination`, composable `@ScreenUi`/`@SheetUi`/`@TabUi`, presenter `@AppRoot`, composable `@AppRootUi`, presenter
+`@ChildPresenter`) is dispatched from its own function on the processor entry. `processNavDestination` is the only one that picks between two generators, choosing the
+screen or the tab binding from the parsed type:
 
 ```kotlin
-internal object FileGenerator {
-    fun generate(data: NavData, hideFromObjC: Boolean): List<FileSpec> = when (data) {
-        is ScreenData -> listOf(
-            ScreenGraphGenerator.generate(data, hideFromObjC),
-            NavDestinationBindingGenerator.generate(data, hideFromObjC),
-        )
-        is TabData -> listOf(
-            ScreenGraphGenerator.generate(data, hideFromObjC),
-            TabDestinationBindingGenerator.generate(data, hideFromObjC),
-        )
-    }
+val binding = when (data) {
+    is ScreenData -> NavDestinationBindingGenerator.generate(data, hideFromObjC)
+    is TabData -> TabDestinationBindingGenerator.generate(data, hideFromObjC)
 }
+writeFiles(declaration, listOf(ScreenGraphGenerator.generate(data, hideFromObjC), binding))
 ```
 
 ## Hiding from Objective-C
