@@ -17,7 +17,6 @@ package io.github.thomaskioko.gradle.plugins.utils
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
@@ -44,23 +43,26 @@ internal val Project.androidExtension: AndroidExtension
     get() = baseExtension.extensions.getByType(AndroidExtension::class.java)
 
 /**
- * This function provides a convenient way to configure the Kotlin Multiplatform plugin using a lambda expression.
+ * Configures the extension of type [T] registered on this project.
+ *
+ * @param block A lambda receiver of type [T] applied to the registered extension.
  */
-internal fun Project.kotlinMultiplatform(block: KotlinMultiplatformExtension.() -> Unit) {
-    extensions.configure(KotlinMultiplatformExtension::class.java) {
+internal inline fun <reified T : Any> Project.configureExtension(crossinline block: T.() -> Unit) {
+    extensions.configure(T::class.java) {
         it.block()
     }
 }
 
 /**
+ * This function provides a convenient way to configure the Kotlin Multiplatform plugin using a lambda expression.
+ */
+internal fun Project.kotlinMultiplatform(block: KotlinMultiplatformExtension.() -> Unit) = configureExtension(block)
+
+/**
  * This function provides a convenient way to access and modify the settings of the Compose Compiler
  * plugin within a Gradle project.
  */
-internal fun Project.composeCompiler(block: ComposeCompilerGradlePluginExtension.() -> Unit) {
-    extensions.configure(ComposeCompilerGradlePluginExtension::class.java) {
-        it.block()
-    }
-}
+internal fun Project.composeCompiler(block: ComposeCompilerGradlePluginExtension.() -> Unit) = configureExtension(block)
 
 /**
  * Configures the Android Gradle Plugin for the [Project] by applying the specified [block].
@@ -71,51 +73,23 @@ internal fun Project.composeCompiler(block: ComposeCompilerGradlePluginExtension
  * @param block A lambda receiver of type [CommonExtension], used to perform configurations
  * applied to the Android Gradle Plugin for the project.
  */
-internal fun Project.android(block: CommonExtension.() -> Unit) {
-    extensions.configure(CommonExtension::class.java) {
-        it.block()
-    }
-}
+internal fun Project.android(block: CommonExtension.() -> Unit) = configureExtension(block)
 
 /**
  * This function simplifies the process of configuring an Android application module by providing a type-safe builder pattern.
  */
-internal fun Project.androidApp(block: ApplicationExtension.() -> Unit) {
-    extensions.configure(ApplicationExtension::class.java) {
-        it.block()
-    }
-}
+internal fun Project.androidApp(block: ApplicationExtension.() -> Unit) = configureExtension(block)
 
 /**
  * Configures the Android Gradle Plugin for a library module.
  * This provides access to LibraryExtension-specific features like buildFeatures.
  */
-internal fun Project.androidLibrary(block: LibraryExtension.() -> Unit) {
-    extensions.configure(LibraryExtension::class.java) {
-        it.block()
-    }
-}
-
-/**
- * Configures the KotlinMultiplatformAndroidLibraryExtension for the project.
- * This is used when configuring the Android target in a KMP project.
- */
-internal fun Project.androidMultiplatform(block: KotlinMultiplatformAndroidLibraryExtension.() -> Unit) {
-    kotlinMultiplatform {
-        extensions.configure(KotlinMultiplatformAndroidLibraryExtension::class.java) {
-            it.block()
-        }
-    }
-}
+internal fun Project.androidLibrary(block: LibraryExtension.() -> Unit) = configureExtension(block)
 
 /**
  * This function provides a concise way to customize the Android build process, including variant configuration and artifact management.
  */
-internal fun Project.androidComponents(block: AndroidComponentsExtension<*, *, *>.() -> Unit) {
-    extensions.configure(AndroidComponentsExtension::class.java) {
-        it.block()
-    }
-}
+internal fun Project.androidComponents(block: AndroidComponentsExtension<*, *, *>.() -> Unit) = configureExtension(block)
 
 /**
  * Configures Kotlin-related settings for the current project by applying the provided `block`
@@ -133,11 +107,7 @@ internal fun Project.kotlin(block: KotlinProjectExtension.() -> Unit) {
  * @param block A lambda expression of type `JavaPluginExtension.() -> Unit` that defines the configuration logic
  *              for the `JavaPluginExtension` in the context of the current project.
  */
-internal fun Project.java(block: JavaPluginExtension.() -> Unit) {
-    extensions.configure(JavaPluginExtension::class.java) {
-        it.block()
-    }
-}
+internal fun Project.java(block: JavaPluginExtension.() -> Unit) = configureExtension(block)
 
 /**
  * Applies a Kotlin compiler options configuration block to whichever Kotlin project extension is
