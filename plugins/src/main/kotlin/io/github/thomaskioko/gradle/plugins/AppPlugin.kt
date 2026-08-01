@@ -86,7 +86,6 @@ public abstract class AppPlugin : Plugin<Project> {
             it.projectDir.set(target.rootProject.layout.projectDirectory)
             it.bumpType.convention(properties.releaseType)
             it.beta.convention(properties.releaseBeta)
-            it.interactive.convention(properties.releaseInteractive)
             it.dryRun.convention(properties.releaseDryRun)
         }
 

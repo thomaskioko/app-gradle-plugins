@@ -171,7 +171,6 @@ dependencies {
     compileOnly(libs.firebase.crashlytics.gradle.plugin)
     compileOnly(libs.metro.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
-    implementation(libs.mordant.core)
 
     lintChecks(libs.androidx.lint.gradle)
 
