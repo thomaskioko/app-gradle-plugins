@@ -1,0 +1,36 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.thomaskioko.gradle.plugins:featureflag-annotations>
+open annotation class io.github.thomaskioko.codegen.annotations/FeatureFlag : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/FeatureFlag|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Boolean, kotlin/String, io.github.thomaskioko.codegen.annotations/Platform = ...) // io.github.thomaskioko.codegen.annotations/FeatureFlag.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean;kotlin.String;io.github.thomaskioko.codegen.annotations.Platform){}[0]
+
+    final val dateAdded // io.github.thomaskioko.codegen.annotations/FeatureFlag.dateAdded|{}dateAdded[0]
+        final fun <get-dateAdded>(): kotlin/String // io.github.thomaskioko.codegen.annotations/FeatureFlag.dateAdded.<get-dateAdded>|<get-dateAdded>(){}[0]
+    final val defaultValue // io.github.thomaskioko.codegen.annotations/FeatureFlag.defaultValue|{}defaultValue[0]
+        final fun <get-defaultValue>(): kotlin/Boolean // io.github.thomaskioko.codegen.annotations/FeatureFlag.defaultValue.<get-defaultValue>|<get-defaultValue>(){}[0]
+    final val description // io.github.thomaskioko.codegen.annotations/FeatureFlag.description|{}description[0]
+        final fun <get-description>(): kotlin/String // io.github.thomaskioko.codegen.annotations/FeatureFlag.description.<get-description>|<get-description>(){}[0]
+    final val key // io.github.thomaskioko.codegen.annotations/FeatureFlag.key|{}key[0]
+        final fun <get-key>(): kotlin/String // io.github.thomaskioko.codegen.annotations/FeatureFlag.key.<get-key>|<get-key>(){}[0]
+    final val platform // io.github.thomaskioko.codegen.annotations/FeatureFlag.platform|{}platform[0]
+        final fun <get-platform>(): io.github.thomaskioko.codegen.annotations/Platform // io.github.thomaskioko.codegen.annotations/FeatureFlag.platform.<get-platform>|<get-platform>(){}[0]
+    final val title // io.github.thomaskioko.codegen.annotations/FeatureFlag.title|{}title[0]
+        final fun <get-title>(): kotlin/String // io.github.thomaskioko.codegen.annotations/FeatureFlag.title.<get-title>|<get-title>(){}[0]
+}
+
+final enum class io.github.thomaskioko.codegen.annotations/Platform : kotlin/Enum<io.github.thomaskioko.codegen.annotations/Platform> { // io.github.thomaskioko.codegen.annotations/Platform|null[0]
+    enum entry ALL // io.github.thomaskioko.codegen.annotations/Platform.ALL|null[0]
+    enum entry IOS // io.github.thomaskioko.codegen.annotations/Platform.IOS|null[0]
+    enum entry JVM // io.github.thomaskioko.codegen.annotations/Platform.JVM|null[0]
+
+    final val entries // io.github.thomaskioko.codegen.annotations/Platform.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.thomaskioko.codegen.annotations/Platform> // io.github.thomaskioko.codegen.annotations/Platform.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.thomaskioko.codegen.annotations/Platform // io.github.thomaskioko.codegen.annotations/Platform.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.thomaskioko.codegen.annotations/Platform> // io.github.thomaskioko.codegen.annotations/Platform.values|values#static(){}[0]
+}

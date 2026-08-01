@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -69,7 +70,10 @@ dokka {
     }
 }
 
+@OptIn(ExperimentalAbiValidation::class)
 kotlin {
+    abiValidation {}
+
     explicitApi()
     jvmToolchain(libs.versions.java.toolchain.get().toInt())
     compilerOptions {

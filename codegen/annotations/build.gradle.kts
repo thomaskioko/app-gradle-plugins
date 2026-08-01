@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.publish)
@@ -21,7 +23,10 @@ plugins {
 group = property("GROUP").toString()
 version = property("VERSION_NAME").toString()
 
+@OptIn(ExperimentalAbiValidation::class)
 kotlin {
+    abiValidation {}
+
     jvm()
     iosArm64()
     iosSimulatorArm64()

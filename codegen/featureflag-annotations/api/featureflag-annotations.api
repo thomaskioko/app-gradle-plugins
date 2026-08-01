@@ -1,0 +1,18 @@
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/FeatureFlag : java/lang/annotation/Annotation {
+	public abstract fun dateAdded ()Ljava/lang/String;
+	public abstract fun defaultValue ()Z
+	public abstract fun description ()Ljava/lang/String;
+	public abstract fun key ()Ljava/lang/String;
+	public abstract fun platform ()Lio/github/thomaskioko/codegen/annotations/Platform;
+	public abstract fun title ()Ljava/lang/String;
+}
+
+public final class io/github/thomaskioko/codegen/annotations/Platform : java/lang/Enum {
+	public static final field ALL Lio/github/thomaskioko/codegen/annotations/Platform;
+	public static final field IOS Lio/github/thomaskioko/codegen/annotations/Platform;
+	public static final field JVM Lio/github/thomaskioko/codegen/annotations/Platform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thomaskioko/codegen/annotations/Platform;
+	public static fun values ()[Lio/github/thomaskioko/codegen/annotations/Platform;
+}
+

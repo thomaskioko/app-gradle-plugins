@@ -1,0 +1,44 @@
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/AppRoot : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/AppRootUi : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun presenter ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/ChildPresenter : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun scope ()Ljava/lang/Class;
+}
+
+public final class io/github/thomaskioko/codegen/annotations/DestinationKind : java/lang/Enum {
+	public static final field OVERLAY Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+	public static final field SCREEN Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+	public static final field TAB_ROOT Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+	public static fun values ()[Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/NavDestination : java/lang/annotation/Annotation {
+	public abstract fun kind ()Lio/github/thomaskioko/codegen/annotations/DestinationKind;
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun route ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/ScreenUi : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun presenter ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/SheetUi : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun presenter ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class io/github/thomaskioko/codegen/annotations/TabUi : java/lang/annotation/Annotation {
+	public abstract fun parentScope ()Ljava/lang/Class;
+	public abstract fun presenter ()Ljava/lang/Class;
+}
+

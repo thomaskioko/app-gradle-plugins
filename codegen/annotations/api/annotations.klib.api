@@ -1,0 +1,82 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.thomaskioko.gradle.plugins:annotations>
+open annotation class io.github.thomaskioko.codegen.annotations/AppRoot : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/AppRoot|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/AppRoot.<init>|<init>(kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/AppRoot.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/AppRoot.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/AppRootUi : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/AppRootUi|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/AppRootUi.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/AppRootUi.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/AppRootUi.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val presenter // io.github.thomaskioko.codegen.annotations/AppRootUi.presenter|{}presenter[0]
+        final fun <get-presenter>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/AppRootUi.presenter.<get-presenter>|<get-presenter>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/ChildPresenter : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/ChildPresenter|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/ChildPresenter.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/ChildPresenter.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/ChildPresenter.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val scope // io.github.thomaskioko.codegen.annotations/ChildPresenter.scope|{}scope[0]
+        final fun <get-scope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/ChildPresenter.scope.<get-scope>|<get-scope>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/NavDestination : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/NavDestination|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>, io.github.thomaskioko.codegen.annotations/DestinationKind) // io.github.thomaskioko.codegen.annotations/NavDestination.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>;io.github.thomaskioko.codegen.annotations.DestinationKind){}[0]
+
+    final val kind // io.github.thomaskioko.codegen.annotations/NavDestination.kind|{}kind[0]
+        final fun <get-kind>(): io.github.thomaskioko.codegen.annotations/DestinationKind // io.github.thomaskioko.codegen.annotations/NavDestination.kind.<get-kind>|<get-kind>(){}[0]
+    final val parentScope // io.github.thomaskioko.codegen.annotations/NavDestination.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/NavDestination.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val route // io.github.thomaskioko.codegen.annotations/NavDestination.route|{}route[0]
+        final fun <get-route>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/NavDestination.route.<get-route>|<get-route>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/ScreenUi : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/ScreenUi|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/ScreenUi.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/ScreenUi.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/ScreenUi.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val presenter // io.github.thomaskioko.codegen.annotations/ScreenUi.presenter|{}presenter[0]
+        final fun <get-presenter>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/ScreenUi.presenter.<get-presenter>|<get-presenter>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/SheetUi : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/SheetUi|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/SheetUi.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/SheetUi.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/SheetUi.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val presenter // io.github.thomaskioko.codegen.annotations/SheetUi.presenter|{}presenter[0]
+        final fun <get-presenter>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/SheetUi.presenter.<get-presenter>|<get-presenter>(){}[0]
+}
+
+open annotation class io.github.thomaskioko.codegen.annotations/TabUi : kotlin/Annotation { // io.github.thomaskioko.codegen.annotations/TabUi|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.thomaskioko.codegen.annotations/TabUi.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val parentScope // io.github.thomaskioko.codegen.annotations/TabUi.parentScope|{}parentScope[0]
+        final fun <get-parentScope>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/TabUi.parentScope.<get-parentScope>|<get-parentScope>(){}[0]
+    final val presenter // io.github.thomaskioko.codegen.annotations/TabUi.presenter|{}presenter[0]
+        final fun <get-presenter>(): kotlin.reflect/KClass<*> // io.github.thomaskioko.codegen.annotations/TabUi.presenter.<get-presenter>|<get-presenter>(){}[0]
+}
+
+final enum class io.github.thomaskioko.codegen.annotations/DestinationKind : kotlin/Enum<io.github.thomaskioko.codegen.annotations/DestinationKind> { // io.github.thomaskioko.codegen.annotations/DestinationKind|null[0]
+    enum entry OVERLAY // io.github.thomaskioko.codegen.annotations/DestinationKind.OVERLAY|null[0]
+    enum entry SCREEN // io.github.thomaskioko.codegen.annotations/DestinationKind.SCREEN|null[0]
+    enum entry TAB_ROOT // io.github.thomaskioko.codegen.annotations/DestinationKind.TAB_ROOT|null[0]
+
+    final val entries // io.github.thomaskioko.codegen.annotations/DestinationKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.thomaskioko.codegen.annotations/DestinationKind> // io.github.thomaskioko.codegen.annotations/DestinationKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.thomaskioko.codegen.annotations/DestinationKind // io.github.thomaskioko.codegen.annotations/DestinationKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.thomaskioko.codegen.annotations/DestinationKind> // io.github.thomaskioko.codegen.annotations/DestinationKind.values|values#static(){}[0]
+}

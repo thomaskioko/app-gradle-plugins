@@ -16,6 +16,7 @@
 import org.gradle.api.tasks.testing.Test
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -273,4 +274,9 @@ mavenPublishing {
             developerConnection.set(property("POM_SCM_DEV_CONNECTION").toString())
         }
     }
+}
+
+@OptIn(ExperimentalAbiValidation::class)
+kotlin {
+    abiValidation {}
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -23,7 +24,10 @@ plugins {
 group = property("GROUP").toString()
 version = property("VERSION_NAME").toString()
 
+@OptIn(ExperimentalAbiValidation::class)
 kotlin {
+    abiValidation {}
+
     explicitApi()
     jvmToolchain(libs.versions.java.toolchain.get().toInt())
     compilerOptions {
