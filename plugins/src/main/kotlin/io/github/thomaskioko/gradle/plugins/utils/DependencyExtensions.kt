@@ -16,77 +16,48 @@
 package io.github.thomaskioko.gradle.plugins.utils
 
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ExternalModuleDependencyBundle
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 
-internal fun Project.addImplementationDependency(
-    dependency: Provider<MinimalExternalModuleDependency>?,
-    limitToTargets: Set<KotlinPlatformType>? = null,
-) {
-    addDependencyInternal(
-        dependency = dependency,
-        notMultiplatformConfiguration = "implementation",
-        commonConfiguration = "commonMainImplementation",
-        targetConfiguration = KotlinTarget::implementationConfigName,
-        limitToTargets = limitToTargets,
-    )
-}
-
-internal fun Project.addBundleImplementationDependency(
-    dependency: Provider<ExternalModuleDependencyBundle>,
-    limitToTargets: Set<KotlinPlatformType>? = null,
-) {
-    addDependencyInternal(
-        dependency = dependency,
-        notMultiplatformConfiguration = "implementation",
-        commonConfiguration = "commonMainImplementation",
-        targetConfiguration = KotlinTarget::implementationConfigName,
-        limitToTargets = limitToTargets,
-    )
-}
-
-private fun <T : Any> Project.addDependencyInternal(
-    dependency: Provider<T>?,
-    notMultiplatformConfiguration: String,
-    commonConfiguration: String,
-    targetConfiguration: KotlinTarget.() -> String,
-    limitToTargets: Set<KotlinPlatformType>?,
-) {
+/**
+ * Adds [dependency] to the `implementation` configuration, or to `commonMainImplementation` when the
+ * project is Kotlin Multiplatform.
+ *
+ * Accepts both a single dependency and a bundle.
+ *
+ * @param dependency Dependency to add, ignored when null.
+ */
+internal fun <T : Any> Project.addImplementationDependency(dependency: Provider<T>?) {
     if (dependency == null) return
 
-    val extension = kotlinExtension
-    if (extension !is KotlinMultiplatformExtension) {
-        dependencies.add(notMultiplatformConfiguration, dependency)
-        return
+    val configuration = when (kotlinExtension) {
+        is KotlinMultiplatformExtension -> "commonMainImplementation"
+        else -> "implementation"
     }
-
-    if (limitToTargets == null) {
-        dependencies.add(commonConfiguration, dependency)
-        return
-    }
-
-    extension.targets.configureEach {
-        if (it.platformType in limitToTargets) {
-            dependencies.add(it.targetConfiguration(), dependency)
-        }
-    }
+    dependencies.add(configuration, dependency)
 }
 
-internal fun Project.addKspDependencyForAllTargets(dependency: Provider<MinimalExternalModuleDependency>) = addKspDependencyForAllTargets("", dependency)
-
-private fun Project.addKspDependencyForAllTargets(
-    configurationNameSuffix: String,
-    dependency: Provider<MinimalExternalModuleDependency>,
-) {
-    when {
-        isKmpProject() -> addKspDependencyForKmp(configurationNameSuffix, dependency)
-        else -> addKspDependencyForSinglePlatform(configurationNameSuffix, dependency)
+/**
+ * Registers a KSP processor against every target of the project.
+ *
+ * For Kotlin Multiplatform projects, attaches [dependency] to the per-target `ksp<Target>`
+ * configurations. Single-platform projects fall back to the default `ksp` configuration.
+ */
+internal fun Project.addKspDependencyForAllTargets(dependency: Provider<MinimalExternalModuleDependency>) {
+    if (!isKmpProject()) {
+        dependencies.add("ksp", dependency)
+        return
     }
+
+    extensions.getByType(KotlinMultiplatformExtension::class.java).targets.names
+        .asSequence()
+        .map { it.replaceFirstChar(Char::uppercaseChar) }
+        .map { target -> if (target == "Metadata") "CommonMainMetadata" else target }
+        .forEach { targetConfigSuffix ->
+            dependencies.add("ksp$targetConfigSuffix", dependency)
+        }
 }
 
 /**
@@ -109,31 +80,3 @@ internal fun Project.addKspDependencyForCommonMain(dependency: Provider<MinimalE
 }
 
 private fun Project.isKmpProject(): Boolean = extensions.findByType(KotlinMultiplatformExtension::class.java) != null
-
-private fun Project.addKspDependencyForKmp(
-    configurationNameSuffix: String,
-    dependency: Provider<MinimalExternalModuleDependency>,
-) {
-    val kmpExtension = extensions.getByType(KotlinMultiplatformExtension::class.java)
-    kmpExtension.targets.names
-        .asSequence()
-        .map { it.replaceFirstChar(Char::uppercaseChar) }
-        .map { target -> if (target == "Metadata") "CommonMainMetadata" else target }
-        .forEach { targetConfigSuffix ->
-            dependencies.add("ksp$targetConfigSuffix$configurationNameSuffix", dependency)
-        }
-}
-
-private fun Project.addKspDependencyForSinglePlatform(
-    configurationNameSuffix: String,
-    dependency: Provider<MinimalExternalModuleDependency>,
-) {
-    dependencies.add("ksp$configurationNameSuffix", dependency)
-}
-
-internal fun KotlinTarget.implementationConfigName(): String {
-    return when (targetName) {
-        "main" -> "implementation"
-        else -> "${targetName}MainImplementation"
-    }
-}
