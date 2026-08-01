@@ -21,14 +21,8 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 
 internal class ScaffoldProperties(project: Project) {
-    internal val composeMetrics: Provider<Boolean> =
-        project.booleanProperty(PropertyKeys.COMPOSE_METRICS, false)
-
     internal val composeReports: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.COMPOSE_REPORTS, false)
-
-    internal val composeCompilerReports: Provider<String> =
-        project.stringProperty(PropertyKeys.COMPOSE_COMPILER_REPORTS)
 
     internal val debugOnly: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.APP_DEBUG_ONLY, false)
@@ -50,9 +44,6 @@ internal class ScaffoldProperties(project: Project) {
 
     internal val releaseBeta: Provider<Boolean> =
         project.stringProperty(PropertyKeys.RELEASE_BETA).map { true }.orElse(false)
-
-    internal val releaseInteractive: Provider<Boolean> =
-        project.stringProperty(PropertyKeys.RELEASE_INTERACTIVE).map { true }.orElse(false)
 
     internal val releaseDryRun: Provider<Boolean> =
         project.stringProperty(PropertyKeys.RELEASE_DRY_RUN).map { true }.orElse(false)
