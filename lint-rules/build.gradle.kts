@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.android.lint)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.dokka)
     alias(libs.plugins.publish)
@@ -72,6 +73,7 @@ kotlin {
     explicitApi()
     jvmToolchain(libs.versions.java.toolchain.get().toInt())
     compilerOptions {
+        allWarningsAsErrors.set(true)
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }
@@ -84,6 +86,8 @@ java {
 dependencies {
     implementation(libs.ktlint.rule.engine.core)
     implementation(libs.ktlint.cli.ruleset.core)
+
+    lintChecks(libs.androidx.lint.gradle)
 
     testImplementation(libs.ktlint.test)
     testImplementation(libs.ktlint.rule.engine)

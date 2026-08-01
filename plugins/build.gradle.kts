@@ -15,10 +15,12 @@
  */
 import org.gradle.api.tasks.testing.Test
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-gradle-plugin")
+    alias(libs.plugins.android.lint)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.jvm)
@@ -44,6 +46,10 @@ spotless {
         target("*.kts")
         licenseHeaderFile(licenseHeader, "(import|plugins|pluginManagement|dependencyResolutionManagement)")
     }
+}
+
+lint {
+    baseline = file("lint-baseline.xml")
 }
 
 val agpDocsVersion = libs.versions.agp.get().split(".").take(2).joinToString(".")
@@ -122,10 +128,12 @@ tasks {
 
     withType<KotlinCompile>().configureEach {
         compilerOptions {
-            allWarningsAsErrors.set(false)
+            allWarningsAsErrors.set(true)
+            jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
             freeCompilerArgs.addAll(
                 "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all",
+                "-Xsam-conversions=class",
+                "-Xlambdas=class",
             )
         }
     }
@@ -163,6 +171,8 @@ dependencies {
     compileOnly(libs.metro.gradle.plugin)
     compileOnly(libs.spotless.gradle.plugin)
     implementation(libs.mordant.core)
+
+    lintChecks(libs.androidx.lint.gradle)
 
     testImplementation(libs.junit)
     testImplementation(gradleTestKit())

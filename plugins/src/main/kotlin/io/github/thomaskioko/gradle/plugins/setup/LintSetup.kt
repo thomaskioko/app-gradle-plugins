@@ -23,8 +23,6 @@ import io.github.thomaskioko.gradle.plugins.utils.getBundleDependenciesOrNull
 import io.github.thomaskioko.gradle.plugins.utils.getVersion
 import io.github.thomaskioko.gradle.plugins.utils.pathBasedAndroidNamespace
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFile
-import org.gradle.api.provider.Provider
 
 internal fun Project.setupStandaloneLint() {
     extensions.configure(Lint::class.java) {
@@ -71,19 +69,5 @@ internal fun Lint.configure(project: Project) {
         ),
     )
 
-    htmlReport = true
-    htmlOutput = project.reportsFile("lint-result.html").get().asFile
-    textReport = true
-    textOutput = project.reportsFile("lint-result.txt").get().asFile
-
     project.dependencies.addIfNotNull("lintChecks", project.getBundleDependenciesOrNull("lint"))
-}
-
-private fun Project.reportsFile(name: String): Provider<RegularFile> {
-    val projectName = project.path
-        .replace("projects", "")
-        .replaceFirst(":", "")
-        .replace(":", "/")
-
-    return rootProject.layout.buildDirectory.file("reports/lint/$projectName/$name")
 }
