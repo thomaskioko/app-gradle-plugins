@@ -45,18 +45,18 @@ The consumer project must already use Metro. Each tier adds its own requirements
 
 The Tv Maniac project is the reference implementation for both tiers. The full runtime contract,
 including the exact consumer types the generated code references, lives in
-[the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/consumer-contract/).
+[the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/internals/consumer-contract/).
 
 ## Docs
 
-- [Get started (navigation)](https://thomaskioko.github.io/app-gradle-plugins/codegen/get-started/): what the navigation codegen does and how to wire
+- [Get started (navigation)](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/): what the navigation codegen does and how to wire
   it into a consumer project.
-- [Feature flag codegen](https://thomaskioko.github.io/app-gradle-plugins/codegen/featureflag/): the `@FeatureFlag` annotation, generated output, DSL
+- [Feature flag codegen](https://thomaskioko.github.io/app-gradle-plugins/feature-flags/): the `@FeatureFlag` annotation, generated output, DSL
   call, and validation rules.
-- [Annotation reference](https://thomaskioko.github.io/app-gradle-plugins/codegen/annotations/): every navigation annotation parameter and the
+- [Annotation reference](https://thomaskioko.github.io/app-gradle-plugins/navigation/annotations/): every navigation annotation parameter and the
   validation rules the processor enforces.
-- [Examples](https://thomaskioko.github.io/app-gradle-plugins/codegen/examples/): input and generated output for every navigation variant.
-- [Architecture](https://thomaskioko.github.io/app-gradle-plugins/codegen/architecture/): how the processors are built, for contributors.
+- [Examples](https://thomaskioko.github.io/app-gradle-plugins/navigation/examples/): input and generated output for every navigation variant.
+- [Architecture](https://thomaskioko.github.io/app-gradle-plugins/internals/): how the processors are built, for contributors.
 
 ## References
 

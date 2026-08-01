@@ -53,6 +53,22 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
+plugins:
+  - search
+  - redirects:
+      redirect_maps:
+        codegen/get-started.md: navigation/get-started.md
+        codegen/annotations.md: navigation/annotations.md
+        codegen/examples.md: navigation/examples.md
+        codegen/featureflag.md: feature-flags.md
+        codegen/architecture/index.md: internals/index.md
+        codegen/architecture/pipeline.md: internals/pipeline.md
+        codegen/architecture/parsers.md: internals/parsers.md
+        codegen/architecture/generators.md: internals/generators.md
+        codegen/architecture/data-model.md: internals/data-model.md
+        codegen/architecture/consumer-contract.md: internals/consumer-contract.md
+        codegen/architecture/testing.md: internals/testing.md
+
 nav:
   - Overview: index.md
   - Installing: install.md
@@ -69,23 +85,25 @@ nav:
       - Baseline profile: plugins/baseline-profile.md
       - Resource generator: plugins/resource-generator.md
       - Build config: plugins/buildconfig.md
-  - Code generation:
-      - Get started: codegen/get-started.md
-      - Annotations: codegen/annotations.md
-      - Examples: codegen/examples.md
-      - Feature flags: codegen/featureflag.md
-      - Architecture:
-          - Overview: codegen/architecture/index.md
-          - Pipeline: codegen/architecture/pipeline.md
-          - Parsers: codegen/architecture/parsers.md
-          - Generators: codegen/architecture/generators.md
-          - Data model: codegen/architecture/data-model.md
-          - Consumer contract: codegen/architecture/consumer-contract.md
-          - Testing: codegen/architecture/testing.md
-  - Lint rules: lint-rules.md
-  - API reference:
-      - Plugins: api/plugins/index.html
-      - Codegen: api/codegen/index.html
-      - Lint rules: api/lint-rules/index.html
+      - API reference: api/plugins/index.html
+  - Navigation:
+      - Get started: navigation/get-started.md
+      - Annotations: navigation/annotations.md
+      - Examples: navigation/examples.md
+      - API reference: api/codegen/index.html
+  - Feature flags:
+      - Get started: feature-flags.md
+      - API reference: api/codegen/index.html
+  - Lint rules:
+      - Rules: lint-rules.md
+      - API reference: api/lint-rules/index.html
+  - Internals:
+      - Overview: internals/index.md
+      - Pipeline: internals/pipeline.md
+      - Parsers: internals/parsers.md
+      - Generators: internals/generators.md
+      - Data model: internals/data-model.md
+      - Consumer contract: internals/consumer-contract.md
+      - Testing: internals/testing.md
   - Change log: changelog.md
   - Releasing: releasing.md

@@ -37,7 +37,7 @@ right predicate (`(it as? ScreenDestination<*>)?.presenter is FooPresenter`) and
 That binding is mechanical and derives entirely from the composable function reference and the presenter type, so `@ScreenUi` and `@SheetUi` generate it instead. The
 composable itself stays manual because it is the feature's UI; the annotation marks the entry point the codegen reads to produce the registry entry.
 
-For how the processor turns each annotation into Metro plus Decompose code, see [architecture/index.md](architecture/index.md).
+For how the processor turns each annotation into Metro plus Decompose code, see [architecture/index.md](../internals/index.md).
 
 ## Supported annotations
 
@@ -250,7 +250,7 @@ generator change in `NavDestinationBindingGenerator.destinationBody`.
 **Where does state save and restore happen?**
 Each generated binding contributes a `NavRouteBinding` or `NavRootBinding` entry that pairs the route class with its `KSerializer`. The consumer's serialization layer
 iterates that multibinding to build a `SerializersModule` that Decompose uses to encode the back stack on process death and decode it on relaunch. The codegen never
-serialises anything itself; it only contributes the entries. See [architecture/consumer-contract.md](architecture/consumer-contract.md#state-save-and-restore).
+serialises anything itself; it only contributes the entries. See [architecture/consumer-contract.md](../internals/consumer-contract.md#state-save-and-restore).
 
 ## References
 

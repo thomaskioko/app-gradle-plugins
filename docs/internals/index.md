@@ -1,7 +1,7 @@
 # Architecture
 
 These pages explain how the navigation codegen processor is built. They are written for contributors who want to read or modify the processor itself. If you only want to
-use the codegen, start at [get-started.md](../get-started.md) and [annotations.md](../annotations.md) instead.
+use the codegen, start at [get-started.md](../navigation/get-started.md) and [annotations.md](../navigation/annotations.md) instead.
 
 The processor turns one annotated symbol into one or two Kotlin source files on disk. Every page below covers one stage of that journey, in pipeline order.
 

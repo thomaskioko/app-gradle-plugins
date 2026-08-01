@@ -59,7 +59,7 @@ the scope marker for `@ContributesTo(AppScope::class)` and `@SingleIn(AppScope::
 **kotlinx.datetime.** `kotlinx.datetime.LocalDate` is the only datetime reference. The generator parses the annotation's `dateAdded` ISO String at codegen time and emits
 a `LocalDate(year, month, day)` constructor call. Consumers must keep `kotlinx-datetime` on the classpath of every module that declares `@FeatureFlag` anchors.
 
-The full feature flag codegen reference lives in [featureflag.md](../featureflag.md). The validation rules and error markers are documented there.
+The full feature flag codegen reference lives in [featureflag.md](../feature-flags.md). The validation rules and error markers are documented there.
 
 ## Runtime flow
 

@@ -7,7 +7,7 @@ and the `<BaseName>Binding` Metro binding. Consumers no longer hand-write the qu
 `FlagBindings` boilerplate.
 
 This tier is independent of the navigation codegen documented in
-[get-started.md](get-started.md). Modules that need both call both DSL functions; modules that need
+[get-started.md](navigation/get-started.md). Modules that need both call both DSL functions; modules that need
 only one apply only that one.
 
 ## Why it exists
@@ -42,7 +42,7 @@ The consumer project must already use Metro and declare a `FeatureFlag<T>` inter
   day)` literal resolves against it.
 
 Type names are hardcoded in
-[architecture/consumer-contract.md](architecture/consumer-contract.md#feature-flag-primitives).
+[architecture/consumer-contract.md](internals/consumer-contract.md#feature-flag-primitives).
 The [Tv Maniac](https://github.com/c0de-wizard/tv-maniac) project is the reference consumer.
 
 ## Wire it up
@@ -216,8 +216,8 @@ Each message names the anchor so the IDE error log identifies the failing flag.
 
 ## References
 
-- [Consumer contract](architecture/consumer-contract.md#feature-flag-primitives): the full list of
+- [Consumer contract](internals/consumer-contract.md#feature-flag-primitives): the full list of
   hardcoded type names the generated code references.
-- [Navigation codegen](get-started.md): the sibling codegen tier for Decompose-based navigation.
+- [Navigation codegen](navigation/get-started.md): the sibling codegen tier for Decompose-based navigation.
 - KSP: <https://kotlinlang.org/docs/ksp-overview.html>
 - KotlinPoet: <https://square.github.io/kotlinpoet/>
