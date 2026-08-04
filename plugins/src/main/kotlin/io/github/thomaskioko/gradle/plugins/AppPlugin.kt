@@ -67,7 +67,9 @@ public abstract class AppPlugin : Plugin<Project> {
 
         target.baseExtension.extensions.create("app", AppExtension::class.java)
 
-        target.setupDependencyGuard("releaseRuntimeClasspath")
+        if (!target.isDebugOnlyBuild()) {
+            target.setupDependencyGuard("releaseRuntimeClasspath")
+        }
 
         val properties = target.scaffoldProperties()
 
