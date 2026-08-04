@@ -19,6 +19,7 @@ Change Log
 - Check how the plugins themselves are written, using the Android lint checks for Gradle code. They found real faults, listed above. The remaining findings are all one thing, using the root project from a module, which stops Gradle from configuring projects independently. Those are recorded so a new one still fails the build.
 - Add the Apache 2.0 license text at the repository root. Every artifact says it is licensed under Apache 2.0, but the license itself was never committed, so GitHub read the project as having no license.
 - Add the Apache license header to every Kotlin file, so the published sources carry it too. The formatter was switched on for `plugins` and `lint-rules` but never told which files to read, so most of the project had never been formatted or checked.
+- Only enable Dependency Guard on `:app` when release builds exist, since `debugOnly` disables them and `releaseRuntimeClasspath` no longer resolves.
 
 ## 0.8.5 *(2026-07-24)*
 
