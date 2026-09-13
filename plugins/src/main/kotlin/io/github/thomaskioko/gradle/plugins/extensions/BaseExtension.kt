@@ -497,7 +497,7 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
                     isStatic = true
 
                     disableNativeCache(
-                        version = DisableCacheInKotlinVersion.`2_4_10`,
+                        version = DisableCacheInKotlinVersion.`2_4_20`,
                         reason = "Kotlin/Native cache bug causes double runtime injection when linking multiple frameworks. See KT-42254.",
                         issueUrl = URI("https://youtrack.jetbrains.com/issue/KT-42254"),
                     )
