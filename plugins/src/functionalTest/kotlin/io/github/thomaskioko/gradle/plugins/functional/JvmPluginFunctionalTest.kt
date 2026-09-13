@@ -17,9 +17,11 @@ package io.github.thomaskioko.gradle.plugins.functional
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class JvmPluginFunctionalTest {
     @get:Rule
@@ -50,5 +52,23 @@ class JvmPluginFunctionalTest {
         val result = project.runner("help", "--task", "spotlessCheck").build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":help")?.outcome)
+    }
+
+    @Test
+    fun `applying jvm plugin opens java base packages to test tasks`() {
+        val project = Fixtures.extract("jvm-library", tempFolder.newFolder("project"))
+        File(project.rootDir, "build.gradle.kts").appendText(
+            """
+
+            tasks.register("printTestJvmArgs") {
+                val jvmArgs = tasks.named<Test>("test").map { it.jvmArgs }
+                doLast { println(jvmArgs.get().joinToString(",")) }
+            }
+            """.trimIndent(),
+        )
+
+        val result = project.runner("printTestJvmArgs").build()
+
+        assertTrue(result.output.contains("--add-opens=java.base/java.io=ALL-UNNAMED"))
     }
 }
