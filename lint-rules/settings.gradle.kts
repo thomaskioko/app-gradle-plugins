@@ -22,7 +22,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:2.4.10")
+        classpath("org.jetbrains.kotlin:kotlin-metadata-jvm:2.4.20")
     }
 }
 
