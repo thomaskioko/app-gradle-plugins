@@ -34,6 +34,9 @@ class MokoResourceGeneratorTaskTest {
     private fun loadResourceFile(path: String): File =
         File(javaClass.classLoader.getResource(path)!!.toURI())
 
+    private fun mokoSources(): List<File> =
+        loadResourceFile("moko-generator/src").listFiles()!!.toList()
+
     @Test
     fun `toPascalCase converts snake_case to PascalCase`() {
         val task = createTask()
@@ -43,14 +46,13 @@ class MokoResourceGeneratorTaskTest {
     }
 
     @Test
-    fun `readKeysFromMRFile extracts string and plural keys`() {
+    fun `should read sorted string and plural keys given accessors split across batch files`() {
         val task = createTask()
-        val mrFile = loadResourceFile("moko-generator/MR.kt")
 
-        val (stringKeys, pluralKeys) = task.readKeysFromMRFile(mrFile)
+        val (stringKeys, pluralKeys) = task.readKeys(mokoSources())
 
         assertEquals(
-            listOf("button_error_retry", "app_name", "label_discover_trending_today"),
+            listOf("app_name", "button_error_retry", "label_discover_trending_today"),
             stringKeys,
         )
         assertEquals(listOf("episode_count", "season_count"), pluralKeys)
@@ -61,8 +63,7 @@ class MokoResourceGeneratorTaskTest {
         val task = createTask()
         val packageName = "com.thomaskioko.tvmaniac.i18n"
         val mrClass = ClassName(packageName, "MR")
-        val mrFile = loadResourceFile("moko-generator/MR.kt")
-        val (stringKeys, _) = task.readKeysFromMRFile(mrFile)
+        val (stringKeys, _) = task.readKeys(mokoSources())
 
         val fileSpec = task.stringResourceKeyFileSpec(
             packageName = packageName,
@@ -79,8 +80,7 @@ class MokoResourceGeneratorTaskTest {
         val task = createTask()
         val packageName = "com.thomaskioko.tvmaniac.i18n"
         val mrClass = ClassName(packageName, "MR")
-        val mrFile = loadResourceFile("moko-generator/MR.kt")
-        val (_, pluralKeys) = task.readKeysFromMRFile(mrFile)
+        val (_, pluralKeys) = task.readKeys(mokoSources())
 
         val fileSpec = task.pluralsResourceKeyFileSpec(
             packageName = packageName,
@@ -96,7 +96,7 @@ class MokoResourceGeneratorTaskTest {
     fun `generate writes both resource key files`() {
         val task = createTask()
         val outputDir = File(task.project.layout.buildDirectory.get().asFile, "resource-keys")
-        task.mokoGeneratedFile.set(loadResourceFile("moko-generator/MR.kt"))
+        task.mokoGeneratedDir.set(loadResourceFile("moko-generator/src"))
         task.commonMainOutput.set(outputDir)
 
         task.generate()

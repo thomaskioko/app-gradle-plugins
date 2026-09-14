@@ -9,9 +9,9 @@ public sealed class StringResourceKey(
   public val resourceId: StringResource
     get() = resourceProvider.value
 
-  public data object ButtonErrorRetry : StringResourceKey(lazy { MR.strings.button_error_retry })
-
   public data object AppName : StringResourceKey(lazy { MR.strings.app_name })
+
+  public data object ButtonErrorRetry : StringResourceKey(lazy { MR.strings.button_error_retry })
 
   public data object LabelDiscoverTrendingToday : StringResourceKey(lazy { MR.strings.label_discover_trending_today })
 }

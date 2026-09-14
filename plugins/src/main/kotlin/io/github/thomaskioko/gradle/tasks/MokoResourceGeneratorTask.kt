@@ -25,12 +25,11 @@ import com.squareup.kotlinpoet.TypeSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -54,13 +53,13 @@ internal abstract class MokoResourceGeneratorTask
     internal val resourcePackage: Property<String> = objectFactory.property(String::class.java)
         .convention("com.thomaskioko.tvmaniac.i18n")
 
-    @get:InputFile
+    @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    internal val mokoGeneratedFile: RegularFileProperty = objectFactory.fileProperty()
+    internal val mokoGeneratedDir: DirectoryProperty = objectFactory.directoryProperty()
         .convention(
             resourcePackage.flatMap { pkg ->
                 val packagePath = pkg.replace('.', '/')
-                layout.buildDirectory.file("generated/moko-resources/commonMain/src/$packagePath/MR.kt")
+                layout.buildDirectory.dir("generated/moko-resources/commonMain/src/$packagePath")
             },
         )
 
@@ -71,11 +70,12 @@ internal abstract class MokoResourceGeneratorTask
     @TaskAction
     internal fun generate() {
         val outputDir = commonMainOutput.get().asFile
-        val mrFile = mokoGeneratedFile.get().asFile
+        val sourceDir = mokoGeneratedDir.get().asFile
         val packageName = resourcePackage.get()
+        val sources = sourceDir.listFiles { file -> file.extension == "kt" }.orEmpty().toList()
 
-        if (!mrFile.exists()) {
-            logger.warn("MR.kt file not found at ${mrFile.absolutePath}")
+        if (sources.isEmpty()) {
+            logger.warn("No Moko generated sources found in ${sourceDir.absolutePath}")
             return
         }
 
@@ -83,7 +83,7 @@ internal abstract class MokoResourceGeneratorTask
         outputDir.mkdirs()
 
         val mrClass = ClassName(packageName, "MR")
-        val (stringKeys, pluralKeys) = readKeysFromMRFile(mrFile)
+        val (stringKeys, pluralKeys) = readKeys(sources)
 
         stringResourceKeyFileSpec(
             packageName = packageName,
@@ -98,51 +98,14 @@ internal abstract class MokoResourceGeneratorTask
         ).writeTo(outputDir)
     }
 
-    internal fun readKeysFromMRFile(mrFile: File): Pair<List<String>, List<String>> {
-        val stringKeys = mutableListOf<String>()
-        val pluralKeys = mutableListOf<String>()
-        var isInStringsObject = false
-        var isInPluralsObject = false
-
-        mrFile.bufferedReader().use { reader ->
-            reader.lineSequence().forEach { line ->
-                when {
-                    line.contains("object strings") -> {
-                        isInStringsObject = true
-                        isInPluralsObject = false
-                    }
-
-                    line.contains("object plurals") -> {
-                        isInStringsObject = false
-                        isInPluralsObject = true
-                    }
-
-                    line.trim() == "}" -> {
-                        isInStringsObject = false
-                        isInPluralsObject = false
-                    }
-
-                    isInStringsObject && line.contains("public val") && line.contains(": StringResource") -> {
-                        extractKeyName(line)?.let { stringKeys.add(it) }
-                    }
-
-                    isInPluralsObject && line.contains("public val") && line.contains(": PluralsResource") -> {
-                        extractKeyName(line)?.let { pluralKeys.add(it) }
-                    }
-                }
-            }
-        }
-        return stringKeys to pluralKeys
+    internal fun readKeys(sources: List<File>): Pair<List<String>, List<String>> {
+        val contents = sources.map { it.readText() }
+        return keysOf(contents, "strings", "StringResource") to keysOf(contents, "plurals", "PluralsResource")
     }
 
-    private fun extractKeyName(line: String): String? {
-        // Example: public val button_error_retry: StringResource
-        return line.split("public val")
-            .getOrNull(1)
-            ?.trim()
-            ?.split(":")
-            ?.getOrNull(0)
-            ?.trim()
+    private fun keysOf(contents: List<String>, accessor: String, resourceType: String): List<String> {
+        val declaration = Regex("""\bval MR\.$accessor\.(\w+): $resourceType\b""")
+        return contents.flatMap { content -> declaration.findAll(content).map { it.groupValues[1] } }.sorted()
     }
 
     internal fun toPascalCase(name: String): String {

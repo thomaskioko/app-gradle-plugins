@@ -12,8 +12,10 @@ plugins {
 
 ## What it does
 
-Registers `generateMokoStrings`, which reads the `MR` object Moko generates and writes a pair of
-sealed classes naming every string and plural key. The result is a compile error when a key is
+Registers `generateMokoStrings`, which reads the string and plural accessors Moko generates for
+`commonMain` and writes a pair of sealed classes naming every string and plural key. It reads the
+layout Moko 0.27.0 introduced, where each key is an extension property on `MR.strings` or
+`MR.plurals`, so it needs Moko 0.27.0 or later. The result is a compile error when a key is
 renamed or removed, rather than a string that silently fails to resolve at runtime.
 
 The generated sources are added to `commonMain`, and the task is chained after Moko's own
