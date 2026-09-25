@@ -17,7 +17,7 @@ kctfork = "0.14.0"
 kotlin = "2.4.20"
 kotlinPoet = "2.4.0"
 ksp="2.3.12"
-metro = "1.4.4"
+metro = "1.4.5"
 publish = "0.37.0"
 spotless = "8.10.2"
 
