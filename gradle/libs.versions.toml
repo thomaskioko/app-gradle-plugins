@@ -19,7 +19,7 @@ kotlinPoet = "2.4.0"
 ksp="2.3.12"
 metro = "1.4.4"
 publish = "0.37.0"
-spotless = "8.10.2"
+spotless = "8.10.3"
 
 [libraries]
 baselineprofile-gradlePlugin = { group = "androidx.benchmark", name = "benchmark-baseline-profile-gradle-plugin", version.ref = "baselineprofile" }
