@@ -2,9 +2,9 @@
 
 `io.github.thomaskioko.gradle.plugins.app`
 
-For an Android application module. Applies the Android application plugin and the Android plugin
-from this suite, so everything on the [Android](android.md) page is available here too, and adds
-an `app {}` block for the things only an application has.
+This plugin configures an Android application module. It applies the Android application plugin
+and this suite's Android plugin, so everything on the [Android](android.md) page works here too.
+It also adds an `app {}` block for the settings only an application has.
 
 ```kotlin
 plugins {
@@ -33,8 +33,8 @@ scaffold {
 
 ## Version and release tasks
 
-An application module also gets `bumpVersion` and `release`, which read and rewrite a `version.txt`
-at the root of the project holding `VERSION_NUMBER` and `BUILD_NUMBER`.
+An application module also gets the `bumpVersion` and `release` tasks. They read and rewrite a
+`version.txt` at the root of the project, which holds `VERSION_NUMBER` and `BUILD_NUMBER`.
 
 ```bash
 ./gradlew bumpVersion -Ptype=minor

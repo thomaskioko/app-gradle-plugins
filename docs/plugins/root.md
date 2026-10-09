@@ -2,8 +2,8 @@
 
 `io.github.thomaskioko.gradle.plugins.root`
 
-Apply this on the root project before anything else. Every other plugin in the suite checks for it
-and fails at once with a clear message if it is missing.
+This plugin configures the root project. Apply it there before anything else. Every other plugin
+in the suite checks for it. If it's missing, they fail at once with a clear message.
 
 ```kotlin
 plugins {
@@ -11,22 +11,22 @@ plugins {
 }
 ```
 
-It refuses to be applied to a module, so a misplaced `id(...)` fails rather than half working.
+It refuses to be applied to a module. A misplaced `id(...)` fails instead of half working.
 
-## What it does
+## Features
 
-- Registers the aggregate test tasks `linuxTest`, `iosTest` and `ciTest`, which the module plugins
-  attach their own test tasks to
+- Registers the aggregate test tasks `linuxTest`, `iosTest` and `ciTest`. The module plugins
+  attach their own test tasks to these
 - Sets the Java vendor used for the Gradle daemon toolchain
-- Applies dependency analysis at the root, so `buildHealth` covers the whole build, and sets the
-  severity of each issue category
+- Applies dependency analysis at the root, so `buildHealth` covers the whole build. It also sets
+  the severity of each issue category
 - Creates the `moduleGraph {}` block described below
 - Configures Gradle Doctor, if the project applies it
 
 ## moduleGraph
 
-Generates a diagram of how the modules depend on each other. `graphDump` writes it, `graphUpdate`
-rewrites the copy under version control.
+This block configures a diagram of how the modules depend on each other. `graphDump` writes it.
+`graphUpdate` rewrites the copy under version control.
 
 ```kotlin
 moduleGraph {

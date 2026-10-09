@@ -1,58 +1,76 @@
 # Data model
 
-Parsers do not feed KSP types directly to KotlinPoet generators. Every parser produces a typed intermediate value and the generators consume nothing else. This
-intermediate value lives in `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/data/`.
+The data model is the set of typed values that sit between the parsers and the KotlinPoet generators. Parsers never hand KSP types to a generator. Each parser produces
+one of these values, and the generators read nothing else. They live in `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/data/`.
 
-There are five top level types. Presenter side navigation annotations (`@NavDestination`) resolve to a `NavData`. UI renderer annotations (`@ScreenUi`, `@SheetUi`,
-`@TabUi`) resolve to a `UiBindingData`. The application root presenter annotation (`@AppRoot`) resolves to an `AppRootData`. The application root composable annotation
-(`@AppRootUi`) resolves to an `AppRootUiData`. The parent-owned child presenter annotation (`@ChildPresenter`) resolves to a `ChildPresenterData`. The five are independent
-and share no supertype because the downstream generators are structurally different.
+There are five top level types:
 
-## NavData
+- The presenter annotation `@NavDestination` resolves to a `NavData`.
+- The UI renderer annotations (`@ScreenUi`, `@SheetUi`, `@TabUi`) resolve to a `UiBindingData`.
+- The application root presenter annotation (`@AppRoot`) resolves to an `AppRootData`.
+- The application root composable annotation (`@AppRootUi`) resolves to an `AppRootUiData`.
+- The annotation for a child presenter owned by a parent presenter (`@ChildPresenter`) resolves to a `ChildPresenterData`.
 
-`NavData` is a sealed interface with two implementations: `ScreenData` for stack screens and modal overlays, `TabData` for top level tab roots.
+`NavData` and `ChildPresenterData` share one supertype, `GraphData`. It holds the names `ScreenGraphGenerator` needs to emit a graph extension, so screens, tab
+roots, and child presenters all go through that one generator. `UiBindingData`, `AppRootData`, and `AppRootUiData` share no supertype, because the generators that
+consume them produce structurally different output.
+
+## GraphData
+
+`GraphData` is a plain interface in `data/NavData.kt`. `NavData` extends it, and `ChildPresenterData` implements it directly.
 
 ```kotlin
-internal sealed interface NavData {
-    val presenterClass: ClassName
-    val baseName: String
-    val packageName: String
+internal interface GraphData {
     val parentScope: ClassName
     val scope: ClassName
     val graphClassName: ClassName
     val graphFactoryFunName: String
-    val bindingClassName: ClassName
     val graphPropertyType: ClassName
     val graphPropertyName: String
+}
+```
+
+`NavData` adds the names the binding generators need on top. `ChildPresenterData` adds nothing, because a child presenter has no binding.
+
+## NavData
+
+`NavData` is a sealed interface with two implementations: `ScreenData` for stack screens and modal overlays, and `TabData` for top level tab roots.
+
+```kotlin
+internal sealed interface NavData : GraphData {
+    val presenterClass: ClassName
+    val baseName: String
+    val packageName: String
+    val bindingClassName: ClassName
     val graphFactoryClassName: ClassName
         get() = graphClassName.nestedClass("Factory")
 }
 ```
 
-`ScreenData` carries the route class, an optional `@AssistedFactory` `ClassName`, the route property name (when the presenter accepts a runtime parameter), and a
-`ScreenKind` enum (`SCREEN` or `OVERLAY`) that the binding generator uses to pick `NavDestination.Screen` or `NavDestination.Overlay`. The `factory` field acts as the
-parameterization marker: when `factory` is `null` the presenter uses plain `@Inject` and the generated graph exposes the presenter directly; when `factory` is non `null`
+`ScreenData` carries the route class, an optional `@AssistedFactory` `ClassName`, the route property name (when the presenter takes a runtime parameter), and a
+`ScreenKind` enum (`SCREEN` or `OVERLAY`). The binding generator uses the enum to pick `NavDestination.Screen` or `NavDestination.Overlay`. The `factory` field marks
+a parameterized presenter. When `factory` is `null`, the presenter uses plain `@Inject` and the generated graph exposes the presenter directly. When `factory` is non `null`,
 the presenter uses `@AssistedInject` and the generated graph exposes the factory. The derived `isParameterized` flag reads `factory != null`.
 
-`TabData` carries the route plus a `configEnclosing` field for nested route classes. It has no factory branch because tabs are always plain `@Inject`. The parser rejects
+`TabData` carries the route plus a `configEnclosing` field for nested route classes. It has no factory branch, because tabs always use plain `@Inject`. The parser rejects
 `@AssistedInject` tab presenters explicitly; see [parsers.md](parsers.md).
 
-The `graphPropertyName` and `graphPropertyType` fields are the one place where the screen branch and the tab branch produce different output downstream. `ScreenData`
-resolves them to the factory's name and class when the presenter is parameterized, and to the presenter's name and class otherwise. `TabData` always resolves to the
+`graphPropertyName` and `graphPropertyType` are the one place where screens and tabs produce different output further down. For a parameterized presenter, `ScreenData`
+resolves them to the factory's name and class. Otherwise it resolves them to the presenter's name and class. `TabData` always resolves to the
 presenter.
 
 ### Naming on the data class
 
-The derived properties (`graphClassName`, `bindingClassName`, `graphPropertyName`, `graphFactoryFunName`) are computed on the data class itself rather than in generators.
-Two reasons:
+We compute the derived properties (`graphClassName`, `bindingClassName`, `graphPropertyName`, `graphFactoryFunName`) on the data class, not in the generators.
+There are two reasons:
 
-1. They are pure functions of `baseName` and `packageName`. Computing them once at parse time keeps the generators free of naming logic.
-2. The naming convention is the contract between this processor and the consumer project. Goldens fix the names; tests fail when they drift. Centralising the convention
-   on the data class makes "what does this file get called" a single grep.
+1. They are pure functions of `baseName` and `packageName`. Computing them once at parse time keeps naming logic out of the generators.
+2. The naming convention is the contract between this processor and the consumer project. Goldens pin the names, and tests fail when they drift. With the convention
+   on the data class, "what is this file called" is a single grep.
 
 ## UiBindingData
 
-`UiBindingData` is a single data class plus a `UiBindingKind` enum (`Screen`, `Sheet`, or `Tab`).
+`UiBindingData` is one data class plus a `UiBindingKind` enum (`Screen`, `Sheet`, or `Tab`).
 
 ```kotlin
 internal data class UiBindingData(
@@ -64,16 +82,16 @@ internal data class UiBindingData(
 )
 ```
 
-`composableFunction` is a KotlinPoet `MemberName` rather than a `ClassName` because the generated code calls the composable as a top level function, and `MemberName` is
-what KotlinPoet's `%M` interpolation expects. Carrying it pre formed avoids re deriving it inside the generator.
+`composableFunction` is a KotlinPoet `MemberName`, not a `ClassName`. The generated code calls the composable as a top level function, and `MemberName` is
+what KotlinPoet's `%M` interpolation expects. Building it once here saves the generator from deriving it again.
 
-The `kind` enum is what `UiBindingGenerator` switches on to pick the content type (`ScreenContent` for `Screen` and `Tab`, `SheetContent` for `Sheet`), the destination
-cast target (`ScreenDestination<*>` for `Screen`, `SheetDestination<*>` for `Sheet`, `TabChild<*>` for `Tab`), and whether the composable receives a `Modifier` parameter
-(yes for `Screen` and `Tab`, no for `Sheet`). The switch lives inside the generator as a private `Variant` data class; see [generators.md](generators.md).
+`UiBindingGenerator` switches on `kind` to pick three things. The content type is `ScreenContent` for `Screen` and `Tab`, and `SheetContent` for `Sheet`. The destination
+cast target is `ScreenDestination<*>` for `Screen`, `SheetDestination<*>` for `Sheet`, and `TabChild<*>` for `Tab`. The composable gets a `Modifier` parameter
+for `Screen` and `Tab`, but not for `Sheet`. The switch lives inside the generator as a private `Variant` data class; see [generators.md](generators.md).
 
 ## AppRootData
 
-`AppRootData` is a single data class produced by [parseAppRootData](parsers.md#approotparser).
+`AppRootData` is one data class, produced by [parseAppRootData](parsers.md#approotparser).
 
 ```kotlin
 internal data class AppRootData(
@@ -86,7 +104,7 @@ internal data class AppRootData(
 )
 ```
 
-The generator emits a `@BindingContainer @ContributesTo(parentScope) object <InterfaceName>BindingContainer` containing one `@Provides @SingleIn(parentScope)` function
+The generator emits a `@BindingContainer @ContributesTo(parentScope) object <InterfaceName>BindingContainer`. It holds one `@Provides @SingleIn(parentScope)` function
 that takes a `ComponentContext` and the nested factory, and returns the bound interface. Every name the generator needs (the binding object name, the provide function
 name) is derived on the data class:
 
@@ -97,12 +115,12 @@ val provideFunName: String =
     "provide${interfaceClassName.simpleName}"
 ```
 
-The factory's single function name (`factoryFunctionName`) is captured at parse time rather than hardcoded so a non standard factory name (`build`, `make`, etc.) works
-without generator changes.
+We capture the factory's function name (`factoryFunctionName`) at parse time instead of hardcoding it. That way a non standard factory name (`build`, `make`, etc.) works
+without touching the generator.
 
 ## AppRootUiData
 
-`AppRootUiData` is a single data class plus an `AppRootUiParameter` data class for each non-modifier parameter on the annotated composable.
+`AppRootUiData` is one data class, plus an `AppRootUiParameter` data class for each parameter on the annotated composable other than the modifier.
 
 ```kotlin
 internal data class AppRootUiData(
@@ -120,43 +138,52 @@ internal data class AppRootUiParameter(
 ```
 
 `composableFunction` is a `MemberName` for the same reason as on `UiBindingData`: the generated code calls the composable as a top level function through KotlinPoet's
-`%M` interpolation. `parameters` carries the composable's non-modifier parameters in declaration order; the generator turns each entry into a `val` on the generated
-`AppRootProvider` interface and uses the same name to call the composable inside the generated extension. `hasModifier` records whether the composable accepts a
-`modifier: Modifier` parameter, so the generator can decide whether to forward the receiver's modifier.
+`%M` interpolation. `parameters` holds the composable's parameters other than the modifier, in declaration order. The generator turns each entry into a `val` on the
+generated `AppRootProvider` interface, and uses the same name when it calls the composable inside the generated extension. `hasModifier` records whether the composable
+takes a `modifier: Modifier` parameter, so the generator knows whether to forward the receiver's modifier.
 
 ## ChildPresenterData
 
-`ChildPresenterData` is a single data class produced by [parseChildPresenterData](parsers.md#childpresenterparser).
+`ChildPresenterData` is one data class, produced by [parseChildPresenterData](parsers.md#childpresenterparser).
 
 ```kotlin
 internal data class ChildPresenterData(
     val presenterClass: ClassName,
     val baseName: String,
     val packageName: String,
-    val scope: ClassName,
-    val parentScope: ClassName,
-)
+    override val scope: ClassName,
+    override val parentScope: ClassName,
+    val factory: ClassName? = null,
+) : GraphData
 ```
 
-The generator emits a `@GraphExtension(scope) interface <BaseName>ChildGraph` exposing the presenter as a property and a nested
-`@ContributesTo(parentScope) @GraphExtension.Factory` interface whose single function returns the graph. The derived properties on the data class fix the naming:
+The generator emits a `@GraphExtension(scope) interface <BaseName>ChildGraph` that exposes the presenter as a property. The `factory` field works as it does on
+`ScreenData`. When it is `null`, the presenter uses plain `@Inject` and the graph exposes the presenter. When it is set, the presenter uses `@AssistedInject` and the
+graph exposes its nested `@AssistedFactory` instead, so the parent can pass runtime values to `create(...)`. Inside it is a nested
+`@ContributesTo(parentScope) @GraphExtension.Factory` interface whose single function returns the graph. The derived properties on the data class fix the names:
 
 ```kotlin
 val graphClassName: ClassName = ClassName(packageName, "${baseName}ChildGraph")
 val graphFactoryFunName: String = "create${baseName}Graph"
-val graphPropertyName: String = baseName.replaceFirstChar { it.lowercaseChar() } + "Presenter"
+val graphPropertyType: ClassName = factory ?: presenterClass
+val graphPropertyName: String =
+    if (factory != null) {
+        baseName.replaceFirstChar { it.lowercaseChar() } + "Factory"
+    } else {
+        baseName.replaceFirstChar { it.lowercaseChar() } + "Presenter"
+    }
 ```
 
-The factory function name embeds `baseName` (rather than a constant `createGraph`) so two child graphs contributing to the same parent scope do not collide. Two
-`@GraphExtension.Factory` interfaces contributed to one scope merge into Metro's parent graph, and a name clash on the factory function would surface as an
+The factory function name includes `baseName` (instead of a fixed `createGraph`) so two child graphs in the same parent scope do not collide. Metro merges every
+`@GraphExtension.Factory` interface contributed to a scope into the parent graph. If two factory functions had the same name, you would get an
 `Incompatible return types` compile error at the activity graph.
 
-## Why an intermediate value at all
+## Intermediate values
 
-The generators target KotlinPoet `FileSpec` outputs. KSP types like `KSClassDeclaration` carry resolution state, lazy children, and a lifetime tied to the round.
-Translating once at the parser boundary means:
+The generators produce KotlinPoet `FileSpec` outputs. KSP types like `KSClassDeclaration` carry resolution state and lazy children, and they only live for one round.
+We translate once, at the parser boundary, which gives us three things:
 
-- Generators are pure functions of the intermediate value: easy to test, easy to read, easy to golden.
-- Parsers concentrate KSP specific logic (annotation argument extraction, nested declaration walks) in one place.
-- The structure of the intermediate value is the contract between the two halves of the processor. The file under `data/` is the place to look when wiring a new
-  annotation through the pipeline.
+- Generators are pure functions of the intermediate value. They are easy to test, easy to read, and easy to golden.
+- KSP specific logic (reading annotation arguments, walking nested declarations) stays in the parsers.
+- The intermediate value is the contract between the two halves of the processor. When you wire a new annotation through the pipeline, start with the file
+  under `data/`.

@@ -1,21 +1,20 @@
 # Examples
 
-Concrete input and generated output for every annotation variant. Each example is taken from the
-golden fixtures used by `codegen-processor-test`, so the output matches what the processor
+This page shows the input and generated output for every annotation variant. Each example comes from
+the golden fixtures used by `codegen-processor-test`, so the output matches what the processor
 produces in a real build.
 
-Each section shows the annotated declaration the consumer writes, then every Kotlin file the
-processor writes to disk for that input. Generated files land in a `<package>.di` sub-package
-next to the annotated symbol. For how each file is built from the input, see
-[architecture/generators.md](../internals/generators.md) and
+Each section shows the annotated declaration you write, then every Kotlin file the processor writes
+for it. Generated files land in a `<package>.di` sub-package next to the annotated symbol. For how
+each file is built from the input, see [architecture/generators.md](../internals/generators.md) and
 [architecture/parsers.md](../internals/parsers.md).
 
 ## Contents
 
-1. [`@NavDestination(kind = SCREEN)`, presenter with no runtime parameters](#1-navdestinationkind--screen-presenter-with-no-runtime-parameters)
-2. [`@NavDestination(kind = SCREEN)`, parameterized presenter](#2-navdestinationkind--screen-parameterized-presenter)
-3. [`@NavDestination(kind = OVERLAY)`](#3-navdestinationkind--overlay)
-4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind--tab_root)
+1. [`@NavDestination(kind = SCREEN)`, presenter with no runtime parameters](#1-navdestinationkind-screen-presenter-with-no-runtime-parameters)
+2. [`@NavDestination(kind = SCREEN)`, parameterized presenter](#2-navdestinationkind-screen-parameterized-presenter)
+3. [`@NavDestination(kind = OVERLAY)`](#3-navdestinationkind-overlay)
+4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind-tab_root)
 5. [`@ScreenUi`](#5-screenui)
 6. [`@SheetUi`](#6-sheetui)
 7. [`@TabUi`](#7-tabui)
@@ -25,11 +24,11 @@ next to the annotated symbol. For how each file is built from the input, see
 
 ## 1. `@NavDestination(kind = SCREEN)`, presenter with no runtime parameters
 
-Use `@NavDestination(kind = SCREEN)` on a presenter declared with a plain `@Inject` constructor when the presenter needs no runtime parameters from the route. Every
-dependency the presenter takes is provided by Metro from the surrounding dependency graph. `@NavDestination` generates a graph that exposes the presenter instance
-directly, plus a `NavDestination.Screen` factory that builds it from a `ComponentContext` alone.
+Use `@NavDestination(kind = SCREEN)` on a presenter with a plain `@Inject` constructor, when it needs no runtime parameters from the route. Metro provides every
+dependency from the surrounding dependency graph. `@NavDestination` generates a graph that exposes the presenter instance directly. It also generates a
+`NavDestination.Screen` factory that builds the presenter from a `ComponentContext` alone.
 
-This is the simpler of the two SCREEN forms. The other (next section) covers presenters that take one runtime parameter through `@AssistedInject`.
+This is the simpler of the two SCREEN forms. The next section covers presenters that take one runtime parameter through `@AssistedInject`.
 
 ### Input
 
@@ -92,12 +91,12 @@ public interface DebugNavDestinationBinding {
 
 ## 2. `@NavDestination(kind = SCREEN)`, parameterized presenter
 
-Use `@NavDestination(kind = SCREEN)` on a presenter declared with `@AssistedInject` and a nested `@AssistedFactory` when the presenter needs one runtime value supplied
-through the route, such as a show ID or an episode ID that identifies the specific instance of the screen. The runtime value lives as a property on the route class.
+Use `@NavDestination(kind = SCREEN)` on a presenter with `@AssistedInject` and a nested `@AssistedFactory`, when it needs one runtime value from the route. Think of a
+show ID or an episode ID that identifies which screen instance this is. The value lives as a property on the route class.
 
-The difference from the previous section is the presenter's constructor: `@AssistedInject` plus an `@Assisted` parameter on one constructor argument and a nested
-`@AssistedFactory` interface. `@NavDestination` detects the assisted factory automatically, exposes it on the generated graph in place of the presenter, and generates a
-factory lambda that reads the matching property off the incoming route and threads it through `factory.create(...)`.
+The difference from the previous section is the constructor. It has `@AssistedInject`, one `@Assisted` argument, and a nested `@AssistedFactory` interface.
+`@NavDestination` detects the assisted factory and exposes it on the generated graph instead of the presenter. The generated factory lambda reads the matching property
+from the incoming route and passes it to `factory.create(...)`.
 
 ### Input
 
@@ -171,21 +170,21 @@ public interface ShowDetailsNavDestinationBinding {
 
 ### Route and factory rules
 
-If you violate either of these rules the processor reports a compile error pointing at the offending declaration. The rules let the processor match the route property to
-the assisted factory parameter.
+Break either rule and the processor reports a compile error on the offending declaration. The rules are what let the processor match the route property to the
+assisted factory parameter.
 
 - The presenter must have exactly one `@Assisted` constructor parameter.
 - The route class must have exactly one property whose type matches the assisted parameter's type.
 
 ## 3. `@NavDestination(kind = OVERLAY)`
 
-Use `@NavDestination(kind = OVERLAY)` for a modal destination presented on top of the current screen through Decompose's slot mechanism, such as a bottom sheet, dialog,
-or menu. The difference from a SCREEN destination is twofold: the route must implement `NavRoute` plus a marker interface (in Tv Maniac, `OverlayRoute`) that tells the
-consumer's navigator to route the destination into the overlay slot instead of pushing it onto the back stack, and the generated binding contributes a
-`NavDestination.Overlay` instead of a `NavDestination.Screen`.
+Use `@NavDestination(kind = OVERLAY)` for a modal destination shown on top of the current screen through Decompose's slot, such as a bottom sheet, dialog, or menu.
+Two things differ from a SCREEN destination. First, the route implements `NavRoute` plus a marker interface (in Tv Maniac, `OverlayRoute`). The marker tells the
+navigator to put the destination in the overlay slot instead of pushing it onto the back stack. Second, the generated binding contributes a `NavDestination.Overlay`
+instead of a `NavDestination.Screen`.
 
-`@NavDestination(kind = OVERLAY)` works with both plain `@Inject` and `@AssistedInject` presenters; the example below uses the parameterized form. The full runtime flow
-lives in [architecture/consumer-contract.md](../internals/consumer-contract.md#runtime-flow).
+`@NavDestination(kind = OVERLAY)` works with both plain `@Inject` and `@AssistedInject` presenters. The example below uses the parameterized form. The full runtime flow
+is in [architecture/consumer-contract.md](../internals/consumer-contract.md#runtime-flow).
 
 ### Input
 
@@ -257,19 +256,19 @@ public interface EpisodeSheetNavDestinationBinding {
 }
 ```
 
-The graph file is identical in form to example 2's `ShowDetailsScreenGraph`. The only difference between SCREEN and OVERLAY output is that the binding contributes a
-`NavDestination.Overlay` instead of a `NavDestination.Screen`. The consumer's navigator inspects that subclass at runtime to decide whether to push the destination onto
-the back stack or render it in Decompose's overlay slot.
+The graph file has the same form as `ShowDetailsScreenGraph` in example 2. The only difference between SCREEN and OVERLAY output is the binding: it contributes a
+`NavDestination.Overlay` instead of a `NavDestination.Screen`. The navigator checks that subclass at runtime to decide whether to push the destination onto the back
+stack or show it in Decompose's overlay slot.
 
 ## 4. `@NavDestination(kind = TAB_ROOT)`
 
-Use `@NavDestination(kind = TAB_ROOT)` for the destination shown when the user selects one of the bottom navigation tabs. The difference from SCREEN and OVERLAY
-destinations is the route type: a tab root's route is a `NavRoot` `data object` rather than a `NavRoute` `data class`, so the route carries no payload. Tab presenters
-therefore use plain `@Inject` only; `@NavDestination` reports a compile error if a tab presenter declares a nested `@AssistedFactory`.
+Use `@NavDestination(kind = TAB_ROOT)` for the destination shown when the user selects a bottom navigation tab. What differs from SCREEN and OVERLAY is the route
+type. A tab root's route is a `NavRoot` `data object`, not a `NavRoute` `data class`, so it carries no payload. That is why tab presenters use plain `@Inject` only.
+`@NavDestination` reports a compile error if a tab presenter declares a nested `@AssistedFactory`.
 
-The generated binding contributes a `NavDestination.TabRoot` (instead of `Screen` or `Overlay`) plus a `NavRootBinding<*>` (instead of `NavRouteBinding<*>`) so the tab
-root participates in polymorphic save and restore alongside the other tabs. It also contributes the route singleton itself into `Set<NavRoot>`, replacing the
-hand-written `<Feature>RootBinding` files consumers used to keep next to each tab.
+The generated binding contributes a `NavDestination.TabRoot` (instead of `Screen` or `Overlay`) plus a `NavRootBinding<*>` (instead of `NavRouteBinding<*>`). That lets
+the tab root take part in polymorphic save and restore alongside the other tabs. It also contributes the route singleton itself into `Set<NavRoot>`. That replaces the
+`<Feature>RootBinding` files consumers used to write by hand next to each tab.
 
 ### Input
 
@@ -338,18 +337,18 @@ public interface DiscoverShowsTabDestinationBinding {
 }
 ```
 
-The tab graph is contributed to `parentScope` (typically `ActivityScope`), the same scope as the unified `Set<NavDestination<*>>`. The consumer's home presenter filters
-by the `TabRoot` subclass and renders the active root. The third contribution feeds `Set<NavRoot>`, which a navigator typically iterates to enumerate the available
-tabs without inspecting destination factories.
+The tab graph is contributed to `parentScope` (usually `ActivityScope`), the same scope as the unified `Set<NavDestination<*>>`. The home presenter filters by the
+`TabRoot` subclass and renders the active root. The third contribution feeds `Set<NavRoot>`. A navigator usually walks that set to list the available tabs without
+looking at destination factories.
 
 ## 5. `@ScreenUi`
 
-Use `@ScreenUi` on the Android `@Composable` function that renders a screen presenter. The annotation generates a `ScreenContent` binding that joins the composable to the
-`Set<ScreenContent>` multibinding the navigation host iterates to pick the right renderer for the active screen. `@ScreenUi` replaces the mechanical binding file each
-composable would otherwise need.
+Use `@ScreenUi` on the Android `@Composable` function that renders a screen presenter. The annotation generates a `ScreenContent` binding that adds the composable to the
+`Set<ScreenContent>` multibinding. The navigation host walks that set to pick the renderer for the active screen. Without `@ScreenUi`, you write this binding file by
+hand for every composable.
 
-The previous four sections cover the presenter-side annotation. `@ScreenUi` covers the Android UI-side annotation that pairs with a `kind = SCREEN` presenter at runtime.
-The next section covers the overlay equivalent, `@SheetUi`.
+The previous four sections cover the annotation on the presenter. `@ScreenUi` is the annotation on the Android UI that pairs with a `kind = SCREEN` presenter at
+runtime. The next section covers the overlay equivalent, `@SheetUi`.
 
 ### Input
 
@@ -404,22 +403,21 @@ public object DebugMenuScreenUiBinding {
 }
 ```
 
-The `@BindingContainer object` structure rather than `interface + companion object` is deliberate. The Android only `ui` source set does not pick up `@Provides @IntoSet`
-declarations from a companion object the way the shared Kotlin Multiplatform source set does, so emitting the interface form would silently produce an empty multibinding
-at runtime. The full reasoning lives in
-[architecture/generators.md](../internals/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
+We emit a `@BindingContainer object` instead of `interface + companion object` on purpose. The Android only `ui` source set doesn't pick up `@Provides @IntoSet`
+declarations from a companion object the way the shared Kotlin Multiplatform source set does. So the interface form would silently give an empty multibinding at
+runtime. The full reasoning is in
+[architecture/generators.md](../internals/generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
-### Function signature requirement
+### Composable signature
 
-The annotated function must accept exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator calls them by
-name, so renaming either causes the generated code to fail at the next compile.
+The annotated function must take exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator passes them by
+name, so renaming either breaks the generated code at the next compile.
 
 ## 6. `@SheetUi`
 
-Use `@SheetUi` on the Android `@Composable` function that renders an overlay presenter. The difference from `@ScreenUi` is the multibinding the generated code contributes
-to: `@SheetUi` adds a `SheetContent` into `Set<SheetContent>` because the consumer's overlay slot iterates the sheet set, while `@ScreenUi` adds a `ScreenContent` into
-`Set<ScreenContent>` because the navigation stack iterates the screen set. `@SheetUi` also does not forward `Modifier` to the composable; `@ScreenUi` does. The reason is
-at the end of this section.
+Use `@SheetUi` on the Android `@Composable` function that renders an overlay presenter. It differs from `@ScreenUi` in the multibinding it contributes to. `@SheetUi`
+adds a `SheetContent` into `Set<SheetContent>`, because the overlay slot walks the sheet set. `@ScreenUi` adds a `ScreenContent` into `Set<ScreenContent>`, because the
+navigation stack walks the screen set. `@SheetUi` also doesn't forward `Modifier` to the composable, while `@ScreenUi` does. The reason is at the end of this section.
 
 ### Input
 
@@ -473,18 +471,18 @@ public object EpisodeSheetUiBinding {
 }
 ```
 
-The overlay renderer does not receive a modifier. `SheetContent.content` is typed as `@Composable (SheetChild) -> Unit`. Modal layout decisions (a `ModalBottomSheet`, for
-example) belong inside the composable body, not at the call site. The annotated function still accepts a `modifier: Modifier = Modifier` parameter for consistency with
-other composables, but the generator does not forward it.
+The overlay renderer doesn't receive a modifier. `SheetContent.content` is typed as `@Composable (SheetChild) -> Unit`. Modal layout decisions (a `ModalBottomSheet`, for
+example) belong inside the composable body, not at the call site. The annotated function still takes a `modifier: Modifier = Modifier` parameter to match other
+composables, but the generator doesn't forward it.
 
 ## 7. `@TabUi`
 
-Use `@TabUi` on the Android `@Composable` function that renders one tab pager page. The annotation generates a `ScreenContent` binding identical in shape to the
-`@ScreenUi` output, but the generated predicate matches `TabChild<*>` rather than `ScreenDestination<*>`. Use it on the four bottom-bar tab pages (Discover, Library,
-Progress, Profile) where the active child is a `TabChild`-wrapped tab presenter rather than a `ScreenDestination`-wrapped routed screen.
+Use `@TabUi` on the Android `@Composable` function that renders one tab pager page. It generates a `ScreenContent` binding with the same shape as the `@ScreenUi`
+output, but the predicate matches `TabChild<*>` instead of `ScreenDestination<*>`. Use it on the four bottom bar tab pages (Discover, Library, Progress, Profile). There
+the active child is a tab presenter wrapped in a `TabChild`, not a routed screen wrapped in a `ScreenDestination`.
 
-The previous section covered the overlay renderer (`@SheetUi`). The next section covers the parent-owned child presenter (`@ChildPresenter`). The next two cover the
-application root pair (`@AppRoot` and `@AppRootUi`).
+The previous section covered the overlay renderer (`@SheetUi`). The next section covers child presenters that a parent presenter owns (`@ChildPresenter`). The two after
+that cover the application root pair (`@AppRoot` and `@AppRootUi`).
 
 ### Input
 
@@ -539,14 +537,15 @@ public object DiscoverScreenUiBinding {
 }
 ```
 
-The output joins the same `Set<ScreenContent>` multibinding the navigation host iterates. The host treats `TabChild` and `ScreenDestination` the same way: it walks the
-set, finds the entry whose predicate returns `true` for the active child, and invokes that entry's `content` lambda.
+The output goes into the same `Set<ScreenContent>` multibinding the navigation host walks. The host treats `TabChild` and `ScreenDestination` the same way. It walks the
+set, finds the entry whose predicate returns `true` for the active child, and calls that entry's `content` lambda.
 
 ## 8. `@ChildPresenter`
 
-Use `@ChildPresenter` on a presenter class owned by a parent host presenter rather than navigated to through a route. The annotation generates a `<Presenter>ChildGraph`
-graph extension exposing the presenter as a property plus a nested factory contributing to the parent's scope. The pattern fits tab pagers (Tv Maniac's progress tab
-hosts an Up Next page and a Calendar page) and any other host presenter that constructs sibling presenters with `Decompose.childContext(key)`.
+Use `@ChildPresenter` on a presenter that a parent host presenter owns, instead of one the navigator reaches through a route. The annotation generates a
+`<Presenter>ChildGraph` graph extension that exposes the presenter as a property, plus a nested factory contributed to the parent's scope. This fits tab pagers (Tv
+Maniac's progress tab hosts an Up Next page and a Calendar page). It also fits any other host presenter that builds sibling presenters with
+`Decompose.childContext(key)`.
 
 ### Input
 
@@ -591,8 +590,8 @@ public interface UpNextChildGraph {
 
 ### Parent presenter wiring
 
-The parent host (here `ProgressPresenter`) takes one factory parameter per child. Each factory call gets a `Decompose.childContext(key)` so the children stay alive
-together with independent lifecycles:
+The parent host (here `ProgressPresenter`) takes one factory parameter per child. Each factory call gets a `Decompose.childContext(key)`, so the children stay alive
+together but keep independent lifecycles:
 
 ```kotlin
 @Inject
@@ -613,14 +612,14 @@ public class ProgressPresenter(
 }
 ```
 
-The factory function name is unique per child (`create<BaseName>Graph`) so two child graphs contributing to the same parent scope (`ProgressRoot::class` here) do not
+Each child gets its own factory function name (`create<BaseName>Graph`). So two child graphs contributed to the same parent scope (`ProgressRoot::class` here) don't
 collide.
 
-### Reusable variant: embed in any screen
+### Reusable components
 
-The example above pins the child to one host because `parentScope` is `ProgressRoot::class`. A
-component meant to live in its own module and be reused (for example a featured-shows hero) instead
-sets `parentScope` to a shared ancestor scope, `ActivityScope::class`. The generated factory then
+The example above ties the child to one host, because `parentScope` is `ProgressRoot::class`. A
+component meant to live in its own module and be reused (say, a featured shows hero) sets
+`parentScope` to a shared ancestor scope instead: `ActivityScope::class`. The generated factory then
 contributes to a graph every screen descends from, so any host below `ActivityScope` can embed it.
 
 ```kotlin
@@ -654,27 +653,27 @@ public interface FeaturedShowsChildGraph {
 }
 ```
 
-A discover host and a search host both embed it with the same two lines, and an embeddable component
-can nest another embeddable component the same way (the outer graph also descends from
-`ActivityScope`):
+A discover host and a search host both embed it with the same two lines. An embeddable component
+can nest another one the same way, since the outer graph also descends from `ActivityScope`:
 
 ```kotlin
 public val featuredPresenter: FeaturedShowsPresenter =
     featuredGraphFactory.createFeaturedShowsGraph(childContext(key = "Featured")).featuredShowsPresenter
 ```
 
-The constraint is that an embeddable component may inject only bindings reachable at `ActivityScope`
-or `AppScope`; depending on a tab-root-scoped binding fails as an ordinary Metro missing-binding
-error at the embedding site.
+There is one constraint. An embeddable component may inject only bindings reachable at `ActivityScope`
+or `AppScope`. A dependency on a binding scoped to one tab root fails as an ordinary Metro
+missing-binding error at the embedding site.
 
 ## 9. `@AppRoot`
 
-Use `@AppRoot` on the application's `@AssistedInject` root presenter implementation. The annotation generates the activity-scope `@BindingContainer` that wires the
-nested `@AssistedFactory` to the bound presenter interface. The output replaces the hand-written binding container the consumer would otherwise have to keep in sync
-with the factory function name and the bound interface name.
+Use `@AppRoot` on the application's `@AssistedInject` root presenter implementation. The annotation generates the `@BindingContainer` in the activity scope that
+connects the nested `@AssistedFactory` to the bound presenter interface. Without it, you write that binding container by hand and keep it in sync with the factory
+function name and the bound interface name.
 
-`@AppRoot` differs from `@NavDestination` in two ways. The root has no route, so the annotation does not take a `route` parameter. The root is bound to its public
-interface at the parent scope rather than exposed through a `@GraphExtension`, so the generated artifact is a binding container, not a graph plus a destination binding.
+`@AppRoot` differs from `@NavDestination` in two ways. First, the root has no route, so the annotation has no `route` parameter. Second, the root is bound to its
+public interface at the parent scope instead of exposed through a `@GraphExtension`. So the generated file is a binding container, not a graph plus a destination
+binding.
 
 ### Input
 
@@ -717,17 +716,17 @@ public object RootPresenterBindingContainer {
 }
 ```
 
-The `object` name is derived from the bound interface (`RootPresenter` becomes `RootPresenterBindingContainer`). The `@Provides` function name follows the same pattern
-(`provideRootPresenter`). The bound interface is inferred from the implementation's supertypes; `ComponentContext`, used as a delegate, is filtered out.
+The `object` name comes from the bound interface (`RootPresenter` becomes `RootPresenterBindingContainer`). The `@Provides` function name follows the same pattern
+(`provideRootPresenter`). The bound interface is inferred from the implementation's supertypes. `ComponentContext`, used as a delegate, is skipped.
 
 ## 10. `@AppRootUi`
 
-Use `@AppRootUi` on the host composable that wraps every other screen. The annotation generates a provider interface declaring one property for each non-modifier
-parameter on the composable plus a `@Composable AppRootProvider.AppRootContent(modifier)` extension that invokes the composable using the receiver's properties. The
-activity-scope graph extends the generated provider, and the activity invokes `graph.AppRootContent()` instead of forwarding each dependency by hand.
+Use `@AppRootUi` on the host composable that wraps every other screen. The annotation generates a provider interface with one property for each non-modifier parameter
+of the composable. It also generates a `@Composable AppRootProvider.AppRootContent(modifier)` extension that calls the composable with the receiver's properties. The
+activity-scope graph extends the generated provider, and the activity calls `graph.AppRootContent()` instead of forwarding each dependency by hand.
 
-The host composable is not a member of the `Set<ScreenContent>` multibinding the navigation system iterates. It is the host that publishes that set to its descendants.
-`@ScreenUi` does not apply for that reason. `@AppRootUi` exists so the codegen can emit a provider interface keyed off the composable's parameter list.
+The host composable is not part of the `Set<ScreenContent>` multibinding the navigation system walks. It is the host that provides that set to its descendants, so
+`@ScreenUi` doesn't apply. `@AppRootUi` lets the codegen emit a provider interface built from the composable's parameter list.
 
 ### Input
 
@@ -786,10 +785,10 @@ public fun AppRootProvider.AppRootContent(modifier: Modifier = Modifier) {
 }
 ```
 
-### Consumer wiring
+### Wiring
 
-The consumer makes its activity-scope `@DependencyGraph` extend `AppRootProvider`. The graph already exposes the three properties; the only change is making the
-contract explicit:
+Make your activity-scope `@DependencyGraph` extend `AppRootProvider`. The graph already exposes the three properties. The only change is making the contract
+explicit:
 
 ```kotlin
 @DependencyGraph(ActivityScope::class)
@@ -801,7 +800,7 @@ public interface ActivityGraph : AppRootProvider {
 }
 ```
 
-The activity then invokes the host with one call:
+The activity then renders the host with one call:
 
 ```kotlin
 class MainActivity : ComponentActivity() {

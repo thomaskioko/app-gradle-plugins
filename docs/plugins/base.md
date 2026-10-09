@@ -2,10 +2,10 @@
 
 `io.github.thomaskioko.gradle.plugins.base`
 
-You do not apply this one. The App, Android, JVM and Multiplatform plugins apply it, and it is
-what creates the `scaffold {}` block every module configures itself through.
+This plugin creates the `scaffold {}` block that every module configures itself through. You don't
+apply it yourself. The App, Android, JVM and Multiplatform plugins apply it for you.
 
-## What it does
+## Features
 
 - Creates `scaffold {}`
 - Applies Spotless with the project's formatting rules
@@ -16,7 +16,7 @@ what creates the `scaffold {}` block every module configures itself through.
 
 ## Options
 
-Everything here is available in `scaffold {}` on any module.
+These options are available in `scaffold {}` on any module.
 
 | Option | What it does |
 |---|---|
@@ -32,7 +32,8 @@ Everything here is available in `scaffold {}` on any module.
 
 ## Targets
 
-These shape a Kotlin Multiplatform module. See the [Multiplatform](multiplatform.md) page.
+These options set the targets of a Kotlin Multiplatform module. See the
+[Multiplatform](multiplatform.md) page.
 
 | Option | What it does |
 |---|---|

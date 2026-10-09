@@ -2,7 +2,8 @@
 
 `io.github.thomaskioko.gradle.plugins.baseline.profile`
 
-Apply this on the benchmark module that produces a baseline profile for your application.
+This plugin configures the benchmark module that produces a baseline profile for your
+application. Apply it on that module.
 
 ```kotlin
 plugins {
@@ -12,19 +13,19 @@ plugins {
 
 The identifier is `baseline.profile` with a dot, not a hyphen.
 
-## What it does
+## Features
 
 - Applies the Android test plugin and Base
 - Points the test module at the application module and sets the instrumentation runner
-- Adds a `benchmark {}` block inside `scaffold {}` carrying the same options as the
+- Adds a `benchmark {}` block inside `scaffold {}`, with the same options as the
   [Android](android.md) page
-- On non-debug builds, applies the AndroidX baseline profile producer, runs it on the registered
-  managed device rather than a connected one, and passes the target application identifier through
-  so the profile is produced for the right package
+- On builds other than debug, applies the AndroidX baseline profile producer. It runs on the
+  registered managed device, not a connected one. It also passes the target application
+  identifier through, so the profile is produced for the right package
 
-In debug-only mode the profile setup is skipped entirely, so local builds stay fast.
+In debug-only mode we skip the profile setup entirely, so local builds stay fast.
 
-## The other half
+## Consuming the profile
 
-The application module consuming the profile calls `useBaselineProfile()` in its `android {}`
-block, naming this module. See the [Android](android.md) page.
+The application module that consumes the profile calls `useBaselineProfile()` in its
+`android {}` block and names this module. See the [Android](android.md) page.

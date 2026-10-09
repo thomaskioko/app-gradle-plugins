@@ -4,10 +4,10 @@
 [![Build](https://github.com/thomaskioko/app-gradle-plugins/actions/workflows/build.yml/badge.svg)](https://github.com/thomaskioko/app-gradle-plugins/actions/workflows/build.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-A module in a large project spends most of its build file repeating the same setup: the same
-target platforms, the same compiler flags, the same test dependencies. These plugins move that
-setup out of the build file and leave behind a `scaffold {}` block where a module declares only
-the choices it actually has to make.
+This repository contains Gradle plugins that are used to build Kotlin Multiplatform and Android
+projects. They hold the setup every module would otherwise repeat (targets, compiler flags, test
+dependencies), so a module's build file only declares the choices that are its own, inside a
+`scaffold {}` block.
 
 ```kotlin
 plugins {
@@ -23,23 +23,24 @@ scaffold {
 }
 ```
 
-Alongside the plugins are a KSP code generator that writes the navigation graph for an annotated
-presenter, and a ktlint rule set for the conventions a type cannot enforce.
+The repository also contains a KSP code generator and a ktlint rule set. The code generator
+writes the navigation graph for an annotated presenter. The rules cover conventions the type
+system can't enforce.
 
 ## Documentation
 
 **<https://thomaskioko.github.io/app-gradle-plugins/>**
 
 - [Installing](https://thomaskioko.github.io/app-gradle-plugins/install/) covers what a project
-  needs before the first module builds. Each step was checked against an empty project.
+  needs before the first module builds. We checked each step against an empty project.
 - [Plugins](https://thomaskioko.github.io/app-gradle-plugins/plugins/) has a page for each of the
-  eleven plugins and every option in `scaffold {}`.
+  eleven plugins. It also covers every option in `scaffold {}`.
 - [Navigation](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/) covers the
   annotations that generate a screen's graph and bindings.
 - [Feature flags](https://thomaskioko.github.io/app-gradle-plugins/feature-flags/) covers declaring
-  a flag once and having its qualifier and bindings written for you.
-- [Lint rules](https://thomaskioko.github.io/app-gradle-plugins/lint-rules/) lists every rule and
-  how to exempt a module from one.
+  a flag once. The codegen writes its qualifier and bindings for you.
+- [Lint rules](https://thomaskioko.github.io/app-gradle-plugins/lint-rules/) lists every rule, and
+  how you exempt a module from one.
 - [API reference](https://thomaskioko.github.io/app-gradle-plugins/api/plugins/) is generated from
   the source.
 

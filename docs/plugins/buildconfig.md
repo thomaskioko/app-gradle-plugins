@@ -2,8 +2,8 @@
 
 `io.github.thomaskioko.gradle.plugins.buildconfig`
 
-Apply this on a module that needs constants fixed at compile time, such as an API key. It works on
-any module, including a Kotlin Multiplatform one, which the Android `BuildConfig` does not.
+This plugin generates constants that are fixed at compile time, such as an API key. It works on
+any module, including a Kotlin Multiplatform one. The Android `BuildConfig` doesn't.
 
 ```kotlin
 plugins {
@@ -17,7 +17,7 @@ buildConfig {
 }
 ```
 
-Note that this block is `buildConfig {}` at the top level, not part of `scaffold {}`.
+This block is `buildConfig {}` at the top level. It isn't part of `scaffold {}`.
 
 ## Options
 
@@ -29,12 +29,12 @@ Note that this block is `buildConfig {}` at the top level, not part of `scaffold
 | `booleanField(name, value)` | A literal true or false constant |
 | `intField(name, value)` | A literal whole number constant |
 
-The three literal helpers write into `stringFields`, `booleanFields` and `intFields`, which are
-also readable and settable directly if you are generating constants in a loop rather than naming
+The three literal helpers write into `stringFields`, `booleanFields` and `intFields`. You can also
+read and set those directly, which helps if you generate constants in a loop instead of naming
 them one at a time.
 
-The generated file is added to `commonMain` and every Kotlin compilation waits for it, so nothing
-has to be ordered by hand.
+The generated file is added to `commonMain`, and every Kotlin compilation waits for it. You don't
+have to order anything by hand.
 
 Full detail in the
 [API reference](../api/plugins/plugins/io.github.thomaskioko.gradle.plugins.extensions/-build-config-extension/index.html).

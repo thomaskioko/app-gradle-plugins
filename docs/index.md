@@ -1,9 +1,9 @@
 # App Gradle Plugins
 
-A module in a large project spends most of its build file repeating the same setup: the same
-target platforms, the same compiler flags, the same test dependencies. These plugins move that
-setup out of the build file and leave behind a `scaffold {}` block where a module declares only
-the choices it actually has to make.
+This repository contains Gradle plugins that are used to build Kotlin Multiplatform and Android
+projects. They hold the setup every module would otherwise repeat (targets, compiler flags, test
+dependencies), so a module's build file only declares the choices that are its own, inside a
+`scaffold {}` block.
 
 ```kotlin
 plugins {
@@ -15,33 +15,39 @@ scaffold {
 }
 ```
 
-## What is here
+## Highlights
 
-**Convention plugins** for Kotlin Multiplatform, Android and JVM modules. Apply the root plugin on
-the root project and one platform plugin on each module, then describe the module through
+### Convention plugins
+
+Plugins for Kotlin Multiplatform, Android and JVM modules. You apply the root plugin on the root
+project and one platform plugin on each module. Then you describe the module through
 `scaffold {}`.
 
-**Code generation** for navigation and feature flags. Mark a presenter as a destination and the
-processor writes the dependency graph and the bindings that go with it, instead of leaving four
-mechanical files to be written by hand for every screen.
+### Code generation
 
-**ktlint rules** for the conventions a type cannot enforce, such as keeping navigation
-construction inside the modules that own it, or requiring the code generation annotation rather
-than a binding written by hand.
+KSP processors for navigation and feature flags. The navigation codegen generates the dependency
+graph and bindings for a presenter you mark as a destination. Those are four files you would
+otherwise write by hand for every screen.
 
-## Where to go next
+### Lint rules
+
+ktlint rules for the conventions the type system can't enforce. For example, navigation is
+only constructed inside the modules that own it, and a binding comes from the code generation
+annotation rather than being written by hand.
+
+## Documentation
 
 The [API reference](api/plugins/index.html) covers every plugin, every option in `scaffold {}`, and every
-annotation, generated from the source itself so it cannot drift away from the code.
+annotation. We generate it from the source, so it can't drift away from the code.
 
 [Installing](install.md) walks through the settings a project needs before the first module
-builds, each step checked against an empty project.
+builds. We checked each step against an empty project.
 
-The [change log](changelog.md) records what changed in each release and what a consumer has to do
-about it, if anything.
+The [change log](changelog.md) records what changed in each release. It also says what you have
+to do about it, if anything.
 
-## Compatibility
+## Usage requirements
 
-These plugins are built against AGP 9 and current Kotlin. They are published to Maven Central and
-used in production by [Tv Maniac](https://github.com/c0de-wizard/tv-maniac), which is where most
-of the requirements come from.
+The plugins are built against AGP 9 and current Kotlin, and published to Maven Central. We use
+them in production in [Tv Maniac](https://github.com/c0de-wizard/tv-maniac). Most of the
+requirements come from there.

@@ -2,7 +2,8 @@
 
 `io.github.thomaskioko.gradle.plugins.lint`
 
-Apply this on the root project to add the suite's own ktlint rules on top of the standard ones.
+This plugin adds the suite's own ktlint rules on top of the standard ones. Apply it on the root
+project.
 
 ```kotlin
 plugins {
@@ -10,21 +11,22 @@ plugins {
 }
 ```
 
-## What it does
+## Features
 
-It reads its own version from its jar and asks for the matching `lint-rules` artifact, then hands
-that to [Spotless](spotless.md) as a custom rule set for the root project and every module.
+The plugin reads its own version from its jar and asks for the matching `lint-rules` artifact.
+Then it hands that to [Spotless](spotless.md) as a custom rule set for the root project and every
+module.
 
-The versions cannot drift apart. Moving the plugin version in your catalog moves the rules with
-it, because the coordinate is built from the version of the plugin doing the asking.
+The versions can't drift apart. We build the coordinate from the plugin's own version, so moving
+the plugin version in your catalog moves the rules with it.
 
-## The rules
+## Rules
 
-The rules cover conventions a type cannot enforce: keeping navigation construction inside the
-modules that own it, requiring the code generation annotations rather than bindings written by
-hand, and naming a test after the behaviour it checks. Each one reads its exemptions from
-`.editorconfig` where it has any, so a module that legitimately breaks a rule says so in the file
-it applies to.
+The rules cover conventions the type system can't enforce. Navigation is only constructed inside
+the modules that own it. Bindings come from the code generation annotations, not from code
+written by hand. A test is named after the behaviour it checks. Rules with exemptions read them
+from `.editorconfig`. So a module that legitimately breaks a rule says so in the file it applies
+to.
 
 Every rule, and the `.editorconfig` property that exempts a module from it, is on the
 [lint rules](../lint-rules.md) page. The classes themselves are in the
