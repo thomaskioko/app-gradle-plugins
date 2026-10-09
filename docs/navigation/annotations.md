@@ -168,7 +168,7 @@ file into `com.example.feature.ui.di`:
   tests `(it as? ScreenDestination<*>)?.presenter is FooPresenter`. The `content` lambda casts the child and invokes `FooScreen(presenter = ..., modifier = modifier)`.
 
 We use a `@BindingContainer object` on purpose. The full reasoning is in
-[architecture/generators.md](../internals/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings). The short version: in an
+[architecture/generators.md](../internals/generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings). The short version: in an
 Android only `ui` module, an `interface + companion object` form silently produces an empty multibinding unless the right Metro flag is set.
 
 ### Composable signature requirement

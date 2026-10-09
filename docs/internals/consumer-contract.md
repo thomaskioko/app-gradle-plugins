@@ -6,16 +6,20 @@ and every generator imports them from there.
 
 ## What is hardcoded
 
-The hardcoded names fall into six groups, sorted by the role each one plays at runtime.
+The hardcoded names fall into eight groups, sorted by the role each one plays at runtime.
 
 **Decompose.** `com.arkivanov.decompose.ComponentContext` is the only Decompose type the codegen uses. It is the `@Provides` parameter on every generated
 graph factory function, so every presenter on the graph can request it. `AppRootBindingGenerator` also uses it as a parameter on the generated
 binding container function.
 
+**Kotlin standard library.** `kotlin.OptIn`, `kotlin.native.HiddenFromObjC`, and `kotlin.experimental.ExperimentalObjCRefinement`. The graph and destination binding
+generators use them to hide generated types from Objective-C when the compilation has a non JVM target. See
+[generators.md](generators.md#hiding-from-objective-c).
+
 **Metro.** Every generated annotation is one of `dev.zacsweers.metro.{ContributesTo, GraphExtension, Provides, IntoSet, BindingContainer, SingleIn}`.
 `UiBindingGenerator` and `AppRootBindingGenerator` use `BindingContainer`. Only `AppRootBindingGenerator` uses `SingleIn`, to scope the generated provider
 to the parent scope. We explain the binding container choice in
-[generators.md](generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
+[generators.md](generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
 **Consumer navigation primitives** under `com.thomaskioko.tvmaniac.navigation`:
 
@@ -33,9 +37,9 @@ for `SheetContent`) are part of the contract. If the consumer changes them, ever
 
 **Consumer home navigation** under `com.thomaskioko.tvmaniac.home.nav`: `TabChild`. The tab root factory lambda always wraps its presenter as `TabChild(...)`.
 
-**Compose.** `UiBindingGenerator` uses `androidx.compose.ui.Modifier` on the screen path (overlay renderers do not forward a modifier), and
-`AppRootUiBindingGenerator` uses it on the generated extension. Only `AppRootUiBindingGenerator` uses `androidx.compose.runtime.Composable`, because it puts that
-annotation directly on the generated `AppRootContent` extension.
+**Compose.** Only `AppRootUiBindingGenerator` names `androidx.compose.ui.Modifier` and `androidx.compose.runtime.Composable`. It puts `@Composable` directly on the
+generated `AppRootContent` extension and declares its `modifier: Modifier` parameter. `UiBindingGenerator` never names either type. For screen and tab renderers it
+forwards the `modifier` argument that the consumer's `ScreenContent` lambda passes in. Overlay renderers forward no modifier.
 
 **App root primitives.** These live in whatever package the consumer chose. The `@AppRoot` and `@AppRootUi` generators do not use any consumer specific name. The bound
 interface (`RootPresenter` in Tv Maniac), the implementation type, and the host composable all come from the annotated symbol through the parser. Consumers can

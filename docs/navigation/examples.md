@@ -11,10 +11,10 @@ each file is built from the input, see [architecture/generators.md](../internals
 
 ## Contents
 
-1. [`@NavDestination(kind = SCREEN)`, presenter with no runtime parameters](#1-navdestinationkind--screen-presenter-with-no-runtime-parameters)
-2. [`@NavDestination(kind = SCREEN)`, parameterized presenter](#2-navdestinationkind--screen-parameterized-presenter)
-3. [`@NavDestination(kind = OVERLAY)`](#3-navdestinationkind--overlay)
-4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind--tab_root)
+1. [`@NavDestination(kind = SCREEN)`, presenter with no runtime parameters](#1-navdestinationkind-screen-presenter-with-no-runtime-parameters)
+2. [`@NavDestination(kind = SCREEN)`, parameterized presenter](#2-navdestinationkind-screen-parameterized-presenter)
+3. [`@NavDestination(kind = OVERLAY)`](#3-navdestinationkind-overlay)
+4. [`@NavDestination(kind = TAB_ROOT)`](#4-navdestinationkind-tab_root)
 5. [`@ScreenUi`](#5-screenui)
 6. [`@SheetUi`](#6-sheetui)
 7. [`@TabUi`](#7-tabui)
@@ -406,7 +406,7 @@ public object DebugMenuScreenUiBinding {
 We emit a `@BindingContainer object` instead of `interface + companion object` on purpose. The Android only `ui` source set doesn't pick up `@Provides @IntoSet`
 declarations from a companion object the way the shared Kotlin Multiplatform source set does. So the interface form would silently give an empty multibinding at
 runtime. The full reasoning is in
-[architecture/generators.md](../internals/generators.md#binding-container-object-for-ui-bindings-interface-companion-for-destination-bindings).
+[architecture/generators.md](../internals/generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
 ### Function signature requirement
 

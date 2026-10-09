@@ -11,24 +11,37 @@ There are five top level types:
 - The application root composable annotation (`@AppRootUi`) resolves to an `AppRootUiData`.
 - The annotation for a child presenter owned by a parent presenter (`@ChildPresenter`) resolves to a `ChildPresenterData`.
 
-The five are independent and share no supertype, because the generators that consume them produce structurally different output.
+`NavData` and `ChildPresenterData` share one supertype, `GraphData`. It holds the names `ScreenGraphGenerator` needs to emit a graph extension, so screens, tab
+roots, and child presenters all go through that one generator. `UiBindingData`, `AppRootData`, and `AppRootUiData` share no supertype, because the generators that
+consume them produce structurally different output.
+
+## GraphData
+
+`GraphData` is a plain interface in `data/NavData.kt`. `NavData` extends it, and `ChildPresenterData` implements it directly.
+
+```kotlin
+internal interface GraphData {
+    val parentScope: ClassName
+    val scope: ClassName
+    val graphClassName: ClassName
+    val graphFactoryFunName: String
+    val graphPropertyType: ClassName
+    val graphPropertyName: String
+}
+```
+
+`NavData` adds the names the binding generators need on top. `ChildPresenterData` adds nothing, because a child presenter has no binding.
 
 ## NavData
 
 `NavData` is a sealed interface with two implementations: `ScreenData` for stack screens and modal overlays, and `TabData` for top level tab roots.
 
 ```kotlin
-internal sealed interface NavData {
+internal sealed interface NavData : GraphData {
     val presenterClass: ClassName
     val baseName: String
     val packageName: String
-    val parentScope: ClassName
-    val scope: ClassName
-    val graphClassName: ClassName
-    val graphFactoryFunName: String
     val bindingClassName: ClassName
-    val graphPropertyType: ClassName
-    val graphPropertyName: String
     val graphFactoryClassName: ClassName
         get() = graphClassName.nestedClass("Factory")
 }
@@ -138,18 +151,27 @@ internal data class ChildPresenterData(
     val presenterClass: ClassName,
     val baseName: String,
     val packageName: String,
-    val scope: ClassName,
-    val parentScope: ClassName,
-)
+    override val scope: ClassName,
+    override val parentScope: ClassName,
+    val factory: ClassName? = null,
+) : GraphData
 ```
 
-The generator emits a `@GraphExtension(scope) interface <BaseName>ChildGraph` that exposes the presenter as a property. Inside it is a nested
+The generator emits a `@GraphExtension(scope) interface <BaseName>ChildGraph` that exposes the presenter as a property. The `factory` field works as it does on
+`ScreenData`. When it is `null`, the presenter uses plain `@Inject` and the graph exposes the presenter. When it is set, the presenter uses `@AssistedInject` and the
+graph exposes its nested `@AssistedFactory` instead, so the parent can pass runtime values to `create(...)`. Inside it is a nested
 `@ContributesTo(parentScope) @GraphExtension.Factory` interface whose single function returns the graph. The derived properties on the data class fix the names:
 
 ```kotlin
 val graphClassName: ClassName = ClassName(packageName, "${baseName}ChildGraph")
 val graphFactoryFunName: String = "create${baseName}Graph"
-val graphPropertyName: String = baseName.replaceFirstChar { it.lowercaseChar() } + "Presenter"
+val graphPropertyType: ClassName = factory ?: presenterClass
+val graphPropertyName: String =
+    if (factory != null) {
+        baseName.replaceFirstChar { it.lowercaseChar() } + "Factory"
+    } else {
+        baseName.replaceFirstChar { it.lowercaseChar() } + "Presenter"
+    }
 ```
 
 The factory function name includes `baseName` (instead of a fixed `createGraph`) so two child graphs in the same parent scope do not collide. Metro merges every

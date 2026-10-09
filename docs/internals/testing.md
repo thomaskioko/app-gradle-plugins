@@ -31,12 +31,13 @@ the actual `@NavDestination` symbol and not a stub.
 ## The stubs
 
 `TestStubs.kt` holds minimal source fakes of the consumer types the generators use. Each stub is a `Pair<String, String>` of file name and source
-text. Three lists group them by what each set of tests needs.
+text. Five lists group them by what each set of tests needs.
 
 - `baseStubs` is the common set: Decompose `ComponentContext`, `ActivityScope`, the navigation primitives, Metro annotations (including `@SingleIn`), and
   `kotlinx.serialization`. Every test uses these.
-- `tabStubs` adds the `TabChild` type from the home navigation package (`com.thomaskioko.tvmaniac.home.nav`). Tab root tests and `@TabUi` tests use these.
-- `uiStubs` adds the Compose UI annotations and the navigation UI primitives (`ScreenContent`, `SheetContent`). `@ScreenUi`, `@SheetUi`, and `@TabUi` tests use these.
+- `tabStubs` adds the `TabChild` type from the home navigation package (`com.thomaskioko.tvmaniac.home.nav`) and a sample `NavRoot`. Tab root tests use these.
+- `uiStubs` adds the Compose UI annotations and the navigation UI primitives (`ScreenContent`, `SheetContent`). `@ScreenUi` and `@SheetUi` tests use these.
+- `tabUiStubs` is `uiStubs` plus the `TabChild` type. `@TabUi` tests use these.
 - `appRootUiStubs` adds the same UI primitives plus a separate `androidx.compose.runtime.Composable` stub, because `@AppRootUi` puts that annotation directly on the
   generated extension. `@AppRootUi` tests use these.
 
@@ -47,7 +48,7 @@ the stubs and `External.kt` disagree, the end to end compilation fails. If you u
 ## Goldens
 
 Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, actual)`. Goldens live under
-`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. There are ten navigation codegen variants
+`codegen/processor-test/src/test/resources/golden/<variant>/<file>.kt`. There are eleven navigation codegen variants
 (the feature flag processor keeps its own `featureflag/` golden, documented in [featureflag.md](../feature-flags.md)):
 
 - `simple/` for `@NavDestination(kind = SCREEN)` with plain `@Inject`.
@@ -58,14 +59,16 @@ Each test asserts through `GoldenFileAssert.assertMatches(variant, fileName, act
 - `tab-ui/` for `@TabUi`.
 - `child-presenter/` for `@ChildPresenter` pinned to one host (`parentScope` is a tab root).
 - `child-presenter-embeddable/` for `@ChildPresenter` made reusable (`parentScope` is the shared `ActivityScope`).
+- `child-presenter-parameterized/` for `@ChildPresenter` on an `@AssistedInject` presenter, where the graph exposes the assisted factory.
 - `app-root/` for `@AppRoot`.
 - `app-root-ui/` for `@AppRootUi`.
 
 Tests are grouped by annotation, not by variant:
 
-- `NavDestinationTest` covers all three `@NavDestination` kinds (SCREEN, OVERLAY, TAB_ROOT) plus the parameterized SCREEN variant.
+- `NavDestinationTest` covers all three `@NavDestination` kinds (SCREEN, OVERLAY, TAB_ROOT) plus the parameterized SCREEN variant. OVERLAY has no golden. The test
+  checks for the `NavDestination.Overlay(` call in the generated binding.
 - `ScreenUiTest` covers `@ScreenUi`, `SheetUiTest` covers `@SheetUi`, and `TabUiTest` covers `@TabUi`.
-- `ChildPresenterTest` covers `@ChildPresenter` in both the flat (pinned) and embeddable (shared `ActivityScope`) shapes.
+- `ChildPresenterTest` covers `@ChildPresenter` in three shapes: flat (pinned), embeddable (shared `ActivityScope`), and parameterized.
 - `AppRootTest` covers `@AppRoot` plus three error paths (missing `@AssistedInject`, missing nested factory, missing bound interface).
 - `AppRootUiTest` covers `@AppRootUi` plus two error paths (no parameter other than the modifier, presenter type mismatch).
 - `ErrorPathTest` runs the validation branches of the navigation parsers and asserts on the compilation messages instead of a golden file.

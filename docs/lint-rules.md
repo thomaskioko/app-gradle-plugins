@@ -100,7 +100,7 @@ The rule can autocorrect. It handles both `@Inject` on the class and `@Inject` o
 
 ### `tvmaniac:presenter-needs-codegen-annotation`
 
-This rule requires every Metro injected presenter class to also carry a codegen annotation that wires it into navigation. It fires on a top level class that matches all three of these: its simple name ends with `Presenter`, it has `@Inject` or `@AssistedInject`, and it has none of the accepted codegen annotations (`@NavDestination`, `@AppRoot`).
+This rule requires every Metro injected presenter class to also carry a codegen annotation that wires it into navigation. It fires on any class that matches all three of these: its simple name ends with `Presenter`, it has `@Inject` or `@AssistedInject`, and it has none of the accepted codegen annotations (`@NavDestination`, `@AppRoot`, `@ChildPresenter`).
 
 ```kotlin
 // Forbidden:
@@ -120,11 +120,16 @@ class TrendingShowsPresenter(...)
 @AppRoot(parentScope = ActivityScope::class)
 @AssistedInject
 class DefaultRootPresenter(...) : RootPresenter
+
+// Allowed (child presenter owned by a parent):
+@Inject
+@ChildPresenter(scope = UpNextScope::class, parentScope = ActivityScope::class)
+class UpNextPresenter(...)
 ```
 
-Classes with `@ContributesBinding`, `@ContributesIntoSet`, or `@ContributesIntoMap` are exempt, because Metro wires them through the binding and not through codegen. Abstract and interface presenters are exempt for the same reason. Child presenters exposed through a hand written `@GraphExtension` opt out by listing their simple class name in `ktlint_tvmaniac_unrouted_presenters`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
+Classes with `@ContributesBinding`, `@ContributesIntoSet`, or `@ContributesIntoMap` are exempt, because Metro wires them through the binding and not through codegen. Abstract and interface presenters are exempt for the same reason. Child presenters annotated with `@ChildPresenter` pass the rule directly. Presenters exposed through a hand written `@GraphExtension` opt out by listing their simple class name in `ktlint_tvmaniac_unrouted_presenters`. See [Configuring codegen exemptions](#configuring-codegen-exemptions).
 
-Some composables render a presenter without being navigation destinations. Examples are a host that places child component composables directly, or an embedded reusable component. These are plain composables and carry no UI annotation. We deliberately have no rule that requires one. A ktlint rule cannot resolve the presenter's type, so it cannot tell an embedded child UI from a routed screen. Codegen only wires routed presenters (`@NavDestination`/`@AppRoot`) and their `@ScreenUi`/`@SheetUi`/`@TabUi`/`@AppRootUi` composables.
+Some composables render a presenter without being navigation destinations. Examples are a host that places child component composables directly, or an embedded reusable component. These are plain composables and carry no UI annotation. We deliberately have no rule that requires one. A ktlint rule cannot resolve the presenter's type, so it cannot tell an embedded child UI from a routed screen. Codegen only wires annotated presenters (`@NavDestination`, `@AppRoot`, `@ChildPresenter`) and the `@ScreenUi`/`@SheetUi`/`@TabUi`/`@AppRootUi` composables.
 
 ### `tvmaniac:test-name-format`
 
@@ -148,14 +153,15 @@ The `tvmaniac:presenter-needs-codegen-annotation` rule reads one `.editorconfig`
 
 ### `ktlint_tvmaniac_unrouted_presenters`
 
-This is a comma separated list of simple class names for presenters that are deliberately not wired through codegen. Use it for child presenters exposed through a hand written `@GraphExtension` (for example pager children inside a parent presenter).
+This is a comma separated list of simple class names for presenters that are deliberately not wired through codegen. Use it for presenters exposed through a hand written `@GraphExtension`. A child presenter that the codegen should wire takes `@ChildPresenter` instead.
 
 ```
 [*.{kt,kts}]
 ktlint_tvmaniac_unrouted_presenters = UpNextPresenter, CalendarPresenter
 ```
 
-- **Default**: empty. Every Metro injected `Presenter` class must carry `@NavDestination` or `@AppRoot`.
+- **Default**: empty. Every Metro injected `Presenter` class must carry `@NavDestination`, `@AppRoot`, or `@ChildPresenter`.
+- **Matching** ignores case.
 - **Whitespace** around entries is trimmed; **blank entries** are ignored.
 - Setting the property to `unset` (or leaving the value empty) keeps the default empty list.
 

@@ -203,6 +203,7 @@ The processor reports a compile error on the offending symbol when any of these 
 | `[FeatureFlag/InvalidTarget]` | The annotated symbol is an annotation class, or is not a class/object/interface. |
 | `[FeatureFlag/EmptyKey]`      | `key` is blank.                                                            |
 | `[FeatureFlag/EmptyTitle]`    | `title` is blank.                                                          |
+| `[FeatureFlag/EmptyDescription]` | `description` is blank.                                               |
 | `[FeatureFlag/InvalidDate]`   | `dateAdded` does not parse as a valid ISO `YYYY-MM-DD` date.               |
 
 Each message names the anchor, so the IDE error log tells you which flag failed.

@@ -57,7 +57,7 @@ either the presenter (for plain `@Inject` presenters and tabs) or the assisted f
 `@ContributesTo(parentScope) @GraphExtension.Factory` and declares the abstract `create<BaseName>Graph(@Provides componentContext: ComponentContext): <Graph>` factory
 function.
 
-Every name in the output (interface name, property name, factory function name) comes from the `NavData`. The generator never derives them again, and that is on purpose.
+Every name in the output (interface name, property name, factory function name) comes from the `GraphData`. The generator never derives them again, and that is on purpose.
 See [data-model.md](data-model.md#naming-on-the-data-class) for why naming lives on the intermediate value.
 
 ## NavDestinationBindingGenerator
@@ -83,12 +83,13 @@ plain `@Inject`, and the parser enforces that earlier.
 ## UiBindingGenerator
 
 This generator produces a `@BindingContainer @ContributesTo(parentScope) object <FunctionName>UiBinding` with one `@Provides @IntoSet` function that returns `ScreenContent` or
-`SheetContent`. A private `Variant` data class holds the values that differ between the two kinds:
+`SheetContent`. A private `Variant` data class holds the values that differ between the three kinds. A tab pager renderer reuses `ScreenContent` and casts to `TabChild`:
 
 ```kotlin
 private fun variantFor(kind: UiBindingKind): Variant = when (kind) {
     UiBindingKind.Screen -> Variant(ScreenContent, ScreenDestination, forwardsModifier = true)
     UiBindingKind.Sheet -> Variant(SheetContent, SheetDestination, forwardsModifier = false)
+    UiBindingKind.Tab -> Variant(ScreenContent, TabChild, forwardsModifier = true)
 }
 ```
 
@@ -137,9 +138,9 @@ The bindings we emit for `@NavDestination` use Metro's `interface + companion ob
 `@TabUi` use Metro's `@BindingContainer object` structure instead. The reason is a Metro detail.
 
 `@Provides @IntoSet` declarations inside an `interface + companion object` only become contributions when Metro's `generateContributionProviders` flag is on. The
-consumer scaffold turns that flag off. The presenter bindings still work in the interface form, because the consumer's Kotlin Multiplatform source set picks them
-up through a separate Metro path. The Android only `ui` modules, where the UI bindings land, have no such fallback. Emitting `interface + companion` there would quietly
-produce an empty multibinding at build time. Using `@BindingContainer object` makes the contributions discoverable without the flag.
+scaffold turns that flag off in `MetroSetup.kt` (`generateContributionProviders.set(false)`). The destination bindings in the Kotlin Multiplatform presenter modules
+still get picked up in the interface form. The Android only `ui` modules, where the UI bindings land, do not pick up companion declarations. Emitting
+`interface + companion` there would quietly produce an empty multibinding at build time. Using `@BindingContainer object` makes the contributions discoverable without the flag.
 
 ### Route class as graph scope
 

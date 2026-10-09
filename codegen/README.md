@@ -15,11 +15,13 @@ This directory contains KSP processors that generate code for Kotlin Multiplatfo
   - the UI renderer binding on the Android side,
   - the binding container that puts the root presenter in the activity scope,
   - the provider interface and extension that let the activity render the root with one call.
-- **Feature flag codegen** targets typed feature flags backed by a `FeatureFlagFactory`. One
-  annotation (`@FeatureFlag`) decorates a `@Qualifier`-annotated annotation class. For each
-  qualifier, the processor emits one `<QualifierBaseName>Binding.kt`. It holds the `@Provides
-  @SingleIn @<Qualifier>` factory call and the `@Provides @IntoSet` rebind into the
-  `Set<FeatureFlag<Boolean>>` multibinding.
+- **Feature flag codegen** targets typed feature flags backed by a `FeatureFlagFactory`. You put
+  one annotation (`@FeatureFlag`) on an anchor: a class, object, or interface, but not an
+  annotation class. For each anchor, the processor emits two files in the anchor's package. The
+  first is `<BaseName>Qualifier.kt`, a Metro `@Qualifier` annotation. The second is
+  `<BaseName>Binding.kt`, which holds the `@Provides @SingleIn(AppScope::class)
+  @<BaseName>Qualifier` factory call and the `@Provides @IntoSet` rebind into the
+  `Set<FeatureFlag<Boolean>>` multibinding. `<BaseName>` is the anchor's simple name.
 
 Neither tier works with Jetpack Navigation, Voyager, Appyx, Dagger/Hilt, or any other library. The
 generated code references Decompose's `ChildStack`/`ChildSlot`/`ComponentContext` primitives and
@@ -43,7 +45,7 @@ Your project must already use Metro. Each tier adds its own requirements:
   defaultValue, dateAdded)` method.
 - Metro graphs scoped at `AppScope` that the generated `@ContributesTo(AppScope::class)` interface
   can plug into.
-- `kotlinx-datetime` on every module that declares `@FeatureFlag` qualifiers.
+- `kotlinx-datetime` on every module that declares `@FeatureFlag` anchors.
 
 Tv Maniac is the reference implementation for both tiers. The full runtime contract, including the
 exact consumer types the generated code references, is in

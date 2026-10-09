@@ -13,9 +13,7 @@ the same values.
 
 ```kotlin
 override fun process(resolver: Resolver): List<KSAnnotated> {
-    processAnnotation(resolver, Constants.NAV_DESTINATION_FQN, Constants.NAV_DESTINATION) { presenter ->
-        parseNavDestinationData(presenter, logger)
-    }
+    processNavDestination(resolver)
     processUiBinding(resolver, Constants.SCREEN_UI_FQN, Constants.SCREEN_UI, UiBindingKind.Screen)
     processUiBinding(resolver, Constants.SHEET_UI_FQN, Constants.SHEET_UI, UiBindingKind.Sheet)
     processUiBinding(resolver, Constants.TAB_UI_FQN, Constants.TAB_UI, UiBindingKind.Tab)
@@ -26,7 +24,7 @@ override fun process(resolver: Resolver): List<KSAnnotated> {
 }
 ```
 
-Five private helpers cover the kinds of annotated symbol the processor knows. `processAnnotation` and `processUiBinding` handle the navigation annotations. Three
+Five private helpers cover the kinds of annotated symbol the processor knows. `processNavDestination` and `processUiBinding` handle the navigation annotations. Three
 named helpers (`processAppRoot`, `processAppRootUi`, `processChildPresenter`) handle the standalone class and function targets. All five do the same steps: read the
 matching symbols from KSP, type check each one, pass it to a parser, and send the parser's result to a generator. They differ only in the symbol kind they accept and the
 data type they produce.
@@ -59,8 +57,8 @@ graph extension that exposes one presenter, with no destination binding next to 
 
 ## File writing
 
-Both `writeFiles` (for class symbols) and `writeFunctionFiles` (for function symbols) build one `Dependencies(aggregating = false, containingFile)` and call
-`FileSpec.writeTo(codeGenerator, deps)` for each file.
+Every helper calls one `writeFiles` function. It takes the annotated `KSDeclaration`, so class and function symbols share it. It builds one
+`Dependencies(aggregating = false, containingFile)` and calls `FileSpec.writeTo(codeGenerator, deps)` for each file.
 
 `aggregating = false` is the detail that matters. It tells KSP that a generated file depends only on the source file its annotation lives in. KSP can then reprocess one
 feature when its source changes, without invalidating the generated output of the other features. See the [glossary](index.md#glossary) for the term.

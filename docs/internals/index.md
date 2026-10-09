@@ -17,15 +17,17 @@ The processor turns one annotated symbol into one or two Kotlin source files. Ea
 
 All the architecture pages use this vocabulary. Terms that only one page needs are defined on that page.
 
-- **variant**. The structural form of a generated artifact. There are nine: a presenter with no runtime parameters, a parameterized presenter, a tab root, a screen
-  renderer, an overlay renderer, a tab pager renderer, a child presenter graph owned by a parent presenter, the application's root presenter binding, and the
-  application's root host composable. Each variant has its own golden directory under `codegen/processor-test/src/test/resources/golden/`.
+- **variant**. The structural form of a generated artifact. There are eleven, and each has its own golden directory under
+  `codegen/processor-test/src/test/resources/golden/`: a presenter with no runtime parameters, a parameterized presenter, a tab root, a screen renderer, an overlay
+  renderer, a tab pager renderer, a child presenter graph pinned to one host, a reusable child presenter graph, a parameterized child presenter graph, the
+  application's root presenter binding, and the application's root host composable. Overlay presenters have no golden. `NavDestinationTest` checks the
+  `NavDestination.Overlay` subclass inline instead. [testing.md](testing.md#goldens) maps each directory to its annotation.
 - **binding**. A Kotlin interface or object that adds one or more entries to a Metro multibinding. The processor emits one binding for each annotated destination and
   one for each annotated UI renderer.
 - **multibinding**. A Metro pattern where many `@Provides` contributions are collected into one `Set<T>`, which other code can request as a whole. The codegen
-  feeds multibindings of `NavDestination<*>`, `NavRouteBinding<*>`, `NavRootBinding<*>`, `ScreenContent`, and `SheetContent`.
+  feeds multibindings of `NavDestination<*>`, `NavRouteBinding<*>`, `NavRootBinding<*>`, `NavRoot`, `ScreenContent`, and `SheetContent`.
 - **graph extension**. A Metro interface annotated with `@GraphExtension`. It declares part of a dependency injection graph, scoped to a specific type. The codegen emits
-  one for each annotated destination and uses the route class as the scope marker.
+  one for each annotated destination, with the route class as the scope marker, and one for each `@ChildPresenter`, with its `scope` argument as the marker.
 - **route**. The class the user navigates to. For stack screens and overlays it implements the consumer's `NavRoute` interface. For tab roots it implements `NavRoot`. The
   route also serves as the graph extension's scope marker.
 - **slot**. A Decompose primitive that hosts one child at a time. We use it for modal overlays. The host filters the active overlay destinations and renders one of them
@@ -42,10 +44,11 @@ All the architecture pages use this vocabulary. Terms that only one page needs a
 
 ## Sub modules
 
-The `codegen/` directory has three Gradle sub modules that these pages refer to often.
+The `codegen/` build has five Gradle sub modules, listed in `codegen/settings.gradle.kts`. These pages cover the three navigation modules. The other two,
+`featureflag-annotations/` and `featureflag-processor/`, belong to the feature flag codegen described in [feature-flags.md](../feature-flags.md).
 
 - `annotations/` is a Kotlin Multiplatform library that defines `@NavDestination`, `@ScreenUi`, `@SheetUi`, `@TabUi`, `@ChildPresenter`, `@AppRoot`, and `@AppRootUi`. It
   has no logic. It is only the surface consumers depend on.
 - `processor/` is a JVM library with the KSP `SymbolProcessor` and the KotlinPoet generators. Every page after [pipeline.md](pipeline.md) is about code in this module.
 - `processor-test/` is a JVM test module. It uses `dev.zacsweers.kctfork` to compile annotated input and compares the output against goldens under
-  `src/test/resources/golden/`. See [testing.md](testing.md).
+  `src/test/resources/golden/`. It tests both processors. See [testing.md](testing.md).

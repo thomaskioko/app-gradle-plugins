@@ -68,12 +68,13 @@ type, the destination cast target, whether to forward `Modifier`) are picked at 
 ## ChildPresenterParser
 
 `parseChildPresenterData` reads `@ChildPresenter` and records the annotated class as a `ClassName`. It derives the base name (the simple name without the `Presenter`
-suffix) and reads `scope` and `parentScope` as `ClassName` instances. It returns a `ChildPresenterData`, and the generator uses its derived properties (`graphClassName`,
-`graphFactoryFunName`, `graphPropertyName`) as they are.
+suffix) and reads `scope` and `parentScope` as `ClassName` instances. It also looks for a nested `@AssistedFactory` with `findNestedAssistedFactory()`. When it finds
+one, it records the factory's `ClassName` in `factory`, and the generated graph exposes the factory instead of the presenter. It returns a `ChildPresenterData`, and the
+generator uses its derived properties (`graphClassName`, `graphFactoryFunName`, `graphPropertyType`, `graphPropertyName`) as they are.
 
-We keep this parser deliberately small. It has no `@AssistedInject` detection branch and no nested factory walk. Child presenters always use plain `@Inject`, because the
-parent host creates them through `Decompose.childContext(key)` and not from a route payload. The processor entry already checks that the annotated symbol is a class
-before it calls the parser, so the parser does not check the symbol kind again.
+We keep this parser deliberately small. It reports no errors of its own. A missing nested factory just means a plain `@Inject` presenter. The parent passes any
+runtime values to the factory's `create(...)` call, not through a route, so there is no route property to read. The processor entry already checks that the
+annotated symbol is a class before it calls the parser, so the parser does not check the symbol kind again.
 
 ## AppRootParser
 
