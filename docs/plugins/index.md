@@ -20,7 +20,7 @@ module. The rest are applied for you, or you opt into them.
 Pick exactly one of App, Android, JVM and Multiplatform per module. Each one applies Base, and
 Base creates the `scaffold {}` block.
 
-## Where the options live
+## Scaffold DSL
 
 `scaffold {}` is one block. Its nested blocks only appear when the matching plugin is applied.
 

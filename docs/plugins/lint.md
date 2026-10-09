@@ -11,7 +11,7 @@ plugins {
 }
 ```
 
-## What it does
+## Features
 
 The plugin reads its own version from its jar and asks for the matching `lint-rules` artifact.
 Then it hands that to [Spotless](spotless.md) as a custom rule set for the root project and every
@@ -20,7 +20,7 @@ module.
 The versions can't drift apart. We build the coordinate from the plugin's own version, so moving
 the plugin version in your catalog moves the rules with it.
 
-## The rules
+## Rules
 
 The rules cover conventions the type system can't enforce. Navigation is only constructed inside
 the modules that own it. Bindings come from the code generation annotations, not from code

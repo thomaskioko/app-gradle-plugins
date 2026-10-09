@@ -10,7 +10,7 @@ This tier is independent of the navigation codegen documented in
 [get-started.md](navigation/get-started.md). A module that needs both calls both DSL functions. A
 module that needs one applies only that one.
 
-## Why it exists
+## Motivation
 
 Every typed feature flag needs three pieces of code. Without the codegen, you write all three by hand,
 for every flag:
@@ -28,7 +28,7 @@ None of it needs thought. Everything comes from the flag name and the metadata o
 So the processor generates all three from one annotated anchor. The anchor is the only thing you
 write.
 
-## What you need
+## Requirements
 
 Your project must already use Metro. It also needs a `FeatureFlag<T>` interface and a
 `FeatureFlagFactory` that builds them. Specifically:
@@ -46,7 +46,7 @@ The type names are hardcoded. They are listed in
 [architecture/consumer-contract.md](internals/consumer-contract.md#feature-flag-primitives).
 The [Tv Maniac](https://github.com/c0de-wizard/tv-maniac) project is the reference consumer.
 
-## Wire it up
+## Setup
 
 Add the codegen dependency aliases to the consumer's `gradle/libs.versions.toml`:
 
@@ -70,7 +70,7 @@ scaffold {
 `kspCommonMainMetadata`). We register every target because that is what makes platform-scoped flags work (see
 [Platform isolation](#platform-isolation)).
 
-## Annotation reference
+## Annotation
 
 `@FeatureFlag` goes on a class-like anchor. We recommend a public `object`. Parameters:
 
@@ -208,7 +208,7 @@ The processor reports a compile error on the offending symbol when any of these 
 
 Each message names the anchor, so the IDE error log tells you which flag failed.
 
-## Out of scope
+## Limitations
 
 - Non-Boolean flag types (`enum`, `integer`, `string`). The processor emits only `factory.boolean(...)`.
   Other methods come when a consumer adds the first non-Boolean flag.

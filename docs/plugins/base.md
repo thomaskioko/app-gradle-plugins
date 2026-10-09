@@ -5,7 +5,7 @@
 This plugin creates the `scaffold {}` block that every module configures itself through. You don't
 apply it yourself. The App, Android, JVM and Multiplatform plugins apply it for you.
 
-## What it does
+## Features
 
 - Creates `scaffold {}`
 - Applies Spotless with the project's formatting rules

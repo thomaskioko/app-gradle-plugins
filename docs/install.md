@@ -4,7 +4,7 @@ This page lists the settings a project needs before its first module builds. We 
 into an empty project and built it, in the order shown here. Follow it top to bottom and the last
 step compiles.
 
-## Before you start
+## Requirements
 
 Gradle has to run on Java 21 or newer. On an older JVM the build fails while resolving the plugin
 itself. The error talks about the JVM runtime version, not about the plugin.
@@ -104,7 +104,7 @@ plugins {
 }
 ```
 
-## What gets applied for you
+## Applied plugins
 
 Three declarations cover the whole suite, because these plugins ship together. Naming
 `com.android.library` puts every Android plugin on the classpath. Naming one Kotlin plugin puts
@@ -129,7 +129,7 @@ Android modules build their namespace from the module path plus one property. Ad
 package.name=com.example.myapp
 ```
 
-## A module
+## Module setup
 
 Each module applies one plugin and describes itself through `scaffold {}`.
 
@@ -147,14 +147,14 @@ There are four platform plugins. `app` is for an Android application, `android` 
 library, `jvm` for a plain Kotlin library, and `multiplatform` for a Kotlin Multiplatform library.
 Pick one per module.
 
-## A note on formatting
+## Formatting
 
 The suite runs Spotless over your build files as well as your source, with four spaces for
 indentation. Every sample here uses four spaces, so pasting one keeps the build green. If you
 paste something indented with two spaces, the first build reports a formatting violation in the
 file you just wrote.
 
-## What to read next
+## Next steps
 
 The [API reference](api/plugins/index.html) covers every plugin, every option in `scaffold {}` and
 every annotation. We generate it from the source.

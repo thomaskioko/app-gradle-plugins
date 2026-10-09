@@ -27,7 +27,7 @@ Neither tier works with Jetpack Navigation, Voyager, Appyx, Dagger/Hilt, or any 
 generated code references Decompose's `ChildStack`/`ChildSlot`/`ComponentContext` primitives and
 Metro's `@ContributesTo`/`@Provides`/`@IntoSet` directly.
 
-## What you need
+## Requirements
 
 Your project must already use Metro. Each tier adds its own requirements:
 
@@ -51,7 +51,7 @@ Tv Maniac is the reference implementation for both tiers. The full runtime contr
 exact consumer types the generated code references, is in
 [the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/internals/consumer-contract/).
 
-## Docs
+## Documentation
 
 - [Get started (navigation)](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/): what the navigation codegen does and how to wire
   it into a consumer project.

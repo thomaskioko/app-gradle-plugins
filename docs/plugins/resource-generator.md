@@ -11,7 +11,7 @@ plugins {
 }
 ```
 
-## What it does
+## Features
 
 The plugin registers `generateMokoStrings`. The task reads the string and plural accessors Moko
 generates for `commonMain`. It then writes a pair of sealed classes that name every string and

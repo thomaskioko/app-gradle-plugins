@@ -4,9 +4,9 @@ The navigation codegen is a KSP processor that writes the Metro dependency injec
 
 You put one annotation on a presenter or a composable. It replaces a Metro `@GraphExtension`, a navigation binding, or a `ScreenContent` / `SheetContent` multibinding contribution that you would otherwise write by hand.
 
-## Why it exists
+## Motivation
 
-### Why the presenter needs an annotation
+### Presenters
 
 In a Kotlin Multiplatform app built on Metro and Decompose, every destination needs three files on the presenter's side:
 
@@ -17,7 +17,7 @@ In a Kotlin Multiplatform app built on Metro and Decompose, every destination ne
 
 You write the route. The graph and the binding are mechanical. Everything in them comes from the presenter class and the route class. So `@NavDestination` generates both. We keep the route manual because it is the feature's public API. It also doubles as the scope marker for the `@GraphExtension`.
 
-### Why the composable needs an annotation
+### Composables
 
 The navigation host renders whatever the navigator pushes. It is a single Compose tree at the activity root. At runtime it holds an active `RootChild` (or `SheetChild` for overlays), and the presenter inside can belong to any feature. The host doesn't know its concrete type. So it needs a registry that maps a presenter type to the composable that renders it.
 
@@ -27,7 +27,7 @@ Without `@ScreenUi` or `@SheetUi`, every feature writes that entry by hand. It i
 
 For how the processor turns each annotation into Metro plus Decompose code, see [architecture/index.md](../internals/index.md).
 
-## Supported annotations
+## Annotations
 
 The processor supports seven annotations. See [annotations.md](annotations.md) for the full reference and [examples.md](examples.md) for
 concrete inputs and outputs.
@@ -102,7 +102,7 @@ Android renderer annotations (target `FUNCTION`, used in the Android `ui` module
    codegen-processor = { module = "io.github.thomaskioko.gradle.plugins:codegen-processor", version.ref = "app-gradle-plugins" }
    ```
 
-## Basic usage
+## Usage
 
 Annotate the presenter (shared Kotlin Multiplatform layer):
 
@@ -177,7 +177,7 @@ The app module needs a direct `implementation` dependency on each feature `ui` m
 module, the generated bindings are not on the app's compile classpath. Metro then fails the build because the `Set<ScreenContent>` (or `Set<SheetContent>`)
 multibinding is empty.
 
-## Common questions
+## FAQ
 
 **Can I reuse one route across multiple presenters?**
 No. Each presenter has its own route class. The route class is also the graph extension's scope marker. Reusing it would give two graphs one scope, and Metro rejects

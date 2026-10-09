@@ -66,7 +66,7 @@ feature when its source changes, without invalidating the generated output of th
 Symbols whose containing file cannot be resolved are skipped with a warning. These are usually symbols another processor created in the same round. This branch never
 fires in normal use. We keep the warning so a future interaction with another processor does not drop output silently.
 
-## Where errors surface
+## Errors
 
 The processor never throws on user error. Every validation failure in a parser calls `logger.error(message, offendingSymbol)` and returns `null`, and the helper treats
 that as "skip this symbol." KSP turns the logged error into a compile error at the symbol's source position. You see it in the IDE next to any other compile

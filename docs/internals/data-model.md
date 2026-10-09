@@ -178,7 +178,7 @@ The factory function name includes `baseName` (instead of a fixed `createGraph`)
 `@GraphExtension.Factory` interface contributed to a scope into the parent graph. If two factory functions had the same name, you would get an
 `Incompatible return types` compile error at the activity graph.
 
-## Why an intermediate value at all
+## Intermediate values
 
 The generators produce KotlinPoet `FileSpec` outputs. KSP types like `KSClassDeclaration` carry resolution state and lazy children, and they only live for one round.
 We translate once, at the parser boundary, which gives us three things:

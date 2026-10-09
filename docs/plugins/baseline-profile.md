@@ -13,7 +13,7 @@ plugins {
 
 The identifier is `baseline.profile` with a dot, not a hyphen.
 
-## What it does
+## Features
 
 - Applies the Android test plugin and Base
 - Points the test module at the application module and sets the instrumentation runner
@@ -25,7 +25,7 @@ The identifier is `baseline.profile` with a dot, not a hyphen.
 
 In debug-only mode we skip the profile setup entirely, so local builds stay fast.
 
-## The other half
+## Consuming the profile
 
 The application module that consumes the profile calls `useBaselineProfile()` in its
 `android {}` block and names this module. See the [Android](android.md) page.

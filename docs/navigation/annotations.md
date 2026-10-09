@@ -41,7 +41,7 @@ public enum class DestinationKind {
 }
 ```
 
-### When to use `@NavDestination`
+### Use cases
 
 Use `@NavDestination` on a presenter when the navigator needs to push it onto the back stack (`SCREEN`), show it as a modal overlay (`OVERLAY`), or render it as a
 top level tab (`TAB_ROOT`). Without it, you write the Metro graph extension, the `NavDestination` factory, and the route binding by hand for every presenter.
@@ -58,7 +58,7 @@ The `parentScope` parameter names the parent dependency injection scope whose fa
 
 The `kind` parameter chooses one of three destination roles. See [DestinationKind](#destinationkind).
 
-### Minimal example
+### Example
 
 ```kotlin
 @Inject
@@ -72,7 +72,7 @@ public class ShowsPresenter(
 ) : ComponentContext by componentContext
 ```
 
-### Generated artifacts
+### Generated code
 
 For a presenter `com.example.feature.presenter.FooPresenter` annotated `@NavDestination(route = FooRoute::class, parentScope = ActivityScope::class, kind = SCREEN)`:
 
@@ -106,7 +106,7 @@ The processor reports a compile error if any of the following hold:
 - The presenter is parameterized but does not have exactly one `@Assisted` constructor parameter.
 - `kind` is `TAB_ROOT` and the presenter declares a nested `@AssistedFactory`. Tab roots must use plain `@Inject` because the route is a `data object` and carries no payload.
 
-### Common pitfalls
+### Pitfalls
 
 - **Forgetting `@Inject` or `@AssistedInject`.** `@NavDestination` only tells the processor which graph and binding to generate. The presenter still needs Metro's
   injection annotation so Metro creates instances of it.
@@ -129,7 +129,7 @@ public annotation class ScreenUi(
 )
 ```
 
-### When to use `@ScreenUi`
+### Use cases
 
 Pair `@ScreenUi` with `@NavDestination(kind = SCREEN)` on the matching presenter. The presenter lives in the shared Kotlin Multiplatform layer. The composable lives
 in an Android only `ui` module.
@@ -146,7 +146,7 @@ active `RootChild` is a `ScreenDestination<*>` wrapping that type. It also casts
 
 The `parentScope` parameter names the dependency injection scope the generated binding is contributed to. Typically `ActivityScope::class`.
 
-### Minimal example
+### Example
 
 ```kotlin
 @Composable
@@ -159,7 +159,7 @@ public fun ShowsScreen(
 }
 ```
 
-### Generated artifacts
+### Generated code
 
 For a composable `com.example.feature.ui.FooScreen` annotated `@ScreenUi(presenter = FooPresenter::class, parentScope = ActivityScope::class)`, the processor emits one
 file into `com.example.feature.ui.di`:
@@ -171,13 +171,13 @@ We use a `@BindingContainer object` on purpose. The full reasoning is in
 [architecture/generators.md](../internals/generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings). The short version: in an
 Android only `ui` module, an `interface + companion object` form silently produces an empty multibinding unless the right Metro flag is set.
 
-### Composable signature requirement
+### Composable signature
 
 The annotated function must match the signature `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The processor doesn't check the
 parameter names or the `Modifier` default while parsing. But the generated code calls the composable with `presenter = ..., modifier = modifier`. So a function with
 parameters in a different order or with different names fails to compile after generation, not during processing.
 
-### Common pitfalls
+### Pitfalls
 
 - **Annotating a composable in a transitive `implementation` dependency.** The generated binding lives in the same module as the composable. If the app only gets that
   module transitively, the binding never reaches the app's compile classpath. Add the module as a direct `implementation` dependency.
@@ -197,7 +197,7 @@ public annotation class SheetUi(
 )
 ```
 
-### When to use `@SheetUi`
+### Use cases
 
 Pair `@SheetUi` with `@NavDestination(kind = OVERLAY)` on the matching presenter. The presenter lives in the shared Kotlin Multiplatform layer. The composable lives
 in an Android only `ui` module.
@@ -211,7 +211,7 @@ separate from `Set<ScreenContent>` because the overlay slot and the navigation s
 
 The parameters have the same meaning as on [`@ScreenUi`](#screenui).
 
-### Minimal example
+### Example
 
 ```kotlin
 @Composable
@@ -224,13 +224,13 @@ public fun EpisodeSheet(
 }
 ```
 
-### Generated artifacts
+### Generated code
 
 For `EpisodeSheet` annotated `@SheetUi(presenter = EpisodeSheetPresenter::class, parentScope = ActivityScope::class)`, the processor emits `EpisodeSheetUiBinding.kt`. It
 has the same structure as a `@ScreenUi` binding, with two differences: the return type is `SheetContent` instead of `ScreenContent`, and the `content` lambda doesn't
 forward a `modifier`.
 
-### Composable signature requirement
+### Composable signature
 
 The signature requirement matches `@ScreenUi`: `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The generated code forwards only
 `presenter`. The `modifier` parameter is there so you can still call the composable from preview code.
@@ -253,7 +253,7 @@ public annotation class TabUi(
 )
 ```
 
-### When to use `@TabUi`
+### Use cases
 
 Pair `@TabUi` with a tab pager presenter that exposes its children as `TabChild<*>` instances, not `ScreenDestination<*>` instances. Tv Maniac's home shell works this
 way. The home pager hosts a fixed set of tab pages (Discover, Library, Progress, Profile). Each is backed by a tab presenter wrapped in a `TabChild`, and the pager
@@ -267,7 +267,7 @@ child type.
 
 The parameters have the same meaning as on [`@ScreenUi`](#screenui).
 
-### Minimal example
+### Example
 
 ```kotlin
 @Composable
@@ -280,13 +280,13 @@ public fun DiscoverScreen(
 }
 ```
 
-### Generated artifacts
+### Generated code
 
 For `DiscoverScreen` annotated `@TabUi(presenter = DiscoverShowsPresenter::class, parentScope = ActivityScope::class)`, the processor emits one file,
 `DiscoverScreenUiBinding.kt`. It has the same structure as a `@ScreenUi` binding, with two differences: the cast inside the `matches` predicate
 (`(it as? TabChild<*>)?.presenter is DiscoverShowsPresenter`) and the cast inside the `content` lambda (`(child as TabChild<*>).presenter as DiscoverShowsPresenter`).
 
-### Composable signature requirement
+### Composable signature
 
 The signature requirement matches `@ScreenUi`: `@Composable fun <Name>(presenter: <PresenterType>, modifier: Modifier = Modifier)`. The generator forwards both `presenter`
 and `modifier` to the composable.
@@ -306,7 +306,7 @@ public annotation class ChildPresenter(
 )
 ```
 
-### When to use `@ChildPresenter`
+### Use cases
 
 Use `@ChildPresenter` when another presenter constructs this one, instead of the navigator reaching it through a route. Tab pager pages, sub-screens inside an
 expanding card, and similar sub-components fit. Routed destinations use `@NavDestination` instead.
@@ -323,7 +323,7 @@ its own graph extension.
 The `parentScope` parameter names the parent dependency injection scope that hosts the generated factory. Usually this is the route class of the parent host (for
 example `ProgressRoot::class`).
 
-### Minimal example
+### Example
 
 ```kotlin
 @Inject
@@ -337,7 +337,7 @@ public class UpNextPresenter(
 ) : ComponentContext by componentContext
 ```
 
-### Generated artifacts
+### Generated code
 
 For a presenter `com.example.feature.upnext.UpNextPresenter` annotated `@ChildPresenter(scope = ProgressChildScope::class, parentScope = ProgressRoot::class)`, the
 processor emits one file into `com.example.feature.upnext.di`:
@@ -367,7 +367,7 @@ public class ProgressPresenter(
 }
 ```
 
-### Embeddable / reusable components
+### Reusable components
 
 `parentScope` decides which hosts can embed the child. Point it at a parent route (as in the example
 above) and the child belongs to that one host. Point it at a shared ancestor scope and every host
@@ -418,7 +418,7 @@ change. The `parentScope` you choose is the whole difference.
 
 The processor reports a compile error if the annotated symbol is not a class.
 
-### Common pitfalls
+### Pitfalls
 
 - **Forgetting `@Inject`.** `@ChildPresenter` only tells the processor which graph to generate. The presenter still needs Metro's injection annotation so Metro creates
   instances of it.
@@ -439,7 +439,7 @@ public annotation class AppRoot(
 )
 ```
 
-### When to use `@AppRoot`
+### Use cases
 
 Use `@AppRoot` on the root presenter implementation in the activity scope. The activity creates the root presenter once and hands it to the host composable. It is
 not a destination on the navigation stack. Without the annotation, you write a `@BindingContainer @ContributesTo(parentScope) object` by hand. It takes the assisted
@@ -453,7 +453,7 @@ graph plus a destination binding.
 
 The `parentScope` parameter names the dependency injection scope hosting the generated binding. Typically `ActivityScope::class` in the consumer project.
 
-### Minimal example
+### Example
 
 ```kotlin
 @AppRoot(parentScope = ActivityScope::class)
@@ -471,7 +471,7 @@ public class DefaultRootPresenter(
 }
 ```
 
-### Generated artifacts
+### Generated code
 
 For an implementation `com.example.app.presenter.DefaultRootPresenter` annotated `@AppRoot(parentScope = ActivityScope::class)` and implementing `RootPresenter`, the
 processor emits one file into `com.example.app.presenter.di`:
@@ -498,7 +498,7 @@ The processor reports a compile error if any of the following hold:
 - The nested factory does not declare exactly one function.
 - The class extends zero or more than one non-marker interface.
 
-### Common pitfalls
+### Pitfalls
 
 - **Forgetting the nested factory.** `@AppRoot` requires `@AssistedInject` plus a nested `@AssistedFactory`. The factory's single function must take a
   `ComponentContext` and return the implementation type, the same way you would call the assisted factory by hand.
@@ -521,7 +521,7 @@ public annotation class AppRootUi(
 )
 ```
 
-### When to use `@AppRootUi`
+### Use cases
 
 Pair `@AppRootUi` with `@AppRoot` on the matching presenter implementation. The composable is the activity's top level Compose entry point. It receives the root
 presenter plus any multibinding sets the host needs (`Set<ScreenContent>`, `Set<SheetContent>`, and so on). It renders every screen the navigation system pushes
@@ -538,7 +538,7 @@ parameter. The first remaining parameter type must equal `presenter`. A mismatch
 
 The `parentScope` parameter names the dependency injection scope hosting the generated artifacts. Typically `ActivityScope::class`.
 
-### Minimal example
+### Example
 
 ```kotlin
 @AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)
@@ -553,7 +553,7 @@ public fun RootScreen(
 }
 ```
 
-### Generated artifacts
+### Generated code
 
 For a composable `com.example.app.ui.RootScreen` annotated `@AppRootUi(presenter = RootPresenter::class, parentScope = ActivityScope::class)`, the processor emits one
 file into `com.example.app.ui.di`:
@@ -565,7 +565,7 @@ file into `com.example.app.ui.di`:
 Make your activity-scope `@DependencyGraph` extend `AppRootProvider`, then call `graph.AppRootContent()` from the activity. The call site shrinks from one argument per
 dependency to one extension call.
 
-### Composable signature requirement
+### Composable signature
 
 The annotated function must:
 
@@ -586,7 +586,7 @@ The processor reports a compile error if any of the following hold:
 - The first non-modifier parameter type does not equal `presenter`.
 - More than one `@AppRootUi` is declared in the same compilation round.
 
-### Common pitfalls
+### Pitfalls
 
 - **Activity graph does not extend `AppRootProvider`.** The generated extension is on `AppRootProvider`, not on your graph type. Declare `: AppRootProvider` on your
   `@DependencyGraph` interface so the extension resolves at the call site.
@@ -607,7 +607,7 @@ The `SCREEN` and `OVERLAY` outputs have the same structure. They differ only in 
 subclass at runtime to decide between pushing onto the stack and showing an overlay.
 
 
-## Required consumer primitives
+## Requirements
 
 The generated code references fully qualified names that your project must provide. They are hardcoded in the processor's `util/External.kt`. Below they are grouped by
 the role each plays.
@@ -641,7 +641,7 @@ The processor is opinionated about these names. A project other than Tv Maniac w
 [architecture/consumer-contract.md](../internals/consumer-contract.md) for why these are constants and what a fork would change.
 
 
-## Migration from earlier versions
+## Migration
 
 Earlier releases shipped `@NavScreen`, `@TabScreen`, and `@NavSheet` as separate annotations. The single `@NavDestination(kind = ...)` API replaces them:
 

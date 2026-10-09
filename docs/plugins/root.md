@@ -13,7 +13,7 @@ plugins {
 
 It refuses to be applied to a module. A misplaced `id(...)` fails instead of half working.
 
-## What it does
+## Features
 
 - Registers the aggregate test tasks `linuxTest`, `iosTest` and `ciTest`. The module plugins
   attach their own test tasks to these

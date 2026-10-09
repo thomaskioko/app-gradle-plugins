@@ -3,7 +3,7 @@
 The processor is tested by `codegen/processor-test/`, a JVM test module. It runs the real `NavigationCodegenProcessor` over inline source strings using
 `dev.zacsweers.kctfork` (a fork of `kotlin-compile-testing` with KSP2 support), and compares the generated files against checked in golden files.
 
-## How a test runs
+## Test flow
 
 `ProcessorTestRunner.run(sources)` is the only entry point. It builds a `KotlinCompilation` from the given `Map<String, String>` of source files and registers
 `NavigationCodegenProcessorProvider` as the only KSP processor. It then runs the compilation under KSP2, walks the KSP output directory, and returns every generated `.kt`
@@ -28,7 +28,7 @@ fun run(sources: Map<String, String>): RunResult {
 `inheritClassPath = true` gives the compilation the test module's runtime classpath. That is how it finds the real `codegen-annotations` jar, so the processor reads
 the actual `@NavDestination` symbol and not a stub.
 
-## The stubs
+## Stubs
 
 `TestStubs.kt` holds minimal source fakes of the consumer types the generators use. Each stub is a `Pair<String, String>` of file name and source
 text. Five lists group them by what each set of tests needs.

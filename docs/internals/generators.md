@@ -128,7 +128,7 @@ The extension sits on the generated provider interface, not on a specific consum
 keeps the codegen independent of the consumer's graph type. It also avoids a circular module dependency between `features/root/ui` (where the annotated composable lives)
 and the consumer's `:app` module (where the graph lives).
 
-## Two output structure decisions
+## Output structure
 
 These are two choices in the output that are easy to miss. It is worth knowing them before you edit a generator.
 

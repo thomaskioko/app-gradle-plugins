@@ -408,7 +408,7 @@ declarations from a companion object the way the shared Kotlin Multiplatform sou
 runtime. The full reasoning is in
 [architecture/generators.md](../internals/generators.md#bindingcontainer-object-for-ui-bindings-interface-companion-for-destination-bindings).
 
-### Function signature requirement
+### Composable signature
 
 The annotated function must take exactly two parameters: `presenter: <PresenterType>` first and `modifier: Modifier = Modifier` second. The generator passes them by
 name, so renaming either breaks the generated code at the next compile.
@@ -615,7 +615,7 @@ public class ProgressPresenter(
 Each child gets its own factory function name (`create<BaseName>Graph`). So two child graphs contributed to the same parent scope (`ProgressRoot::class` here) don't
 collide.
 
-### Reusable variant: embed in any screen
+### Reusable components
 
 The example above ties the child to one host, because `parentScope` is `ProgressRoot::class`. A
 component meant to live in its own module and be reused (say, a featured shows hero) sets
@@ -785,7 +785,7 @@ public fun AppRootProvider.AppRootContent(modifier: Modifier = Modifier) {
 }
 ```
 
-### Consumer wiring
+### Wiring
 
 Make your activity-scope `@DependencyGraph` extend `AppRootProvider`. The graph already exposes the three properties. The only change is making the contract
 explicit:

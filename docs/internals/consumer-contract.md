@@ -4,7 +4,7 @@ The consumer contract is the set of type names from the consumer project that th
 qualified names, and they are not configurable. They are `ClassName` constants in `codegen/processor/src/main/kotlin/io/github/thomaskioko/codegen/processor/util/External.kt`,
 and every generator imports them from there.
 
-## What is hardcoded
+## Hardcoded names
 
 The hardcoded names fall into eight groups, sorted by the role each one plays at runtime.
 
@@ -109,7 +109,7 @@ consumer's serialization layer needs.
 
 Tabs use the parallel `NavRootBinding`, so `NavRoot` instances take part in the same polymorphic save and restore as `NavRoute` instances. Tab bindings also contribute the `NavRoot` singleton itself into `Set<NavRoot>`. Navigators read that set to list the available tabs without going through destination factories.
 
-## Why constants rather than configuration
+## Constants over configuration
 
 We hardcode the consumer type names on purpose, instead of reading them from KSP processor options. There are three reasons.
 
@@ -120,7 +120,7 @@ We hardcode the consumer type names on purpose, instead of reading them from KSP
 3. **Easy to fork, but you do have to fork.** A consumer other than Tv Maniac is expected to fork the processor and edit `External.kt` directly. The constants are
    `internal`. They are easy to change in source and impossible to override without a fork. That keeps the upstream processor opinionated and small.
 
-## What a fork would change
+## Forking
 
 For a project with a different set of navigation primitives, you edit `External.kt` and the matching fakes in
 `codegen/processor-test/src/test/kotlin/io/github/thomaskioko/codegen/processor/TestStubs.kt`. The generators stay as they are, as long as the consumer's

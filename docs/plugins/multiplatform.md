@@ -29,7 +29,7 @@ scaffold {
 | `addIosTargetsWithXcFramework(frameworkName, includeX64 = false, configure = {})` | The same, bundled into one static XCFramework |
 | `configureNativeTargets(bundleId = null, configure = {})` | Applies shared compiler and linker options to every native target |
 
-## The Android target
+## Android target
 
 `addAndroidTarget()` takes five parameters, all with defaults. Most modules call it with no
 arguments.

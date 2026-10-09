@@ -42,7 +42,7 @@ All the architecture pages use this vocabulary. Terms that only one page needs a
 - **KSP**. Kotlin Symbol Processing, the compiler API the processor uses to read annotated symbols and emit Kotlin source files. See
   [KSP docs](https://kotlinlang.org/docs/ksp-overview.html).
 
-## Sub modules
+## Modules
 
 The `codegen/` build has five Gradle sub modules, listed in `codegen/settings.gradle.kts`. These pages cover the three navigation modules. The other two,
 `featureflag-annotations/` and `featureflag-processor/`, belong to the feature flag codegen described in [feature-flags.md](../feature-flags.md).
