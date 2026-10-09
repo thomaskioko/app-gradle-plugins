@@ -2,9 +2,9 @@
 
 `io.github.thomaskioko.gradle.plugins.multiplatform`
 
-For a Kotlin Multiplatform module. Applies the Kotlin Multiplatform plugin and Base. Unlike the
-other three, this one adds no targets on its own, because which platforms a module builds for is
-the decision it exists to make.
+This plugin configures a Kotlin Multiplatform module. It applies the Kotlin Multiplatform plugin
+and Base. Unlike the other three, it adds no targets on its own. Choosing the platforms is the
+whole point of a multiplatform module, so we leave that to you.
 
 ```kotlin
 plugins {
@@ -31,8 +31,8 @@ scaffold {
 
 ## The Android target
 
-`addAndroidTarget()` takes five parameters, all with defaults, so calling it bare is the common
-case.
+`addAndroidTarget()` takes five parameters, all with defaults. Most modules call it with no
+arguments.
 
 ```kotlin
 scaffold {
@@ -54,8 +54,8 @@ scaffold {
 | `configure` | The same options as the [Android](android.md) page |
 | `lintConfiguration` | Reaches the lint settings for this target |
 
-The `configure` block and the separate `android { }` block reach the same options. Use `android { }`
-when the call would otherwise be long enough to bury the target list.
+The `configure` block and the separate `android { }` block set the same options. Use
+`android { }` when the call would otherwise get long enough to bury the target list.
 
 Full detail in the
 [API reference](../api/plugins/plugins/io.github.thomaskioko.gradle.plugins.extensions/-base-extension/index.html).

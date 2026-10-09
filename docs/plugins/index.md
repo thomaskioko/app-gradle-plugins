@@ -1,7 +1,7 @@
 # Plugins
 
-Eleven plugins are published. A project applies `root` once and then one plugin per module. The
-rest are applied for you or opted into.
+This section describes the eleven plugins we publish. You apply `root` once, then one plugin per
+module. The rest are applied for you, or you opt into them.
 
 | Plugin | Identifier | Apply it |
 |---|---|---|
@@ -17,13 +17,12 @@ rest are applied for you or opted into.
 | [Resource generator](resource-generator.md) | `io.github.thomaskioko.gradle.plugins.resource.generator` | On the module holding the strings |
 | [Build config](buildconfig.md) | `io.github.thomaskioko.gradle.plugins.buildconfig` | On a module needing compile-time constants |
 
-Pick exactly one of App, Android, JVM and Multiplatform per module. Each applies Base, which is
-what creates the `scaffold {}` block.
+Pick exactly one of App, Android, JVM and Multiplatform per module. Each one applies Base, and
+Base creates the `scaffold {}` block.
 
 ## Where the options live
 
-`scaffold {}` is one block with nested blocks that appear only when the matching plugin is
-applied.
+`scaffold {}` is one block. Its nested blocks only appear when the matching plugin is applied.
 
 ```kotlin
 scaffold {

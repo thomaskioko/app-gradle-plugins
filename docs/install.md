@@ -1,20 +1,21 @@
 # Installing
 
-Everything on this page was pasted into an empty project and built before being written down, in
-the order it appears. Follow it top to bottom and the last step compiles.
+This page lists the settings a project needs before its first module builds. We pasted each step
+into an empty project and built it, in the order shown here. Follow it top to bottom and the last
+step compiles.
 
 ## Before you start
 
-Gradle has to run on Java 21 or newer. On an older one the build fails while resolving the plugin
-itself, with a message about the JVM runtime version rather than about the plugin.
+Gradle has to run on Java 21 or newer. On an older JVM the build fails while resolving the plugin
+itself. The error talks about the JVM runtime version, not about the plugin.
 
 ## Repositories
 
-The plugins live on Maven Central, which the Gradle plugin portal already reads, so the portal on
-its own is enough to find them. It is not enough to build with them. They depend on the Android
-Gradle plugin, which is published only to Google's repository, so without `google()` the build
-fails while resolving `com.android.tools.build:gradle`. That names a plugin you never asked for,
-which is a confusing place to end up.
+The plugins are published to Maven Central. The Gradle plugin portal already reads Maven Central,
+so the portal alone is enough to find them. It isn't enough to build with them, though. They
+depend on the Android Gradle plugin, which is only published to Google's repository. Without
+`google()`, the build fails while resolving `com.android.tools.build:gradle`. That names a plugin
+you never asked for, which is confusing.
 
 Add both to `settings.gradle.kts`:
 
@@ -36,8 +37,8 @@ dependencyResolutionManagement {
 
 ## Version catalog
 
-The plugins read versions from a catalog named `libs`, so `gradle/libs.versions.toml` has to
-exist even in a project that would not otherwise have one.
+The plugins read versions from a catalog named `libs`. So `gradle/libs.versions.toml` has to
+exist, even in a project that wouldn't otherwise have one.
 
 Three versions are always required. A module targeting Android needs three more.
 
@@ -76,19 +77,19 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ```
 
-Options inside `scaffold {}` read further entries as they are switched on. `useMetro()` reads
+Options inside `scaffold {}` read more entries when you switch them on. `useMetro()` reads
 `metro-runtime`, `useCodegen()` reads `codegen-annotations` and `codegen-processor`, and so on.
-Each option's documentation names what it looks for.
+Each option's documentation names the entries it looks for.
 
 ## Root project
 
-The root project does two jobs. It applies the root plugin, which every other plugin in the suite
-checks for and fails without. It also names every plugin any module will use, so that a module can
-apply one without repeating the version.
+The root project does two jobs. First, it applies the root plugin. Every other plugin in the
+suite checks for it and fails without it. Second, it names every plugin any module will use. That
+way a module can apply one without repeating the version.
 
-Everything a module applies is declared here with `apply false`. That puts it on the build
-classpath without applying it to the root project. Leave one out and the module that applies it
-fails with a message about the plugin already being on the classpath with an unknown version.
+You declare everything a module applies here, with `apply false`. That puts the plugin on the
+build classpath without applying it to the root project. If you leave one out, the module that
+applies it fails. The error says the plugin is already on the classpath with an unknown version.
 
 ```kotlin
 plugins {
@@ -105,9 +106,9 @@ plugins {
 
 ## What gets applied for you
 
-Three declarations cover the whole suite because these plugins ship together. Naming
-`com.android.library` puts every Android plugin on the classpath, and naming one Kotlin plugin
-puts the rest there too.
+Three declarations cover the whole suite, because these plugins ship together. Naming
+`com.android.library` puts every Android plugin on the classpath. Naming one Kotlin plugin puts
+the rest there too.
 
 Applied to every module: Spotless and dependency analysis.
 
@@ -115,13 +116,13 @@ Applied by the plugin you chose: `com.android.application` for `app`, `com.andro
 `com.android.lint` for `android`, `org.jetbrains.kotlin.jvm` for `jvm`, and
 `org.jetbrains.kotlin.multiplatform` for `multiplatform`.
 
-Applied only when you ask for them, through `scaffold {}`: KSP, Metro, Compose, Kotlin
-serialization, Roborazzi, dependency guard, baseline profiles, Google Services and Crashlytics.
-Each option's documentation says what it applies and what it reads from the catalog.
+Applied only when you ask for them in `scaffold {}`: KSP, Metro, Compose, Kotlin serialization,
+Roborazzi, dependency guard, baseline profiles, Google Services and Crashlytics. Each option's
+documentation says what it applies and what it reads from the catalog.
 
 ## Android namespace
 
-Android modules build their namespace from the module path and one property. Add it to
+Android modules build their namespace from the module path plus one property. Add it to
 `gradle.properties`:
 
 ```properties
@@ -130,7 +131,7 @@ package.name=com.example.myapp
 
 ## A module
 
-Apply one plugin per module and describe the module through `scaffold {}`.
+Each module applies one plugin and describes itself through `scaffold {}`.
 
 ```kotlin
 plugins {
@@ -142,18 +143,18 @@ scaffold {
 }
 ```
 
-The four platform plugins are `app` for an Android application, `android` for an Android library,
-`jvm` for a plain Kotlin library, and `multiplatform` for a Kotlin Multiplatform library. Pick one
-per module.
+There are four platform plugins. `app` is for an Android application, `android` for an Android
+library, `jvm` for a plain Kotlin library, and `multiplatform` for a Kotlin Multiplatform library.
+Pick one per module.
 
 ## A note on formatting
 
-The suite runs Spotless over your build files as well as your source, using four spaces for
-indentation. Every sample here is written that way, so pasting one leaves the build green. Paste
-something indented with two spaces and the first build reports a formatting violation in the file
-you just wrote.
+The suite runs Spotless over your build files as well as your source, with four spaces for
+indentation. Every sample here uses four spaces, so pasting one keeps the build green. If you
+paste something indented with two spaces, the first build reports a formatting violation in the
+file you just wrote.
 
 ## What to read next
 
-Every plugin, every option in `scaffold {}` and every annotation is covered in the
-[API reference](api/plugins/index.html), generated from the source itself.
+The [API reference](api/plugins/index.html) covers every plugin, every option in `scaffold {}` and
+every annotation. We generate it from the source.

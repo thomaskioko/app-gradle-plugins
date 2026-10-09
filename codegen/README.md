@@ -1,31 +1,33 @@
 # Codegen
 
-KSP based code generation for Kotlin Multiplatform consumers using
-[Metro](https://zacsweers.github.io/metro/) for dependency injection. Two independent tiers:
+This directory contains KSP processors that generate code for Kotlin Multiplatform projects using
+[Metro](https://zacsweers.github.io/metro/) for dependency injection. There are two independent tiers:
 
 - **Navigation codegen** targets [Decompose](https://arkivanov.github.io/Decompose/). One annotation
-  (`@NavDestination`) covers stack screens, modal overlays, and bottom navigation tab roots. Three
-  more (`@ScreenUi`, `@SheetUi`, `@TabUi`) cover the renderer bindings that join Android composables
-  to the navigation host. `@ChildPresenter` covers parent-owned child presenters such as tab pager
-  pages. Two more (`@AppRoot`, `@AppRootUi`) cover the application's root presenter and the host
-  composable that wraps every other screen. The processor emits the Metro `@GraphExtension` graph,
-  the `NavDestination` binding for the Decompose host (including the `NavRoot` singleton
-  contribution for tabs), the UI renderer binding for the Android side, the activity-scope binding
-  container for the root presenter, and the provider interface plus extension that lets the
-  activity render the root with one call.
+  (`@NavDestination`) covers screens on the navigation stack, modal overlays, and bottom navigation
+  tab roots. Three more (`@ScreenUi`, `@SheetUi`, `@TabUi`) connect Android composables to the
+  navigation host. `@ChildPresenter` covers child presenters that a parent presenter owns, such as
+  tab pager pages. `@AppRoot` and `@AppRootUi` cover the application's root presenter and the host
+  composable that wraps every other screen. From these, the processor generates:
+  - the Metro `@GraphExtension` graph,
+  - the `NavDestination` binding for the Decompose host (plus the `NavRoot` singleton contribution
+    for tabs),
+  - the UI renderer binding on the Android side,
+  - the binding container that puts the root presenter in the activity scope,
+  - the provider interface and extension that let the activity render the root with one call.
 - **Feature flag codegen** targets typed feature flags backed by a `FeatureFlagFactory`. One
-  annotation (`@FeatureFlag`) decorates a `@Qualifier`-annotated annotation class. The processor
-  emits one `<QualifierBaseName>Binding.kt` per qualifier containing the `@Provides @SingleIn
-  @<Qualifier>` factory call plus the `@Provides @IntoSet` rebind into the
+  annotation (`@FeatureFlag`) decorates a `@Qualifier`-annotated annotation class. For each
+  qualifier, the processor emits one `<QualifierBaseName>Binding.kt`. It holds the `@Provides
+  @SingleIn @<Qualifier>` factory call and the `@Provides @IntoSet` rebind into the
   `Set<FeatureFlag<Boolean>>` multibinding.
 
-Both tiers do not work with Jetpack Navigation, Voyager, Appyx, Dagger/Hilt, or any other library;
-the generated output references Decompose's `ChildStack`/`ChildSlot`/`ComponentContext` primitives
-and Metro's `@ContributesTo`/`@Provides`/`@IntoSet` directly.
+Neither tier works with Jetpack Navigation, Voyager, Appyx, Dagger/Hilt, or any other library. The
+generated code references Decompose's `ChildStack`/`ChildSlot`/`ComponentContext` primitives and
+Metro's `@ContributesTo`/`@Provides`/`@IntoSet` directly.
 
 ## What you need
 
-The consumer project must already use Metro. Each tier adds its own requirements:
+Your project must already use Metro. Each tier adds its own requirements:
 
 **Navigation tier:**
 
@@ -43,8 +45,8 @@ The consumer project must already use Metro. Each tier adds its own requirements
   can plug into.
 - `kotlinx-datetime` on every module that declares `@FeatureFlag` qualifiers.
 
-The Tv Maniac project is the reference implementation for both tiers. The full runtime contract,
-including the exact consumer types the generated code references, lives in
+Tv Maniac is the reference implementation for both tiers. The full runtime contract, including the
+exact consumer types the generated code references, is in
 [the consumer contract](https://thomaskioko.github.io/app-gradle-plugins/internals/consumer-contract/).
 
 ## Docs

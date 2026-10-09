@@ -2,8 +2,8 @@
 
 `io.github.thomaskioko.gradle.plugins.android`
 
-For an Android library module. Applies the Android library plugin, the Kotlin plugin and Base, and
-adds the `android {}` block inside `scaffold {}`.
+This plugin configures an Android library module. It applies the Android library plugin, the
+Kotlin plugin and Base. It also adds the `android {}` block inside `scaffold {}`.
 
 ```kotlin
 plugins {
@@ -17,10 +17,10 @@ scaffold {
 }
 ```
 
-The namespace comes from the module path and the `package.name` property, so no module sets one.
+The namespace comes from the module path and the `package.name` property. No module sets its own.
 
-A Kotlin Multiplatform module reaches the same options by calling `addAndroidTarget()` first. See
-the [Multiplatform](multiplatform.md) page.
+A Kotlin Multiplatform module gets the same options once it calls `addAndroidTarget()`. See the
+[Multiplatform](multiplatform.md) page.
 
 ## Options
 
@@ -41,9 +41,9 @@ the [Multiplatform](multiplatform.md) page.
 
 ## Core library desugaring
 
-Declare `android-desugarJdkLibs` in your version catalog and the plugin turns on core library
-desugaring and adds the dependency for you. Leave it out and desugaring stays off, which is the
-right default for a module that does not need it.
+If you declare `android-desugarJdkLibs` in your version catalog, the plugin turns on core library
+desugaring and adds the dependency for you. If you leave it out, desugaring stays off. We think
+that's the right default for a module that doesn't need it.
 
 ```toml
 [libraries]
