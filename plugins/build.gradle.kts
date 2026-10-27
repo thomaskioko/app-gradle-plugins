@@ -102,10 +102,11 @@ val functionalTestTask =
         )
     }
 
-val testPluginExtras: Configuration by configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
+val testPluginExtras =
+    configurations.create("testPluginExtras") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+    }
 
 dependencies {
     testPluginExtras(libs.spotless.gradle.plugin)
