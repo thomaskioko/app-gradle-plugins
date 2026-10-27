@@ -74,7 +74,7 @@ internal fun Project.getDependencyOrNull(name: String): Provider<MinimalExternal
  * Returns an empty map if the file does not exist.
  */
 internal fun Project.parseKeyValueFile(fileName: String): Map<String, String> {
-    val file = rootProject.file(fileName)
+    val file = rootDir.resolve(fileName)
     if (!file.exists()) return emptyMap()
     return file.readLines()
         .filter { it.contains("=") && !it.trimStart().startsWith("//") }

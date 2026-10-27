@@ -35,7 +35,7 @@ internal fun Project.setupCompose() {
         }
 
         val stabilityFile =
-            project.layout.projectDirectory.file(rootProject.file("compose-stability.conf").absolutePath)
+            project.layout.projectDirectory.file(rootDir.resolve("compose-stability.conf").absolutePath)
         stabilityConfigurationFiles.add(stabilityFile)
 
         targetKotlinPlatforms.set(

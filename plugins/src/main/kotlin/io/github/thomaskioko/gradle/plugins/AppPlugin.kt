@@ -73,19 +73,19 @@ public abstract class AppPlugin : Plugin<Project> {
 
         val properties = target.scaffoldProperties()
 
-        val versionFile = target.rootProject.file("version.txt")
+        val versionFile = target.rootDir.resolve("version.txt")
         target.tasks.register("bumpVersion", BumpVersionTask::class.java) {
             it.versionFile.set(versionFile)
             it.bumpType.convention(properties.releaseType)
         }
 
-        val changelogFile = target.rootProject.file("CHANGELOG.md")
-        val cliffConfig = target.rootProject.file("cliff.toml")
+        val changelogFile = target.rootDir.resolve("CHANGELOG.md")
+        val cliffConfig = target.rootDir.resolve("cliff.toml")
         target.tasks.register("release", ReleaseTask::class.java) {
             it.versionFile.set(versionFile)
             it.changelogFile.set(changelogFile)
             it.cliffConfigFile.set(cliffConfig)
-            it.projectDir.set(target.rootProject.layout.projectDirectory)
+            it.projectDir.set(target.isolated.rootProject.projectDirectory)
             it.bumpType.convention(properties.releaseType)
             it.beta.convention(properties.releaseBeta)
             it.dryRun.convention(properties.releaseDryRun)
@@ -114,7 +114,7 @@ public abstract class AppPlugin : Plugin<Project> {
 
             signingConfigs {
                 named("debug") {
-                    val debugKeystore = target.rootProject.file("gradle/debug.keystore")
+                    val debugKeystore = target.rootDir.resolve("gradle/debug.keystore")
                     if (debugKeystore.exists()) {
                         it.storeFile = debugKeystore
                     }
@@ -136,7 +136,7 @@ public abstract class AppPlugin : Plugin<Project> {
                     }
 
                     register("release") {
-                        it.storeFile = target.rootProject.file(keyStoreFile.get())
+                        it.storeFile = target.rootDir.resolve(keyStoreFile.get())
                         it.storePassword = properties.releaseStorePassword.get()
                         it.keyAlias = properties.releaseKeyAlias.get()
                         it.keyPassword = properties.releaseKeyPassword.get()
