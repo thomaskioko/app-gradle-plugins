@@ -39,7 +39,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * Common Kotlin and JVM configuration applied to every subproject in the suite.
  *
  * Every other subproject plugin (`app`, `android`, `jvm`, `multiplatform`) applies this plugin
- * itself, so consumers do not apply it directly.
+ * itself, so consumers do not apply it directly. Each module only configures itself, so the
+ * plugin works with Gradle's isolated projects turned on.
  *
  * The plugin registers the `scaffold {}` extension, applies Spotless, applies the
  * dependency-analysis plugin per subproject so `buildHealth` aggregates every module, configures

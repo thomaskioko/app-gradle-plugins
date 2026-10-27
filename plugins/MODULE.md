@@ -26,7 +26,8 @@ scaffold {
 ```
 
 The root plugin sets the daemon toolchain vendor, configures dependency analysis, and checks that
-it was applied to the root project and not a module.
+it was applied to the root project and not a module. Every module plugin configures only its own
+module, so the suite works with Gradle's isolated projects turned on.
 
 # Package io.github.thomaskioko.gradle.plugins
 

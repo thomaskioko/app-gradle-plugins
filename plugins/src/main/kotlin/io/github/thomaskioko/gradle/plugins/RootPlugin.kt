@@ -34,7 +34,8 @@ import org.gradle.jvm.toolchain.JvmVendorSpec
  * `buildHealth` task and the DSL configuration; `BasePlugin` re-applies the plugin on every
  * subproject so per-project analysis contributes to the aggregate. It sets the JVM vendor on the
  * daemon toolchain task, configures dependency analysis with the project's exclusion list and
- * Compose bundles, and configures Gradle Doctor when the consumer applies it.
+ * Compose bundles, and configures Gradle Doctor when the consumer applies it. It never reads or
+ * configures another project, so it works with Gradle's isolated projects turned on.
  *
  * ```kotlin
  * // root build.gradle.kts
@@ -50,7 +51,7 @@ public abstract class RootPlugin : Plugin<Project> {
      * @throws IllegalArgumentException if applied to anything other than the root project.
      */
     override fun apply(target: Project): Unit = with(target) {
-        require(project == project.rootProject) {
+        require(path == isolated.rootProject.path) {
             "Root plugin should only be applied on the root project!"
         }
 

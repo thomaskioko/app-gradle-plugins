@@ -18,3 +18,7 @@ It refuses to be applied to a module. A misplaced `id(...)` fails instead of hal
 - Applies dependency analysis at the root, so `buildHealth` covers the whole build. It also sets
   the severity of each issue category
 - Configures Gradle Doctor, if the project applies it
+
+It configures nothing outside the root project. Each module configures itself, so the suite works
+with Gradle's [isolated projects](https://docs.gradle.org/current/userguide/isolated_projects.html)
+turned on.
