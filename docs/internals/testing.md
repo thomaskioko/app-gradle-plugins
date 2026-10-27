@@ -81,8 +81,7 @@ trailing newline difference does not cause flaky failures.
 Set `golden.update=true` (system property) or `GOLDEN_UPDATE=true` (environment variable) and run the suite again. `GoldenFileAssert` then writes the actual output to the
 golden file instead of failing.
 
-The repo wraps this in the `/update-golden` skill. It sets the property, runs the suite, and shows the diff so you can review the change before committing. Always read the
-diff. Goldens are the contract you are committing to, and a bulk update nobody reviewed hides regressions.
+Always read the diff before committing. Goldens are the contract you are committing to, and a bulk update nobody reviewed hides regressions.
 
 ## Adding a fixture
 
