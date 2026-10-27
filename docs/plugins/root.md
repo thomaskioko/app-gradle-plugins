@@ -2,8 +2,7 @@
 
 `io.github.thomaskioko.gradle.plugins.root`
 
-This plugin configures the root project. Apply it there before anything else. Every other plugin
-in the suite checks for it. If it's missing, they fail at once with a clear message.
+This plugin configures the root project. Apply it there before anything else.
 
 ```kotlin
 plugins {

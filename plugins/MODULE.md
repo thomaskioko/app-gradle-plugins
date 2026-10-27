@@ -26,8 +26,7 @@ scaffold {
 ```
 
 The root plugin sets the daemon toolchain vendor, configures dependency analysis and the module
-graph tasks, and checks that it was applied to the root project and not a module. Every module
-plugin checks that the root plugin is present and fails with a clear message when it is not.
+graph tasks, and checks that it was applied to the root project and not a module.
 
 # Package io.github.thomaskioko.gradle.plugins
 

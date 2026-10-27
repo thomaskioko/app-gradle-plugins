@@ -24,7 +24,6 @@ import io.github.thomaskioko.gradle.plugins.utils.javaTargetVersion
 import io.github.thomaskioko.gradle.plugins.utils.javaToolchainVersion
 import io.github.thomaskioko.gradle.plugins.utils.jvmTarget
 import io.github.thomaskioko.gradle.plugins.utils.kotlin
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
@@ -39,9 +38,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * Common Kotlin and JVM configuration applied to every subproject in the suite.
  *
  * Every other subproject plugin (`app`, `android`, `jvm`, `multiplatform`) applies this plugin
- * itself, so consumers do not apply it directly. Applying any of those plugins without
- * `io.github.thomaskioko.gradle.plugins.root` on the root project throws a `GradleException` at
- * apply-time so the missing root setup is caught early.
+ * itself, so consumers do not apply it directly.
  *
  * The plugin registers the `scaffold {}` extension, applies Spotless, applies the
  * dependency-analysis plugin per subproject so `buildHealth` aggregates every module, configures
@@ -50,7 +47,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * It also registers the module's [LINUX_TEST], [IOS_TEST] and [ALL_TEST] aggregate tasks.
  *
  * ```kotlin
- * // settings.gradle.kts (root)
+ * // build.gradle.kts (root)
  * plugins {
  *   id("io.github.thomaskioko.gradle.plugins.root")
  * }
@@ -89,8 +86,6 @@ public abstract class BasePlugin : Plugin<Project> {
          * by CI pipelines that want a single entry point covering every test on every host.
          */
         public const val ALL_TEST: String = "ciTest"
-
-        internal const val ROOT_PLUGIN_ID: String = "io.github.thomaskioko.gradle.plugins.root"
     }
 
     /**
@@ -98,8 +93,6 @@ public abstract class BasePlugin : Plugin<Project> {
      * every module in the suite shares.
      */
     override fun apply(target: Project) {
-        requireRootPluginApplied(target)
-
         target.plugins.apply("io.github.thomaskioko.gradle.plugins.spotless")
         target.plugins.apply("com.autonomousapps.dependency-analysis")
 
@@ -110,15 +103,6 @@ public abstract class BasePlugin : Plugin<Project> {
         target.configureJava()
         target.configureKotlin()
         target.configureTests()
-    }
-
-    private fun requireRootPluginApplied(target: Project) {
-        if (!target.rootProject.plugins.hasPlugin(ROOT_PLUGIN_ID)) {
-            throw GradleException(
-                "$ROOT_PLUGIN_ID must be applied to the root project. " +
-                    "Add `id(\"$ROOT_PLUGIN_ID\")` to the root build.gradle.kts plugins block.",
-            )
-        }
     }
 
     private fun Project.configureTests() {

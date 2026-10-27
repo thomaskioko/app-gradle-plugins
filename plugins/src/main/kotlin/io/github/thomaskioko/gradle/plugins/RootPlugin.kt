@@ -32,9 +32,7 @@ import javax.inject.Inject
  * Configures the root project for the suite. Required on every consumer build.
  *
  * Apply this plugin on the root `build.gradle.kts` before any other plugin in the suite. The
- * plugin checks that it is being applied to the root project and throws otherwise. Subproject
- * plugins (`app`, `android`, `jvm`, `multiplatform`, `base`) check for this plugin at apply
- * time and fail with a clear error when it is missing.
+ * plugin checks that it is being applied to the root project and throws otherwise.
  *
  * The plugin applies `com.autonomousapps.dependency-analysis` at the root for the aggregate
  * `buildHealth` task and the DSL configuration; `BasePlugin` re-applies the plugin on every
