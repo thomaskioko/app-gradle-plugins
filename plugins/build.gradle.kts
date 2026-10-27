@@ -225,11 +225,6 @@ gradlePlugin {
         implementationClass = "io.github.thomaskioko.gradle.plugins.checks.SpotlessPlugin"
     }
 
-    plugins.create("lintPlugin") {
-        id = "io.github.thomaskioko.gradle.plugins.lint"
-        implementationClass = "io.github.thomaskioko.gradle.plugins.checks.LintPlugin"
-    }
-
     plugins.create("resourceGeneratorPlugin") {
         id = "io.github.thomaskioko.gradle.plugins.resource.generator"
         implementationClass = "io.github.thomaskioko.gradle.plugins.ResourceGeneratorPlugin"

@@ -59,12 +59,6 @@ public abstract class io/github/thomaskioko/gradle/plugins/RootPlugin : org/grad
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public final class io/github/thomaskioko/gradle/plugins/checks/LintPlugin : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
-}
-
 public final class io/github/thomaskioko/gradle/plugins/checks/SpotlessPlugin : org/gradle/api/Plugin {
 	public static final field CUSTOM_RULE_SETS_KEY Ljava/lang/String;
 	public static final field Companion Lio/github/thomaskioko/gradle/plugins/checks/SpotlessPlugin$Companion;

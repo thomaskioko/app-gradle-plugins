@@ -47,5 +47,5 @@ generation it needs, and which dependencies to hold to a baseline.
 # Package io.github.thomaskioko.gradle.plugins.checks
 
 Static analysis applied to a module. `SpotlessPlugin` configures Spotless with the project's ktlint
-setup, and `LintPlugin` adds the custom rule set from the `lint-rules` artifact so those rules run
-alongside the standard ones.
+setup. With `app.enableLintRules=true` it also adds the custom rule set from the `lint-rules`
+artifact, so those rules run alongside the standard ones.

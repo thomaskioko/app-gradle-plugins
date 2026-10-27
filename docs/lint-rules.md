@@ -1,7 +1,7 @@
 # Lint Rules
 
-This is a small ktlint rule set that enforces the conventions of this codebase. The lint convention plugin in `plugins/` loads it into
-Spotless. There are seven rules, and they cover:
+This is a small ktlint rule set that enforces the conventions of this codebase. The Spotless convention plugin in `plugins/` loads it
+when `app.enableLintRules=true`. There are seven rules, and they cover:
 - Navigation layering
 - Compose preview styling
 - Metro Dependency injection cleanup
@@ -214,7 +214,7 @@ ktlint_tvmaniac_preview_wrapper_packages = com.thomaskioko.tvmaniac.designsystem
 
 ## Loading
 
-ktlint finds rule sets through the Java service loader. The published `lint-rules` jar has a service file at `META-INF/services/com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3` that points at `TvManiacRuleSetProvider`. Spotless picks up the jar when it is on the formatter task's classpath. The `lint` convention plugin in `plugins/` puts it there for every module that applies a `scaffold {}` plugin.
+ktlint finds rule sets through the Java service loader. The published `lint-rules` jar has a service file at `META-INF/services/com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3` that points at `TvManiacRuleSetProvider`. Spotless picks up the jar when it is on the formatter task's classpath. With `app.enableLintRules=true` in `gradle.properties`, the Spotless convention plugin in `plugins/` puts it there for every module that applies a `scaffold {}` plugin.
 
 To turn on the rule set in a project that does not use the convention plugins:
 

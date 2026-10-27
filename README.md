@@ -34,7 +34,7 @@ system can't enforce.
 - [Installing](https://thomaskioko.github.io/app-gradle-plugins/install/) covers what a project
   needs before the first module builds. We checked each step against an empty project.
 - [Plugins](https://thomaskioko.github.io/app-gradle-plugins/plugins/) has a page for each of the
-  eleven plugins. It also covers every option in `scaffold {}`.
+  ten plugins. It also covers every option in `scaffold {}`.
 - [Navigation](https://thomaskioko.github.io/app-gradle-plugins/navigation/get-started/) covers the
   annotations that generate a screen's graph and bindings.
 - [Feature flags](https://thomaskioko.github.io/app-gradle-plugins/feature-flags/) covers declaring

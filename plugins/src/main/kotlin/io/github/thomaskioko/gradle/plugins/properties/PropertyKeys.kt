@@ -18,6 +18,7 @@ package io.github.thomaskioko.gradle.plugins.properties
 internal object PropertyKeys {
     const val APP_DEBUG_ONLY: String = "app.debugOnly"
     const val APP_ENABLE_IOS: String = "app.enableIos"
+    const val APP_ENABLE_LINT_RULES: String = "app.enableLintRules"
     const val APP_VERSION_SUFFIX: String = "app.versionSuffix"
 
     const val COMPOSE_REPORTS: String = "compose.enableCompilerReports"

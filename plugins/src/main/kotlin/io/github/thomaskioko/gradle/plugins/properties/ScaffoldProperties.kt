@@ -30,6 +30,9 @@ internal class ScaffoldProperties(project: Project) {
     internal val enableIos: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.APP_ENABLE_IOS, false)
 
+    internal val enableLintRules: Provider<Boolean> =
+        project.booleanProperty(PropertyKeys.APP_ENABLE_LINT_RULES, false)
+
     internal val javaToolchainsStrict: Provider<Boolean> =
         project.booleanProperty(PropertyKeys.JAVA_TOOLCHAINS_STRICT, false)
 
