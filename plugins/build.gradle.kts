@@ -88,6 +88,13 @@ configurations[functionalTest.implementationConfigurationName]
 configurations[functionalTest.runtimeOnlyConfigurationName]
     .extendsFrom(configurations.testRuntimeOnly.get())
 
+val testLintRules =
+    configurations.create("testLintRules") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+        isTransitive = false
+    }
+
 val functionalTestTask =
     tasks.register<Test>("functionalTest") {
         description = "Runs functional tests via Gradle TestKit against the built plugin classpath."
@@ -99,6 +106,13 @@ val functionalTestTask =
         systemProperty(
             "io.github.thomaskioko.gradle.plugins.fixtures.dir",
             file("src/functionalTest/resources/fixtures").absolutePath,
+        )
+        val lintRulesJar = files(testLintRules)
+        inputs.files(lintRulesJar).withPropertyName("lintRulesJar")
+        jvmArgumentProviders.add(
+            CommandLineArgumentProvider {
+                listOf("-Dio.github.thomaskioko.gradle.plugins.lint.rules.dir=${lintRulesJar.singleFile.parent}")
+            },
         )
     }
 
@@ -112,10 +126,11 @@ dependencies {
     testPluginExtras(libs.spotless.gradle.plugin)
     testPluginExtras(libs.metro.gradle.plugin)
     testPluginExtras(libs.baselineprofile.gradlePlugin)
+    testLintRules("${project.group}:lint-rules:${project.version}")
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
-    pluginClasspath.from(testPluginExtras)
+    pluginClasspath.setFrom(tasks.jar, configurations.runtimeClasspath, testPluginExtras)
 }
 
 tasks {
