@@ -60,7 +60,7 @@ public abstract class BuildConfigExtension(private val project: Project) {
 
     private val localProperties: Properties by lazy {
         val props = Properties()
-        val localPropertiesFile = project.rootProject.file("local.properties")
+        val localPropertiesFile = project.rootDir.resolve("local.properties")
         if (localPropertiesFile.exists()) {
             localPropertiesFile.inputStream().use { props.load(it) }
         }

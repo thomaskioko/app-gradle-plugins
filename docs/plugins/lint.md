@@ -1,21 +1,18 @@
 # Lint
 
-`io.github.thomaskioko.gradle.plugins.lint`
+`app.enableLintRules`
 
-This plugin adds the suite's own ktlint rules on top of the standard ones. Apply it on the root
-project.
+The suite's own ktlint rules run on top of the standard ones once you turn them on in
+`gradle.properties`.
 
-```kotlin
-plugins {
-    id("io.github.thomaskioko.gradle.plugins.lint")
-}
+```properties
+app.enableLintRules=true
 ```
 
 ## Features
 
-The plugin reads its own version from its jar and asks for the matching `lint-rules` artifact.
-Then it hands that to [Spotless](spotless.md) as a custom rule set for the root project and every
-module.
+[Spotless](spotless.md) reads the property in every module it formats. It reads the plugin's own
+version from its jar and adds the matching `lint-rules` artifact as a custom rule set.
 
 The versions can't drift apart. We build the coordinate from the plugin's own version, so moving
 the plugin version in your catalog moves the rules with it.

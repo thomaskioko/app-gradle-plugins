@@ -36,7 +36,7 @@ class KmpPluginFunctionalTest {
     }
 
     @Test
-    fun `applying multiplatform plugin wires variant test tasks into root ciTest`() {
+    fun `applying multiplatform plugin wires variant test tasks into ciTest`() {
         val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
 
         val result = project.runner("help", "--task", "ciTest").build()
@@ -45,7 +45,7 @@ class KmpPluginFunctionalTest {
     }
 
     @Test
-    fun `applying multiplatform plugin wires ios test tasks into root iosTest`() {
+    fun `applying multiplatform plugin wires ios test tasks into iosTest`() {
         val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
 
         val result = project.runner("help", "--task", "iosTest").build()
@@ -54,7 +54,7 @@ class KmpPluginFunctionalTest {
     }
 
     @Test
-    fun `applying multiplatform plugin wires android host tests into root linuxTest`() {
+    fun `applying multiplatform plugin wires android host tests into linuxTest`() {
         val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
 
         val result = project.runner("linuxTest", "--dry-run").build()
@@ -66,7 +66,7 @@ class KmpPluginFunctionalTest {
     }
 
     @Test
-    fun `applying multiplatform plugin wires jvm tests into root linuxTest`() {
+    fun `applying multiplatform plugin wires jvm tests into linuxTest`() {
         val project = Fixtures.extract("kmp-android-ios", tempFolder.newFolder("project"))
 
         val result = project.runner("linuxTest", "--dry-run").build()

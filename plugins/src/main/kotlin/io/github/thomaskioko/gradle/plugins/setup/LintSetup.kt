@@ -48,7 +48,7 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.configureCommonAndroid(proj
 }
 
 internal fun Lint.configure(project: Project) {
-    lintConfig = project.rootProject.file("gradle/lint.xml")
+    lintConfig = project.rootDir.resolve("gradle/lint.xml")
 
     checkReleaseBuilds = false
     checkGeneratedSources = false

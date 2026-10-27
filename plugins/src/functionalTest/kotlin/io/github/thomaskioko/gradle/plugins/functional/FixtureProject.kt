@@ -26,6 +26,7 @@ internal class FixtureProject(val rootDir: File) {
             .withArguments(
                 buildList {
                     addAll(args.asList())
+                    add("-Dorg.gradle.isolated-projects=true")
                     add("--stacktrace")
                 },
             )

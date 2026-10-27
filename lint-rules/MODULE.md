@@ -6,12 +6,11 @@ written by hand, that a test is named after the behaviour it checks. These are t
 that catch those in review instead of leaving them to a reviewer.
 
 The rules are loaded through a ktlint rule set provider, so nothing here is called directly. Add
-the artifact to Spotless as a custom rule set, or apply the lint plugin and let it do that.
+the artifact to Spotless as a custom rule set, or set this in `gradle.properties` and let the
+convention plugins do that.
 
-```kotlin
-plugins {
-  id("io.github.thomaskioko.gradle.plugins.lint")
-}
+```properties
+app.enableLintRules=true
 ```
 
 The rules that need an escape hatch read their exemptions from `.editorconfig`, so a module that

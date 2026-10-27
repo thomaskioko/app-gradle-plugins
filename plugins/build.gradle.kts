@@ -49,12 +49,6 @@ spotless {
     }
 }
 
-lint {
-    // A root plugin configures the root project by definition: cross-project task, extension, and
-    // plugin lookups are the job, not a defect. Project isolation is not reachable here.
-    disable += "GradleProjectIsolation"
-}
-
 val agpDocsVersion = libs.versions.agp.get().split(".").take(2).joinToString(".")
 
 dokka {
@@ -94,6 +88,13 @@ configurations[functionalTest.implementationConfigurationName]
 configurations[functionalTest.runtimeOnlyConfigurationName]
     .extendsFrom(configurations.testRuntimeOnly.get())
 
+val testLintRules =
+    configurations.create("testLintRules") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+        isTransitive = false
+    }
+
 val functionalTestTask =
     tasks.register<Test>("functionalTest") {
         description = "Runs functional tests via Gradle TestKit against the built plugin classpath."
@@ -106,21 +107,30 @@ val functionalTestTask =
             "io.github.thomaskioko.gradle.plugins.fixtures.dir",
             file("src/functionalTest/resources/fixtures").absolutePath,
         )
+        val lintRulesJar = files(testLintRules)
+        inputs.files(lintRulesJar).withPropertyName("lintRulesJar")
+        jvmArgumentProviders.add(
+            CommandLineArgumentProvider {
+                listOf("-Dio.github.thomaskioko.gradle.plugins.lint.rules.dir=${lintRulesJar.singleFile.parent}")
+            },
+        )
     }
 
-val testPluginExtras: Configuration by configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
+val testPluginExtras =
+    configurations.create("testPluginExtras") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+    }
 
 dependencies {
     testPluginExtras(libs.spotless.gradle.plugin)
     testPluginExtras(libs.metro.gradle.plugin)
     testPluginExtras(libs.baselineprofile.gradlePlugin)
+    testLintRules("${project.group}:lint-rules:${project.version}")
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
-    pluginClasspath.from(testPluginExtras)
+    pluginClasspath.setFrom(tasks.jar, configurations.runtimeClasspath, testPluginExtras)
 }
 
 tasks {
@@ -225,11 +235,6 @@ gradlePlugin {
         implementationClass = "io.github.thomaskioko.gradle.plugins.checks.SpotlessPlugin"
     }
 
-    plugins.create("lintPlugin") {
-        id = "io.github.thomaskioko.gradle.plugins.lint"
-        implementationClass = "io.github.thomaskioko.gradle.plugins.checks.LintPlugin"
-    }
-
     plugins.create("resourceGeneratorPlugin") {
         id = "io.github.thomaskioko.gradle.plugins.resource.generator"
         implementationClass = "io.github.thomaskioko.gradle.plugins.ResourceGeneratorPlugin"
@@ -252,22 +257,6 @@ mavenPublishing {
         description.set(property("POM_DESCRIPTION").toString())
         inceptionYear.set(property("INCEPTION_YEAR").toString())
         url.set(property("POM_URL").toString())
-
-        licenses {
-            license {
-                name.set(property("POM_LICENSE_NAME").toString())
-                url.set(property("POM_LICENSE_URL").toString())
-                distribution.set(property("POM_LICENSE_DIST").toString())
-            }
-        }
-
-        developers {
-            developer {
-                id.set(property("POM_DEVELOPER_ID").toString())
-                name.set(property("POM_DEVELOPER_NAME").toString())
-                url.set(property("POM_DEVELOPER_URL").toString())
-            }
-        }
 
         scm {
             url.set(property("POM_SCM_URL").toString())

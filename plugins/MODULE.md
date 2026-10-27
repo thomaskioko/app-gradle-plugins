@@ -25,10 +25,9 @@ scaffold {
 }
 ```
 
-The root plugin registers the aggregate test tasks, sets the daemon toolchain vendor, configures
-dependency analysis and the module graph tasks, and checks that it was applied to the root project
-and not a module. Every module plugin checks that the root plugin is present and fails with a clear
-message when it is not.
+The root plugin sets the daemon toolchain vendor, configures dependency analysis, and checks that
+it was applied to the root project and not a module. Every module plugin configures only its own
+module, so the suite works with Gradle's isolated projects turned on.
 
 # Package io.github.thomaskioko.gradle.plugins
 
@@ -49,5 +48,5 @@ generation it needs, and which dependencies to hold to a baseline.
 # Package io.github.thomaskioko.gradle.plugins.checks
 
 Static analysis applied to a module. `SpotlessPlugin` configures Spotless with the project's ktlint
-setup, and `LintPlugin` adds the custom rule set from the `lint-rules` artifact so those rules run
-alongside the standard ones.
+setup. With `app.enableLintRules=true` it also adds the custom rule set from the `lint-rules`
+artifact, so those rules run alongside the standard ones.

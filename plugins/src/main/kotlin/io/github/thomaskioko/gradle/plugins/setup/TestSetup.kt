@@ -26,13 +26,13 @@ internal fun Test.setupTests() {
     }
 
     reports.html.outputLocation.set(
-        project.rootProject.layout.buildDirectory.dir(
-            projectNameProvider.map { "reports/tests/$it" },
+        project.isolated.rootProject.projectDirectory.dir(
+            projectNameProvider.map { "build/reports/tests/$it" },
         ),
     )
     reports.junitXml.outputLocation.set(
-        project.rootProject.layout.buildDirectory.dir(
-            projectNameProvider.map { "reports/tests/$it" },
+        project.isolated.rootProject.projectDirectory.dir(
+            projectNameProvider.map { "build/reports/tests/$it" },
         ),
     )
 

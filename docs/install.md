@@ -68,7 +68,6 @@ app-jvm = { id = "io.github.thomaskioko.gradle.plugins.jvm", version.ref = "app-
 app-kmp = { id = "io.github.thomaskioko.gradle.plugins.multiplatform", version.ref = "app-gradle-plugins" }
 app-baseline-profile = { id = "io.github.thomaskioko.gradle.plugins.baseline.profile", version.ref = "app-gradle-plugins" }
 app-buildconfig = { id = "io.github.thomaskioko.gradle.plugins.buildconfig", version.ref = "app-gradle-plugins" }
-app-lint = { id = "io.github.thomaskioko.gradle.plugins.lint", version.ref = "app-gradle-plugins" }
 app-resource-generator = { id = "io.github.thomaskioko.gradle.plugins.resource.generator", version.ref = "app-gradle-plugins" }
 app-spotless = { id = "io.github.thomaskioko.gradle.plugins.spotless", version.ref = "app-gradle-plugins" }
 
@@ -83,9 +82,9 @@ Each option's documentation names the entries it looks for.
 
 ## Root project
 
-The root project does two jobs. First, it applies the root plugin. Every other plugin in the
-suite checks for it and fails without it. Second, it names every plugin any module will use. That
-way a module can apply one without repeating the version.
+The root project does two jobs. First, it applies the root plugin, which sets up dependency
+analysis for the whole build. Second, it names every plugin any module will use. That way a
+module can apply one without repeating the version.
 
 You declare everything a module applies here, with `apply false`. That puts the plugin on the
 build classpath without applying it to the root project. If you leave one out, the module that

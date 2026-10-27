@@ -18,30 +18,24 @@ package io.github.thomaskioko.gradle.plugins
 import com.autonomousapps.DependencyAnalysisExtension
 import com.osacky.doctor.DoctorExtension
 import io.github.thomaskioko.gradle.plugins.analysis.AnalysisExclusions
-import io.github.thomaskioko.gradle.plugins.extensions.ModuleGraphExtension
-import io.github.thomaskioko.gradle.plugins.graph.configureGraphTasks
 import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.configuration.BuildFeatures
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 import org.gradle.jvm.toolchain.JvmVendorSpec
-import javax.inject.Inject
 
 /**
  * Configures the root project for the suite. Required on every consumer build.
  *
  * Apply this plugin on the root `build.gradle.kts` before any other plugin in the suite. The
- * plugin checks that it is being applied to the root project and throws otherwise. Subproject
- * plugins (`app`, `android`, `jvm`, `multiplatform`, `base`) check for this plugin at apply
- * time and fail with a clear error when it is missing.
+ * plugin checks that it is being applied to the root project and throws otherwise.
  *
  * The plugin applies `com.autonomousapps.dependency-analysis` at the root for the aggregate
  * `buildHealth` task and the DSL configuration; `BasePlugin` re-applies the plugin on every
- * subproject so per-project analysis contributes to the aggregate. Registers the aggregate test
- * tasks ([BasePlugin.LINUX_TEST], [BasePlugin.IOS_TEST], [BasePlugin.ALL_TEST]), sets the JVM
- * vendor on the daemon toolchain task, configures dependency analysis with the project's
- * exclusion list and Compose bundles, and configures Gradle Doctor when the consumer applies it.
+ * subproject so per-project analysis contributes to the aggregate. It sets the JVM vendor on the
+ * daemon toolchain task, configures dependency analysis with the project's exclusion list and
+ * Compose bundles, and configures Gradle Doctor when the consumer applies it. It never reads or
+ * configures another project, so it works with Gradle's isolated projects turned on.
  *
  * ```kotlin
  * // root build.gradle.kts
@@ -51,38 +45,22 @@ import javax.inject.Inject
  * ```
  */
 public abstract class RootPlugin : Plugin<Project> {
-    @get:Inject
-    @Suppress("UnstableApiUsage")
-    internal abstract val buildFeatures: BuildFeatures
-
     /**
-     * Configures the root project and registers the aggregate tasks the module plugins attach to.
+     * Configures dependency analysis, the daemon toolchain and Gradle Doctor on the root project.
      *
      * @throws IllegalArgumentException if applied to anything other than the root project.
      */
     override fun apply(target: Project): Unit = with(target) {
-        require(project == project.rootProject) {
+        require(path == isolated.rootProject.path) {
             "Root plugin should only be applied on the root project!"
         }
 
         plugins.apply("com.autonomousapps.dependency-analysis")
 
         scaffoldProperties()
-        configureAggregateTestTasks()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
-        configureModuleGraph()
         configureGradleDoctor()
-    }
-
-    private fun Project.configureAggregateTestTasks() {
-        val linuxTest = tasks.register(BasePlugin.LINUX_TEST)
-        val macTest = tasks.register(BasePlugin.IOS_TEST)
-
-        tasks.register(BasePlugin.ALL_TEST) {
-            it.dependsOn(linuxTest)
-            it.dependsOn(macTest)
-        }
     }
 
     @Suppress("UnstableApiUsage")
@@ -121,17 +99,6 @@ public abstract class RootPlugin : Plugin<Project> {
             }
         }
     }
-
-    private fun Project.configureModuleGraph() {
-        extensions.create("moduleGraph", ModuleGraphExtension::class.java)
-        if (!buildFeatures.isIsolatedProjectsEnabled()) {
-            subprojects { it.configureGraphTasks() }
-        }
-    }
-
-    @Suppress("UnstableApiUsage")
-    private fun BuildFeatures.isIsolatedProjectsEnabled(): Boolean =
-        isolatedProjects.active.getOrElse(false)
 
     private fun Project.configureDependencyAnalysis() {
         extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->

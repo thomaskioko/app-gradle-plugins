@@ -13,4 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "fixture-missing-root-plugin"
+rootProject.name = "fixture-module-graph"
+
+include(":base", ":core", ":core:testing", ":feature")

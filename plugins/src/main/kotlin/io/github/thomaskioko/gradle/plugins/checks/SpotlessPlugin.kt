@@ -16,27 +16,39 @@
 package io.github.thomaskioko.gradle.plugins.checks
 
 import com.diffplug.gradle.spotless.SpotlessExtension
+import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import io.github.thomaskioko.gradle.plugins.utils.libs
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
  * Applies Spotless with the project's ktlint configuration.
  *
- * Applied automatically by [io.github.thomaskioko.gradle.plugins.BasePlugin], so consumers do not apply this plugin directly. The
- * plugin applies `com.diffplug.spotless`, configures Kotlin (`src/**/*.kt`), Kotlin Gradle
- * scripts (`*.kts`), and XML targets, and reads any custom ktlint rule sets from the
- * [CUSTOM_RULE_SETS_KEY] extra (typically populated by [LintPlugin]). The DSL configuration is
- * deferred until `afterEvaluate` so plugins applied later in the same project can register their
- * rule sets before Spotless reads them.
+ * [io.github.thomaskioko.gradle.plugins.BasePlugin] applies it to every module. Apply it on the
+ * root project as well so Spotless also checks the root build scripts. The plugin applies
+ * `com.diffplug.spotless` and configures Kotlin (`src/**/*.kt`), Kotlin Gradle scripts (`*.kts`),
+ * and XML targets.
+ *
+ * With `app.enableLintRules=true` in `gradle.properties`, ktlint also runs the suite's
+ * navigation, preview, and test naming rules from the
+ * `io.github.thomaskioko.gradle.plugins:lint-rules` artifact. The plugin reads its own version
+ * from the jar manifest's `Implementation-Version` attribute and asks for the same version of the
+ * rules, so bumping the plugin also bumps the rules. Further ktlint rule sets come from the
+ * module's own [CUSTOM_RULE_SETS_KEY] extra. The DSL configuration is deferred until
+ * `afterEvaluate` so the module's build script can register its rule sets before Spotless reads
+ * them.
  *
  * Spotless is skipped entirely on benchmark modules, where running the formatter has no value
  * and adds noise to the build graph.
  */
 public class SpotlessPlugin : Plugin<Project> {
     /**
-     * Applies Spotless and configures its formats once the project is evaluated, so a plugin
-     * applied later can still register its rule sets first.
+     * Applies Spotless and configures its formats once the project is evaluated, so the build
+     * script can still register its rule sets first.
+     *
+     * @throws org.gradle.api.GradleException if `app.enableLintRules` is `true` and the plugin
+     *   jar carries no `Implementation-Version`.
      */
     override fun apply(project: Project): Unit = with(project) {
         pluginManager.apply("com.diffplug.spotless")
@@ -51,9 +63,6 @@ public class SpotlessPlugin : Plugin<Project> {
             return@with
         }
 
-        // Defer the Spotless DSL configuration so plugins applied later in the same project
-        // (notably LintPlugin via subprojects {}) have a chance to populate
-        // CUSTOM_RULE_SETS_KEY before the value is read.
         afterEvaluate {
             val ktlintVersion = libs.findVersion("ktlint").get().requiredVersion
             val customRuleSets = readCustomKtlintRuleSets(project)
@@ -98,12 +107,22 @@ public class SpotlessPlugin : Plugin<Project> {
     }
 
     private fun readCustomKtlintRuleSets(project: Project): List<String> {
-        return when (val value = project.findProperty(CUSTOM_RULE_SETS_KEY)) {
+        val moduleRuleSets = when (val value = project.extensions.extraProperties.properties[CUSTOM_RULE_SETS_KEY]) {
             is List<*> -> value.filterIsInstance<String>()
             is String -> value.split(",").map(String::trim).filter(String::isNotEmpty)
-            null -> emptyList()
             else -> emptyList()
         }
+        if (!project.scaffoldProperties().enableLintRules.get()) return moduleRuleSets
+        return listOf(lintRulesCoordinate()) + moduleRuleSets
+    }
+
+    private fun lintRulesCoordinate(): String {
+        val version = SpotlessPlugin::class.java.`package`?.implementationVersion?.takeIf { it.isNotBlank() }
+            ?: throw GradleException(
+                "app.enableLintRules needs the plugin version, and the plugin jar has no " +
+                    "'Implementation-Version' in its manifest.",
+            )
+        return "io.github.thomaskioko.gradle.plugins:lint-rules:$version"
     }
 
     /**
@@ -111,10 +130,11 @@ public class SpotlessPlugin : Plugin<Project> {
      */
     public companion object {
         /**
-         * Key under `extra` where consumers register Maven coordinates of custom ktlint rule
-         * sets. The list of coordinates is read by [SpotlessPlugin] during `afterEvaluate` and
-         * passed to ktlint through Spotless's `customRuleSets(...)` step. [LintPlugin]
-         * populates this key with the suite's `lint-rules` artifact.
+         * Key under the module's own `extra` where a build script registers Maven coordinates of
+         * custom ktlint rule sets, as a list or a comma-separated string. [SpotlessPlugin] reads
+         * it during `afterEvaluate` and passes it to ktlint through Spotless's
+         * `customRuleSets(...)` step. The suite's own rules need no entry here; they come from
+         * `app.enableLintRules`.
          */
         public const val CUSTOM_RULE_SETS_KEY: String = "app.spotless.customRuleSets"
     }

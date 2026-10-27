@@ -12,7 +12,7 @@ val shared: Properties = Properties().apply {
 gradle.beforeProject {
     shared.forEach { key, value ->
         val k = key.toString()
-        if (!hasProperty(k)) {
+        if (!providers.gradleProperty(k).isPresent) {
             extensions.extraProperties.set(k, value.toString())
         }
     }
