@@ -140,8 +140,8 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
     private fun Project.configureAndroidHostTests() {
         if (!file("src/androidHostTest").exists()) return
 
-        rootProject.tasks.named(BasePlugin.LINUX_TEST).configure {
-            it.dependsOn("$path:testAndroidHostTest")
+        tasks.named(BasePlugin.LINUX_TEST).configure {
+            it.dependsOn("testAndroidHostTest")
         }
     }
 
@@ -168,8 +168,8 @@ public abstract class KotlinMultiplatformPlugin : Plugin<Project> {
                             else -> BasePlugin.LINUX_TEST
                         }
                         val testTaskName = "${target.name}${compilation.name.capitalizeFirst()}"
-                        rootProject.tasks.named(aggregateTaskName).configure {
-                            it.dependsOn("$path:$testTaskName")
+                        tasks.named(aggregateTaskName).configure {
+                            it.dependsOn(testTaskName)
                         }
                     }
                 }

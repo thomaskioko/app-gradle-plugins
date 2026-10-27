@@ -13,6 +13,9 @@ apply it yourself. The App, Android, JVM and Multiplatform plugins apply it for 
 - Sets the Java toolchain and target from the version catalog
 - Sets the shared Kotlin compiler options, including the unused return value check on production
   code but not on tests
+- Registers the test tasks `linuxTest`, `iosTest` and `ciTest`. The App, Android, JVM and
+  Multiplatform plugins attach the module's tests to them. `./gradlew linuxTest` runs the task in
+  every module that has it
 
 ## Options
 

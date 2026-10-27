@@ -109,8 +109,8 @@ public abstract class AndroidPlugin : Plugin<Project> {
 
             onVariants { variant ->
                 if (variant.buildType == "debug") {
-                    rootProject.tasks.named(BasePlugin.LINUX_TEST).configure { task ->
-                        task.dependsOn("$path:test${variant.name.capitalizeFirst()}UnitTest")
+                    tasks.named(BasePlugin.LINUX_TEST).configure { task ->
+                        task.dependsOn("test${variant.name.capitalizeFirst()}UnitTest")
                     }
                 }
             }

@@ -57,7 +57,7 @@ class AppPluginFunctionalTest {
     }
 
     @Test
-    fun `applying app plugin wires android variant test tasks into root ciTest`() {
+    fun `applying app plugin wires android variant test tasks into ciTest`() {
         val project = Fixtures.extract("app-only", tempFolder.newFolder("project"))
 
         val result = project.runner("help", "--task", "ciTest").build()

@@ -47,6 +47,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * dependency-analysis plugin per subproject so `buildHealth` aggregates every module, configures
  * the JVM and Kotlin toolchains, sets the project-wide compiler flags (explicit API mode,
  * language version, progressive mode, opt-ins, JVM target), and turns on reproducible JAR output.
+ * It also registers the module's [LINUX_TEST], [IOS_TEST] and [ALL_TEST] aggregate tasks.
  *
  * ```kotlin
  * // settings.gradle.kts (root)
@@ -67,19 +68,19 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  */
 public abstract class BasePlugin : Plugin<Project> {
     /**
-     * Names of the aggregate test tasks the root project registers and the module plugins
-     * attach their own test tasks to.
+     * Names of the aggregate test tasks every module registers and attaches its own test tasks
+     * to. Running one of these names from the root runs it in every module.
      */
     public companion object {
         /**
          * Name of the aggregate task that runs every JVM and Linux-runnable test on the host.
-         * Subproject plugins attach their variant test tasks to this aggregate via `dependsOn`.
+         * Module plugins attach their variant test tasks to this aggregate via `dependsOn`.
          */
         public const val LINUX_TEST: String = "linuxTest"
 
         /**
-         * Name of the aggregate task that runs the iOS simulator tests. Wired up only on
-         * Kotlin Multiplatform modules with iOS targets.
+         * Name of the aggregate task that runs the iOS simulator tests. Only Kotlin
+         * Multiplatform modules with iOS targets attach tests to it.
          */
         public const val IOS_TEST: String = "iosTest"
 
@@ -123,6 +124,12 @@ public abstract class BasePlugin : Plugin<Project> {
     private fun Project.configureTests() {
         tasks.withType(Test::class.java).configureEach {
             it.failOnNoDiscoveredTests.set(false)
+        }
+
+        val linuxTest = tasks.register(LINUX_TEST)
+        val iosTest = tasks.register(IOS_TEST)
+        tasks.register(ALL_TEST) {
+            it.dependsOn(linuxTest, iosTest)
         }
     }
 

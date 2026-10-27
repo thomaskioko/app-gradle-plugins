@@ -15,8 +15,6 @@ It refuses to be applied to a module. A misplaced `id(...)` fails instead of hal
 
 ## Features
 
-- Registers the aggregate test tasks `linuxTest`, `iosTest` and `ciTest`. The module plugins
-  attach their own test tasks to these
 - Sets the Java vendor used for the Gradle daemon toolchain
 - Applies dependency analysis at the root, so `buildHealth` covers the whole build. It also sets
   the severity of each issue category

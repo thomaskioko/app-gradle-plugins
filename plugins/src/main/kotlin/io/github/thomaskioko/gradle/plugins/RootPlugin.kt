@@ -38,10 +38,9 @@ import javax.inject.Inject
  *
  * The plugin applies `com.autonomousapps.dependency-analysis` at the root for the aggregate
  * `buildHealth` task and the DSL configuration; `BasePlugin` re-applies the plugin on every
- * subproject so per-project analysis contributes to the aggregate. Registers the aggregate test
- * tasks ([BasePlugin.LINUX_TEST], [BasePlugin.IOS_TEST], [BasePlugin.ALL_TEST]), sets the JVM
- * vendor on the daemon toolchain task, configures dependency analysis with the project's
- * exclusion list and Compose bundles, and configures Gradle Doctor when the consumer applies it.
+ * subproject so per-project analysis contributes to the aggregate. It sets the JVM vendor on the
+ * daemon toolchain task, configures dependency analysis with the project's exclusion list and
+ * Compose bundles, and configures Gradle Doctor when the consumer applies it.
  *
  * ```kotlin
  * // root build.gradle.kts
@@ -56,7 +55,7 @@ public abstract class RootPlugin : Plugin<Project> {
     internal abstract val buildFeatures: BuildFeatures
 
     /**
-     * Configures the root project and registers the aggregate tasks the module plugins attach to.
+     * Configures dependency analysis, the daemon toolchain and Gradle Doctor on the root project.
      *
      * @throws IllegalArgumentException if applied to anything other than the root project.
      */
@@ -68,21 +67,10 @@ public abstract class RootPlugin : Plugin<Project> {
         plugins.apply("com.autonomousapps.dependency-analysis")
 
         scaffoldProperties()
-        configureAggregateTestTasks()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
         configureModuleGraph()
         configureGradleDoctor()
-    }
-
-    private fun Project.configureAggregateTestTasks() {
-        val linuxTest = tasks.register(BasePlugin.LINUX_TEST)
-        val macTest = tasks.register(BasePlugin.IOS_TEST)
-
-        tasks.register(BasePlugin.ALL_TEST) {
-            it.dependsOn(linuxTest)
-            it.dependsOn(macTest)
-        }
     }
 
     @Suppress("UnstableApiUsage")
