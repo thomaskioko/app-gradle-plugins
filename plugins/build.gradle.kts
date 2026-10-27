@@ -116,6 +116,10 @@ val functionalTestTask =
         )
     }
 
+tasks.named("check") {
+    dependsOn(functionalTestTask)
+}
+
 val testPluginExtras =
     configurations.create("testPluginExtras") {
         isCanBeConsumed = false

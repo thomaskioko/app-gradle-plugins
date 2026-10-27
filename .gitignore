@@ -36,6 +36,5 @@ gradle.properties.local
 /docs/releasing.md
 /snippets/
 
-# Claude skills — untracked while iterating; remove once stable
-.claude/skills/
+# Local agent instructions
 CLAUDE.md

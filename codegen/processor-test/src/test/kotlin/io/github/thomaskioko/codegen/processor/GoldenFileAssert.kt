@@ -31,8 +31,7 @@ import java.io.File
  *
  * Set the system property `golden.update=true` or the environment variable `GOLDEN_UPDATE=true`
  * and run the suite. [assertMatches] writes the actual output back to the golden file instead of
- * failing. The repo wraps this in the `/update-golden` skill, which sets the property, runs the
- * suite, and surfaces the diff so the change is reviewable before commit. Always read the diff.
+ * failing. Always read the diff before committing.
  * Goldens are the contract a contributor is committing to; an unreviewed bulk update masks
  * regressions.
  */
