@@ -68,9 +68,6 @@ dokka {
 }
 
 subprojects {
-    group = property("GROUP").toString()
-    version = property("VERSION_NAME").toString()
-
     pluginManager.apply("com.autonomousapps.dependency-analysis")
     pluginManager.apply("com.diffplug.spotless")
 

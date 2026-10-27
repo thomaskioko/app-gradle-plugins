@@ -59,22 +59,6 @@ mavenPublishing {
         inceptionYear.set(property("INCEPTION_YEAR").toString())
         url.set(property("POM_URL").toString())
 
-        licenses {
-            license {
-                name.set(property("POM_LICENSE_NAME").toString())
-                url.set(property("POM_LICENSE_URL").toString())
-                distribution.set(property("POM_LICENSE_DIST").toString())
-            }
-        }
-
-        developers {
-            developer {
-                id.set(property("POM_DEVELOPER_ID").toString())
-                name.set(property("POM_DEVELOPER_NAME").toString())
-                url.set(property("POM_DEVELOPER_URL").toString())
-            }
-        }
-
         scm {
             url.set(property("POM_SCM_URL").toString())
             connection.set(property("POM_SCM_CONNECTION").toString())
