@@ -126,7 +126,7 @@ public abstract class io/github/thomaskioko/gradle/plugins/extensions/BaseExtens
 	public final fun configureNativeTargets (Ljava/lang/String;)V
 	public final fun configureNativeTargets (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun configureNativeTargets$default (Lio/github/thomaskioko/gradle/plugins/extensions/BaseExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun ignoreAll ([Ljava/lang/String;)V
+	public final fun ignoreAll ()V
 	public final fun ignoreUnusedDependencies ([Ljava/lang/String;)V
 	public final fun optIn ([Ljava/lang/String;)V
 	public final fun useCodegen ()V

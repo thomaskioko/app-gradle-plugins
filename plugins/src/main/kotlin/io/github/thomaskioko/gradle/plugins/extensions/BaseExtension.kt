@@ -17,7 +17,7 @@ package io.github.thomaskioko.gradle.plugins.extensions
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
-import com.autonomousapps.DependencyAnalysisExtension
+import com.autonomousapps.DependencyAnalysisSubExtension
 import io.github.thomaskioko.gradle.plugins.setup.setupCodegen
 import io.github.thomaskioko.gradle.plugins.setup.setupDependencyGuard
 import io.github.thomaskioko.gradle.plugins.setup.setupFeatureFlagCodegen
@@ -67,12 +67,11 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
     /**
      * Excludes the named project dependencies from this module's "unused dependencies" check.
      *
-     * The call routes to the root project's `DependencyAnalysisExtension` and scopes the exclusion
-     * to the module the scaffold is attached to, replacing a hand-written project-scoped
-     * `configure<DependencyAnalysisSubExtension> { issues { onUnusedDependencies { exclude(...) } } }`
-     * block. Appropriate when a module declares a dependency as `api(...)` for downstream consumers
-     * (for example integration-test fixtures) that its own sources never reference, so the analysis
-     * reports the dependency as unused.
+     * The call configures this module's own `dependencyAnalysis` block, replacing a hand-written
+     * `dependencyAnalysis { issues { onUnusedDependencies { exclude(...) } } }` block in the
+     * module's build script. Appropriate when a module declares a dependency as `api(...)` for
+     * downstream consumers (for example integration-test fixtures) that its own sources never
+     * reference, so the analysis reports the dependency as unused.
      *
      * ```kotlin
      * scaffold {
@@ -84,27 +83,19 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      *   `":data:request-manager:testing"`) to exclude from this module's unused-dependency check.
      */
     public fun ignoreUnusedDependencies(vararg dependencyPaths: String) {
-        project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
+        project.extensions.configure(DependencyAnalysisSubExtension::class.java) { analysis ->
             analysis.issues { issues ->
-                issues.project(project.path) { perProject ->
-                    perProject.onUnusedDependencies { it.exclude(*dependencyPaths) }
-                }
+                issues.onUnusedDependencies { it.exclude(*dependencyPaths) }
             }
         }
     }
 
     /**
-     * Silences every DAGP issue category (`onAny`) for the named Gradle project paths. Use
-     * sparingly.
+     * Silences every DAGP issue category (`onAny`) for this module. Use sparingly.
      *
-     * The call routes to the root project's `DependencyAnalysisExtension`, so the named module's
-     * analysis output is suppressed regardless of which scaffold the call lives in. Appropriate
-     * for a Kotlin/Native-only framework module whose dependencies are entirely consumed by the
-     * iOS app and never by another JVM or Android consumer, where DAGP's model genuinely does
-     * not apply. Replaces the previous hardcoded `AnalysisExclusions.ignoredModules` list with
-     * an explicit per-module opt-in.
-     *
-     * Called with no arguments, it silences the project the scaffold is attached to:
+     * The call configures this module's own `dependencyAnalysis` block. Appropriate for a
+     * Kotlin/Native-only framework module whose dependencies are entirely consumed by the iOS app
+     * and never by another JVM or Android consumer, where DAGP's model genuinely does not apply.
      *
      * ```kotlin
      * // ios-framework/build.gradle.kts
@@ -112,19 +103,11 @@ public abstract class BaseExtension(private val project: Project) : ExtensionAwa
      *   ignoreAll()
      * }
      * ```
-     *
-     * @param projectPaths Gradle project paths (for example `":ios-framework"`) whose DAGP
-     *   analysis output should be silenced. Defaults to the current project when empty.
      */
-    public fun ignoreAll(vararg projectPaths: String) {
-        val paths = if (projectPaths.isEmpty()) arrayOf(project.path) else projectPaths
-        project.rootProject.extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->
+    public fun ignoreAll() {
+        project.extensions.configure(DependencyAnalysisSubExtension::class.java) { analysis ->
             analysis.issues { issues ->
-                paths.forEach { projectPath ->
-                    issues.project(projectPath) { perProject ->
-                        perProject.onAny { it.severity("ignore") }
-                    }
-                }
+                issues.onAny { it.severity("ignore") }
             }
         }
     }

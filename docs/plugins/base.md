@@ -31,7 +31,7 @@ These options are available in `scaffold {}` on any module.
 | `useDependencyGuard(vararg configurations)` | Holds the named resolvable configurations to a recorded baseline |
 | `optIn(vararg classes)` | Adds compiler opt-in entries to every Kotlin compilation |
 | `ignoreUnusedDependencies(vararg dependencyPaths)` | Excludes named project dependencies from the unused dependency check |
-| `ignoreAll(vararg projectPaths)` | Silences every dependency analysis category for the named projects, or for this one when called empty |
+| `ignoreAll()` | Silences every dependency analysis category for this module |
 
 ## Targets
 
