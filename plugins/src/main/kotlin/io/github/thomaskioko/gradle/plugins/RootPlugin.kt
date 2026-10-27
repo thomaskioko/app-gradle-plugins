@@ -18,15 +18,11 @@ package io.github.thomaskioko.gradle.plugins
 import com.autonomousapps.DependencyAnalysisExtension
 import com.osacky.doctor.DoctorExtension
 import io.github.thomaskioko.gradle.plugins.analysis.AnalysisExclusions
-import io.github.thomaskioko.gradle.plugins.extensions.ModuleGraphExtension
-import io.github.thomaskioko.gradle.plugins.graph.configureGraphTasks
 import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.configuration.BuildFeatures
 import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 import org.gradle.jvm.toolchain.JvmVendorSpec
-import javax.inject.Inject
 
 /**
  * Configures the root project for the suite. Required on every consumer build.
@@ -48,10 +44,6 @@ import javax.inject.Inject
  * ```
  */
 public abstract class RootPlugin : Plugin<Project> {
-    @get:Inject
-    @Suppress("UnstableApiUsage")
-    internal abstract val buildFeatures: BuildFeatures
-
     /**
      * Configures dependency analysis, the daemon toolchain and Gradle Doctor on the root project.
      *
@@ -67,7 +59,6 @@ public abstract class RootPlugin : Plugin<Project> {
         scaffoldProperties()
         configureDaemonToolchainTask()
         configureDependencyAnalysis()
-        configureModuleGraph()
         configureGradleDoctor()
     }
 
@@ -107,17 +98,6 @@ public abstract class RootPlugin : Plugin<Project> {
             }
         }
     }
-
-    private fun Project.configureModuleGraph() {
-        extensions.create("moduleGraph", ModuleGraphExtension::class.java)
-        if (!buildFeatures.isIsolatedProjectsEnabled()) {
-            subprojects { it.configureGraphTasks() }
-        }
-    }
-
-    @Suppress("UnstableApiUsage")
-    private fun BuildFeatures.isIsolatedProjectsEnabled(): Boolean =
-        isolatedProjects.active.getOrElse(false)
 
     private fun Project.configureDependencyAnalysis() {
         extensions.configure(DependencyAnalysisExtension::class.java) { analysis ->

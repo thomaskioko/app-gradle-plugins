@@ -148,14 +148,6 @@ public abstract class io/github/thomaskioko/gradle/plugins/extensions/JvmExtensi
 	public final fun useAndroidLint ()V
 }
 
-public abstract class io/github/thomaskioko/gradle/plugins/extensions/ModuleGraphExtension {
-	public fun <init> ()V
-	public abstract fun getIgnoredProjects ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getIgnoredProjectsRegex ()Lorg/gradle/api/provider/Property;
-	public abstract fun getSupportedConfigurations ()Lorg/gradle/api/provider/SetProperty;
-	public final fun ignore ([Ljava/lang/String;)V
-}
-
 public abstract interface annotation class io/github/thomaskioko/gradle/plugins/extensions/ScaffoldDsl : java/lang/annotation/Annotation {
 }
 

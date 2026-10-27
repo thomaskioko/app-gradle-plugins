@@ -16,6 +16,7 @@
 package io.github.thomaskioko.gradle.plugins
 
 import io.github.thomaskioko.gradle.plugins.extensions.BaseExtension
+import io.github.thomaskioko.gradle.plugins.graph.configureGraphTasks
 import io.github.thomaskioko.gradle.plugins.properties.scaffoldProperties
 import io.github.thomaskioko.gradle.plugins.utils.compilerOptions
 import io.github.thomaskioko.gradle.plugins.utils.getVersionOrNull
@@ -44,7 +45,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
  * dependency-analysis plugin per subproject so `buildHealth` aggregates every module, configures
  * the JVM and Kotlin toolchains, sets the project-wide compiler flags (explicit API mode,
  * language version, progressive mode, opt-ins, JVM target), and turns on reproducible JAR output.
- * It also registers the module's [LINUX_TEST], [IOS_TEST] and [ALL_TEST] aggregate tasks.
+ * It also registers the module's [LINUX_TEST], [IOS_TEST] and [ALL_TEST] aggregate tasks and its
+ * `graphDump` and `graphUpdate` tasks.
  *
  * ```kotlin
  * // build.gradle.kts (root)
@@ -103,6 +105,7 @@ public abstract class BasePlugin : Plugin<Project> {
         target.configureJava()
         target.configureKotlin()
         target.configureTests()
+        target.configureGraphTasks()
     }
 
     private fun Project.configureTests() {
