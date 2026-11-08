@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## 0.8.8 *(2026-11-08)*
+
+- Stop disabling unit tests for the release build type of Android modules. AGP 9.5 registers a `generate<Variant>ComposePreviewRunfiles` task for every variant of a module with Compose on, and the task fails during configuration when the variant has no unit test component, so Android Studio sync and `./gradlew tasks --all` failed in every Compose module with "Compose Preview failed ... Unit tests are disabled for this variant". AGP has no switch for the task, and since AGP 9 it creates unit tests only for the tested build type by default, so a build on AGP 9.5 also needs `android.onlyEnableUnitTestForTheTestedBuildType=false` in `gradle.properties`. Release unit test tasks exist again; `linuxTest` still runs only the debug ones.
+
 ## 0.8.7 *(2026-10-26)*
 
 - Support Gradle's isolated projects. Every plugin in the suite now reads and configures only the project it is applied to, so a build can set `org.gradle.isolated-projects=true`. Before, the plugins reached files, tasks and extensions through the root project, and the build failed during configuration as soon as the flag was on. The functional tests now run with the flag on, and Android lint's `GradleProjectIsolation` check, which was switched off, is back on, so a plugin that reaches into another project fails the build.

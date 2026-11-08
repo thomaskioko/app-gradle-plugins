@@ -18,7 +18,6 @@ package io.github.thomaskioko.gradle.plugins
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.CompileOptions
 import com.android.build.api.variant.HasAndroidTestBuilder
-import com.android.build.api.variant.HasUnitTestBuilder
 import io.github.thomaskioko.gradle.plugins.extensions.AndroidExtension
 import io.github.thomaskioko.gradle.plugins.setup.configureCommonAndroid
 import io.github.thomaskioko.gradle.plugins.setup.configureTestOptions
@@ -101,12 +100,6 @@ public abstract class AndroidPlugin : Plugin<Project> {
         }
 
         androidComponents {
-            beforeVariants(
-                selector().withBuildType("release"),
-            ) {
-                (it as? HasUnitTestBuilder)?.enableUnitTest = false
-            }
-
             onVariants { variant ->
                 if (variant.buildType == "debug") {
                     tasks.named(BasePlugin.LINUX_TEST).configure { task ->
