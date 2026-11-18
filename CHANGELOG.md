@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## 0.8.9 *(2026-11-18)*
+
+- Update KSP to 2.3.14, which fixes KSP sometimes writing no output for a module when many KSP tasks run in parallel ([google/ksp#3286](https://github.com/google/ksp/issues/3286)).
+- Dependency updates.
+
 ## 0.8.8 *(2026-11-08)*
 
 - Stop disabling unit tests for the release build type of Android modules. AGP 9.5 registers a `generate<Variant>ComposePreviewRunfiles` task for every variant of a module with Compose on, and the task fails during configuration when the variant has no unit test component, so Android Studio sync and `./gradlew tasks --all` failed in every Compose module with "Compose Preview failed ... Unit tests are disabled for this variant". AGP has no switch for the task, and since AGP 9 it creates unit tests only for the tested build type by default, so a build on AGP 9.5 also needs `android.onlyEnableUnitTestForTheTestedBuildType=false` in `gradle.properties`. Release unit test tasks exist again; `linuxTest` still runs only the debug ones.
