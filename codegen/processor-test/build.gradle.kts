@@ -45,6 +45,9 @@ dependencies {
 
 configurations.testRuntimeClasspath {
     exclude(group = "org.jetbrains", module = "annotations")
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.google.devtools.ksp") useVersion(libs.versions.ksp.get())
+    }
 }
 
 tasks.named<Test>("test") {
